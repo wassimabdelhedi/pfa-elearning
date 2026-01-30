@@ -9,6 +9,8 @@ public class BackendPfaApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BackendPfaApplication.class, args);
+		
+		System.out.println("hello amin");
 	}
 
 	@Override
