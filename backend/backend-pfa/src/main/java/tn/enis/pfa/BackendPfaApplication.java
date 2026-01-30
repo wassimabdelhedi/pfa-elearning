@@ -8,6 +8,8 @@ public class BackendPfaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BackendPfaApplication.class, args);
+		
+		System.out.println("hello amin");
 	}
 
 }
