@@ -1,0 +1,112 @@
+.page {
+  max-width: 800px;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.meta {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.desc {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.btnEnroll {
+  padding: 0.6rem 1.2rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 500;
+}
+
+.btnEnroll:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btnEnroll:disabled {
+  opacity: 0.7;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  background: var(--success);
+  color: var(--bg);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.modules {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.module {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.module h2 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.content,
+.exercise {
+  margin-bottom: 1rem;
+}
+
+.content h3,
+.exercise h3 {
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.body {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.options {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.btnDone {
+  padding: 0.4rem 0.8rem;
+  background: var(--surface-hover);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.btnDone:hover {
+  background: var(--border);
+}
+
+.done {
+  font-size: 0.85rem;
+  color: var(--success);
+}
+
+.loginHint {
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,84 @@
+.page {
+  max-width: 900px;
+}
+
+.page h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.sub {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.empty {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty p {
+  margin-bottom: 0.5rem;
+}
+
+.empty a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+}
+
+.empty a:hover {
+  background: var(--accent-hover);
+  color: white;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.type {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.title:hover {
+  color: var(--accent);
+}
+
+.reason {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.score {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
