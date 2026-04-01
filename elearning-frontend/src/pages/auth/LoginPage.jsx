@@ -1,0 +1,86 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { login } from '../../api/authApi';
+import { FiMail, FiLock, FiBookOpen } from 'react-icons/fi';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { loginUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await login(email, password);
+      const { token, userId, fullName, role } = res.data;
+      loginUser({ id: userId, email, fullName, role }, token);
+
+      if (role === 'TEACHER') navigate('/teacher/dashboard');
+      else if (role === 'ADMIN') navigate('/admin');
+      else navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Email ou mot de passe incorrect');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="card auth-card">
+        <div style={{ textAlign: 'center', marginBottom: 8 }}>
+          <FiBookOpen size={40} color="var(--primary-400)" />
+        </div>
+        <h1>Bienvenue 👋</h1>
+        <p className="subtitle">Connectez-vous à votre compte LearnAgent</p>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="votre@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Mot de passe</label>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}
+            style={{ width: '100%' }}>
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Pas encore de compte ?{' '}
+          <Link to="/register">Créer un compte</Link>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,36 @@
+package com.pfa.elearning.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "quiz_results")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class QuizResult {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
+    private Quiz quiz;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
+    private int score;
+    private int totalQuestions;
+
+    @Column(updatable = false)
+    private LocalDateTime submittedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.submittedAt = LocalDateTime.now();
+    }
+}
