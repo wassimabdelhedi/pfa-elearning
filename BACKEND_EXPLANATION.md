@@ -10,6 +10,109 @@ The application follows the **Layered (N-Tier) Architectural Pattern**, which en
 
 ---
 
+## 0. Visual Architecture & Flow
+
+### Directory Tree Structure
+```text
+elearning-backend/
+├── pom.xml
+├── src/main/resources/
+│   ├── application.yml
+│   └── data.sql
+└── src/main/java/com/pfa/elearning/
+    ├── ElearningApplication.java             # Main application bootstrap
+    ├── config/                               # Global configuration logic
+    │   ├── CorsConfig.java
+    │   ├── SecurityConfig.java
+    │   └── WebConfig.java
+    ├── controller/                           # REST API Endpoints
+    │   ├── AdminController.java
+    │   ├── AuthController.java
+    │   ├── CategoryController.java
+    │   ├── CourseController.java
+    │   ├── EnrollmentController.java
+    │   ├── ExerciseController.java
+    │   ├── QuizController.java
+    │   ├── RecommendationController.java
+    │   └── SearchController.java
+    ├── dto/                                  # Data Transfer Objects (Request/Response)
+    │   ├── request/
+    │   │   ├── CourseRequest.java
+    │   │   ├── LoginRequest.java
+    │   │   ├── RegisterRequest.java
+    │   │   └── SearchRequest.java
+    │   └── response/
+    │       ├── AuthResponse.java
+    │       ├── CourseResponse.java
+    │       ├── RecommendationResponse.java
+    │       └── SearchResponse.java
+    ├── exception/                            # Error & Exception Handling
+    │   ├── GlobalExceptionHandler.java
+    │   ├── ResourceNotFoundException.java
+    │   └── UnauthorizedException.java
+    ├── model/                                # Database Entities (JPA)
+    │   ├── Category.java
+    │   ├── Course.java
+    │   ├── CourseRating.java
+    │   ├── DifficultyLevel.java
+    │   ├── Enrollment.java
+    │   ├── Exercise.java
+    │   ├── Quiz.java
+    │   ├── QuizQuestion.java
+    │   ├── QuizResult.java
+    │   ├── Recommendation.java
+    │   ├── Role.java
+    │   ├── SearchHistory.java
+    │   └── User.java
+    ├── repository/                           # Database Interfaces (Hibernate)
+    │   ├── CategoryRepository.java
+    │   ├── CourseRatingRepository.java
+    │   ├── CourseRepository.java
+    │   ├── EnrollmentRepository.java
+    │   ├── ExerciseRepository.java
+    │   ├── QuizRepository.java
+    │   ├── QuizResultRepository.java
+    │   ├── RecommendationRepository.java
+    │   ├── SearchHistoryRepository.java
+    │   └── UserRepository.java
+    ├── security/                             # Authentication & JWT
+    │   ├── CustomUserDetailsService.java
+    │   ├── JwtAuthenticationFilter.java
+    │   └── JwtTokenProvider.java
+    └── service/                              # Core Business Logic
+        ├── CourseService.java
+        ├── EnrollmentService.java
+        ├── FileStorageService.java
+        ├── RecommendationService.java
+        ├── SearchService.java
+        └── UserService.java
+```
+
+### Data Flow Diagram
+```mermaid
+flowchart TD
+    %% Layers
+    Client[React Frontend]
+    Security[Security Layer\n(JWT Check)]
+    Controller[Controller Layer\n(API Endpoints)]
+    Service[Service Layer\n(Business Logic)]
+    Repository[Repository Layer\n(Spring Data JPA)]
+    
+    %% External dependencies
+    DB[(PostgreSQL)]
+    AI[FastAPI Engine\n(AI Service)]
+
+    %% Connections
+    Client -- "HTTP Requests" --> Security
+    Security -- "Valid Token" --> Controller
+    Controller -- "Uses DTOs" --> Service
+    Service -- "CRUD Operations" --> Repository
+    Service -- "WebClient Call" --> AI
+    Repository -- "Generated SQL" --> DB
+```
+
+---
+
 ## 1. Application Entry Point
 - **`ElearningApplication.java`**: The bootstrap class. It contains the standard `public static void main(String[] args)` method annotated with `@SpringBootApplication`. It initializes the Spring Context, auto-configures the application based on dependencies (like setting up Tomcat and Hibernate), and starts the server.
 
