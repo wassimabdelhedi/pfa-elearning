@@ -1,0 +1,167 @@
+package com.pfa.elearning.controller;
+
+import com.pfa.elearning.exception.ResourceNotFoundException;
+import com.pfa.elearning.exception.UnauthorizedException;
+import com.pfa.elearning.model.*;
+import com.pfa.elearning.repository.CategoryRepository;
+import com.pfa.elearning.repository.ExerciseRepository;
+import com.pfa.elearning.service.CourseService;
+import com.pfa.elearning.service.FileStorageService;
+import com.pfa.elearning.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/exercises")
+@RequiredArgsConstructor
+@Slf4j
+public class ExerciseController {
+
+    private final ExerciseRepository exerciseRepository;
+    private final UserService userService;
+    private final FileStorageService fileStorageService;
+    private final CategoryRepository categoryRepository;
+    private final CourseService courseService;
+
+    @GetMapping
+    public ResponseEntity<List<Map<String, Object>>> getPublishedExercises() {
+        List<Exercise> exercises = exerciseRepository.findByPublishedTrue();
+        return ResponseEntity.ok(exercises.stream().map(this::toMap).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getExerciseById(@PathVariable Long id) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+        return ResponseEntity.ok(toMap(exercise));
+    }
+
+    @GetMapping("/my-exercises")
+    public ResponseEntity<List<Map<String, Object>>> getMyExercises(Authentication authentication) {
+        User teacher = userService.getUserByEmail(authentication.getName());
+        List<Exercise> exercises = exerciseRepository.findByTeacherId(teacher.getId());
+        return ResponseEntity.ok(exercises.stream().map(this::toMap).collect(Collectors.toList()));
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> createExercise(
+            @RequestParam("title") String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "courseId", required = false) Long courseId,
+            @RequestParam(value = "level", required = false) String level,
+            @RequestParam(value = "published", defaultValue = "false") boolean published,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            Authentication authentication) {
+
+        User teacher = userService.getUserByEmail(authentication.getName());
+
+        Exercise exercise = Exercise.builder()
+                .title(title)
+                .description(description)
+                .level(level != null ? DifficultyLevel.valueOf(level) : DifficultyLevel.BEGINNER)
+                .published(published)
+                .teacher(teacher)
+                .build();
+
+        if (categoryId != null) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+            exercise.setCategory(category);
+        }
+
+        if (courseId != null) {
+            Course course = courseService.getCourseById(courseId);
+            exercise.setCourse(course);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String storedFileName = fileStorageService.storeFile(file);
+            exercise.setFilePath(storedFileName);
+            exercise.setOriginalFileName(file.getOriginalFilename());
+        }
+
+        exercise = exerciseRepository.save(exercise);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toMap(exercise));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExercise(@PathVariable Long id, Authentication authentication) {
+        User teacher = userService.getUserByEmail(authentication.getName());
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        if (!exercise.getTeacher().getId().equals(teacher.getId())) {
+            throw new UnauthorizedException("You can only delete your own exercises");
+        }
+
+        if (exercise.getFilePath() != null) {
+            fileStorageService.deleteFile(exercise.getFilePath());
+        }
+
+        exerciseRepository.delete(exercise);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadExerciseFile(@PathVariable Long id) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        if (exercise.getFilePath() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            Path filePath = fileStorageService.getFilePath(exercise.getFilePath());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                String fileName = exercise.getOriginalFileName() != null
+                        ? exercise.getOriginalFileName() : exercise.getFilePath();
+                return ResponseEntity.ok()
+                        .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                        .header("Access-Control-Expose-Headers", "Content-Disposition")
+                        .body(resource);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error downloading file for exercise {}: {}", id, e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private Map<String, Object> toMap(Exercise e) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", e.getId());
+        map.put("title", e.getTitle());
+        map.put("description", e.getDescription());
+        map.put("content", e.getContent());
+        map.put("level", e.getLevel());
+        map.put("categoryName", e.getCategory() != null ? e.getCategory().getName() : null);
+        map.put("categoryId", e.getCategory() != null ? e.getCategory().getId() : null);
+        map.put("teacherName", e.getTeacher().getFullName());
+        map.put("teacherId", e.getTeacher().getId());
+        map.put("courseName", e.getCourse() != null ? e.getCourse().getTitle() : null);
+        map.put("courseId", e.getCourse() != null ? e.getCourse().getId() : null);
+        map.put("filePath", e.getFilePath());
+        map.put("originalFileName", e.getOriginalFileName());
+        map.put("published", e.isPublished());
+        map.put("createdAt", e.getCreatedAt());
+        return map;
+    }
+}
