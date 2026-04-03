@@ -24,7 +24,7 @@ export default function Dashboard() {
   const loadDashboard = async () => {
     try {
       const [enrollRes, recRes, quizRes, exRes] = await Promise.all([
-        getMyEnrollments(),
+        getMyEnrollments().catch(() => ({ data: [] })),
         getRecommendations().catch(() => ({ data: [] })),
         getPublishedQuizzes().catch(() => ({ data: [] })),
         getPublishedExercises().catch(() => ({ data: [] }))
@@ -167,7 +167,7 @@ export default function Dashboard() {
               <div key={quiz.id} className="card animate-in">
                 <h3 style={{ marginBottom: 8 }}>{quiz.title}</h3>
                 <p className="course-meta" style={{ marginBottom: 16 }}>{quiz.description?.substring(0, 50) || 'Aucune description'}...</p>
-                <Link to={`/quizzes/${quiz.id}`} className="btn btn-primary btn-sm" style={{ width: '100%', textAlign: 'center' }}>
+                <Link to={`/quiz/${quiz.id}`} className="btn btn-primary btn-sm" style={{ width: '100%', textAlign: 'center' }}>
                   Passer le quiz
                 </Link>
               </div>
