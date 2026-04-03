@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCourseById } from '../../api/courseApi';
+import { getCourseById, downloadCourse } from '../../api/courseApi';
 import { enrollInCourse } from '../../api/userApi';
 import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay } from 'react-icons/fi';
 
@@ -49,9 +49,23 @@ export default function CourseViewPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (course.filePath) {
-      window.open(`http://localhost:8081/api/courses/${course.id}/download`, '_blank');
+      try {
+        const response = await downloadCourse(course.id);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const fileName = course.originalFileName || `cours_${course.id}`;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      } catch (err) {
+        console.error('Erreur lors du téléchargement', err);
+        setEnrollMsg('Erreur lors du téléchargement');
+        setTimeout(() => setEnrollMsg(''), 3000);
+      }
     }
   };
 

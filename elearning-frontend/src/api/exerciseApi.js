@@ -16,3 +16,6 @@ export const createExercise = (formData) =>
 
 export const deleteExercise = (id) =>
   api.delete(`/exercises/${id}`);
+
+export const downloadExercise = (id) =>
+  api.get(`/exercises/${id}/download`, { responseType: 'blob' });
