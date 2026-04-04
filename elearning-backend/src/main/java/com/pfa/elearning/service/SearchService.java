@@ -193,6 +193,11 @@ public class SearchService {
         for (RecommendationResponse rec : recommendations) {
             Course course = courseRepository.findById(rec.getCourseId()).orElse(null);
             if (course != null) {
+                List<Recommendation> existing = recommendationRepository.findByStudentIdAndCourseId(student.getId(), course.getId());
+                if (!existing.isEmpty()) {
+                    recommendationRepository.deleteAll(existing);
+                }
+
                 Recommendation recommendation = Recommendation.builder()
                         .student(student)
                         .course(course)

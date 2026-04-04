@@ -15,6 +15,7 @@ com\pfa\elearning\model\QuizResult$QuizResultBuilder.class
 com\pfa\elearning\repository\CourseRatingRepository.class
 com\pfa\elearning\controller\AdminController.class
 com\pfa\elearning\controller\ExerciseController.class
+com\pfa\elearning\repository\ExerciseCompletionRepository.class
 com\pfa\elearning\service\CourseService$1.class
 com\pfa\elearning\controller\SearchController.class
 com\pfa\elearning\model\QuizResult.class
@@ -22,6 +23,7 @@ com\pfa\elearning\service\UserService.class
 com\pfa\elearning\exception\GlobalExceptionHandler.class
 com\pfa\elearning\model\Category.class
 com\pfa\elearning\model\Exercise.class
+com\pfa\elearning\model\ExerciseCompletion$ExerciseCompletionBuilder.class
 com\pfa\elearning\model\SearchHistory$SearchHistoryBuilder.class
 com\pfa\elearning\controller\QuizController.class
 com\pfa\elearning\dto\response\AuthResponse.class
@@ -47,6 +49,7 @@ com\pfa\elearning\model\Role.class
 com\pfa\elearning\repository\CategoryRepository.class
 com\pfa\elearning\model\Recommendation.class
 com\pfa\elearning\dto\response\CourseResponse.class
+com\pfa\elearning\model\ExerciseCompletion.class
 com\pfa\elearning\config\WebConfig.class
 com\pfa\elearning\model\SearchHistory.class
 com\pfa\elearning\config\CorsConfig.class

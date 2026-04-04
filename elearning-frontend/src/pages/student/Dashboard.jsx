@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMyEnrollments } from '../../api/userApi';
 import { getRecommendations } from '../../api/searchApi';
-import { getPublishedQuizzes } from '../../api/quizApi';
-import { getPublishedExercises, downloadExercise } from '../../api/exerciseApi';
+import { getPublishedQuizzes, getMyStudentResults } from '../../api/quizApi';
+import { getPublishedExercises, downloadExercise, getMyCompletedExercises } from '../../api/exerciseApi';
 import { Link, useNavigate } from 'react-router-dom';
 import CourseCard from '../../components/course/CourseCard';
 import { FiBookOpen, FiTrendingUp, FiAward, FiSearch, FiCheckSquare, FiFile, FiDownload } from 'react-icons/fi';
@@ -15,6 +15,8 @@ export default function Dashboard() {
   const [recommendations, setRecommendations] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
   const [exercises, setExercises] = useState([]);
+  const [completedQuizzesCount, setCompletedQuizzesCount] = useState(0);
+  const [completedExercisesCount, setCompletedExercisesCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,16 +25,20 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [enrollRes, recRes, quizRes, exRes] = await Promise.all([
+      const [enrollRes, recRes, quizRes, exRes, myQuizRes, myExRes] = await Promise.all([
         getMyEnrollments().catch(() => ({ data: [] })),
         getRecommendations().catch(() => ({ data: [] })),
         getPublishedQuizzes().catch(() => ({ data: [] })),
-        getPublishedExercises().catch(() => ({ data: [] }))
+        getPublishedExercises().catch(() => ({ data: [] })),
+        getMyStudentResults().catch(() => ({ data: [] })),
+        getMyCompletedExercises().catch(() => ({ data: [] }))
       ]);
       setEnrollments(enrollRes.data);
       setRecommendations(recRes.data);
       setQuizzes(quizRes.data);
       setExercises(exRes.data);
+      setCompletedQuizzesCount(myQuizRes.data.length);
+      setCompletedExercisesCount(myExRes.data.length);
     } catch (err) {
       console.error('Dashboard error:', err);
     } finally {
@@ -77,26 +83,31 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <div className="stat-card animate-in">
           <div className="stat-icon">📚</div>
           <div className="stat-value">{enrollments.length}</div>
           <div className="stat-label">Cours inscrits</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">✅</div>
+          <div className="stat-icon">🎓</div>
           <div className="stat-value">{completedCount}</div>
           <div className="stat-label">Cours terminés</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">📈</div>
-          <div className="stat-value">{avgProgress}%</div>
-          <div className="stat-label">Progression moyenne</div>
+          <div className="stat-icon">📝</div>
+          <div className="stat-value">{completedQuizzesCount}</div>
+          <div className="stat-label">Quiz faits</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">🤖</div>
-          <div className="stat-value">{recommendations.length}</div>
-          <div className="stat-label">Recommandations</div>
+          <div className="stat-icon">✅</div>
+          <div className="stat-value">{completedExercisesCount}</div>
+          <div className="stat-label">Exercices faits</div>
+        </div>
+        <div className="stat-card animate-in">
+          <div className="stat-icon">📈</div>
+          <div className="stat-value">{avgProgress}%</div>
+          <div className="stat-label">Progression</div>
         </div>
       </div>
 

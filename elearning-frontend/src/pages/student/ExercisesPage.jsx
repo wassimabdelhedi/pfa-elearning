@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPublishedExercises } from '../../api/exerciseApi';
+import { getPublishedExercises, completeExercise, getMyCompletedExercises } from '../../api/exerciseApi';
 import { enrollInCourse } from '../../api/userApi';
 import { FiFileText, FiUser, FiArrowLeft } from 'react-icons/fi';
 
@@ -10,6 +10,7 @@ export default function ExercisesPage() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeExercise, setActiveExercise] = useState(null);
+  const [completedExIds, setCompletedExIds] = useState(new Set());
 
   useEffect(() => {
     loadExercises();
@@ -28,6 +29,10 @@ export default function ExercisesPage() {
       } else {
         setActiveExercise(null);
       }
+
+      // Fetch completed exercises for the user
+      const compRes = await getMyCompletedExercises();
+      setCompletedExIds(new Set(compRes.data.map(c => c.exerciseId)));
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,6 +57,16 @@ export default function ExercisesPage() {
   const closeExercise = () => {
     setActiveExercise(null);
     navigate('/exercises');
+  };
+
+  const handleComplete = async (exerciseId) => {
+    try {
+      await completeExercise(exerciseId);
+      setCompletedExIds(prev => new Set([...prev, exerciseId]));
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la mise à jour");
+    }
   };
 
   if (loading) {
@@ -95,7 +110,7 @@ export default function ExercisesPage() {
             </p>
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, display: 'flex', justifyContent: 'center', gap: 16 }}>
             {activeExercise.filePath ? (
               <button
                 className="btn btn-primary btn-lg"
@@ -109,6 +124,14 @@ export default function ExercisesPage() {
                 Aucun fichier n'a été attaché à cet exercice.
               </div>
             )}
+            
+            <button
+               className={`btn ${completedExIds.has(activeExercise.id) ? 'btn-secondary' : 'btn-success'} btn-lg`}
+               onClick={() => handleComplete(activeExercise.id)}
+               disabled={completedExIds.has(activeExercise.id)}
+            >
+               {completedExIds.has(activeExercise.id) ? '✅ Exercice Fait' : 'Marquer comme fait'}
+            </button>
           </div>
         </div>
       </div>

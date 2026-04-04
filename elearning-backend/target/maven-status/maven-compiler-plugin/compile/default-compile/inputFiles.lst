@@ -9,6 +9,7 @@ C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\m
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\controller\AdminController.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\model\Enrollment.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\exception\GlobalExceptionHandler.java
+C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\repository\ExerciseCompletionRepository.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\model\Quiz.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\service\SearchService.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\service\FileStorageService.java
@@ -25,6 +26,7 @@ C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\E
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\model\Category.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\controller\CategoryController.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\config\SecurityConfig.java
+C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\model\ExerciseCompletion.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\model\User.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\repository\CategoryRepository.java
 C:\Users\bahlo\pfa-elearning\elearning-backend\src\main\java\com\pfa\elearning\controller\EnrollmentController.java

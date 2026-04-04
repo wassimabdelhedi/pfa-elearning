@@ -220,6 +220,27 @@ public class QuizController {
         return ResponseEntity.ok(resultsList);
     }
 
+    // ===== ALL RESULTS FOR THE STUDENT =====
+    @GetMapping("/my-student-results")
+    public ResponseEntity<List<Map<String, Object>>> getMyStudentResults(Authentication authentication) {
+        User student = userService.getUserByEmail(authentication.getName());
+        List<QuizResult> myResults = quizResultRepository.findByStudentId(student.getId());
+
+        List<Map<String, Object>> resultsList = myResults.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", r.getId());
+            map.put("quizId", r.getQuiz().getId());
+            map.put("quizTitle", r.getQuiz().getTitle());
+            map.put("score", r.getScore());
+            map.put("totalQuestions", r.getTotalQuestions());
+            map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
+            map.put("submittedAt", r.getSubmittedAt());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(resultsList);
+    }
+
     private Map<String, Object> toMap(Quiz q) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", q.getId());
