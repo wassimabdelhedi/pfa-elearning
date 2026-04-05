@@ -16,3 +16,12 @@ export const createExercise = (formData) =>
 
 export const deleteExercise = (id) =>
   api.delete(`/exercises/${id}`);
+
+export const downloadExercise = (id) =>
+  api.get(`/exercises/${id}/download`, { responseType: 'blob' });
+
+export const completeExercise = (id) =>
+  api.post(`/exercises/${id}/complete`);
+
+export const getMyCompletedExercises = () =>
+  api.get('/exercises/my-completed-exercises');

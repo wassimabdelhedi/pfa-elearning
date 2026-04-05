@@ -91,7 +91,7 @@ export default function CreateCourse() {
             />
             {file && (
               <p style={{ marginTop: 8, color: 'var(--primary-500)', fontSize: '0.9rem' }}>
-                ✅ Fichier sélectionné : {file.name} ({(file.size / (1024*1024)).toFixed(1)} MB)
+                ✅ Fichier sélectionné : {file.name} ({(file.size / (1024 * 1024)).toFixed(1)} MB)
               </p>
             )}
             <p style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
@@ -119,7 +119,7 @@ export default function CreateCourse() {
 
           <div style={{ display: 'flex', gap: 12 }}>
             <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ flex: 1 }}>
-              {loading ? 'Création en cours...' : '🚀 Créer le cours'}
+              {loading ? 'Création en cours...' : 'Créer le cours'}
             </button>
             <button type="button" className="btn btn-secondary btn-lg"
               onClick={() => navigate('/teacher/dashboard')}>

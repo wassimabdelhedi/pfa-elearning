@@ -50,6 +50,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("TEACHER")
                 .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("TEACHER")
 
+                // Student exercise completions
+                .requestMatchers(HttpMethod.POST, "/api/exercises/*/complete").hasRole("STUDENT")
+
                 // Teacher endpoints - exercises
                 .requestMatchers(HttpMethod.POST, "/api/exercises/**").hasRole("TEACHER")
                 .requestMatchers(HttpMethod.PUT, "/api/exercises/**").hasRole("TEACHER")

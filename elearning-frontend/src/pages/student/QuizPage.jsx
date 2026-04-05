@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getPublishedQuizzes, submitQuizResult } from '../../api/quizApi';
-import { FiCheckCircle, FiUser, FiClock } from 'react-icons/fi';
+import { FiCheckCircle, FiUser, FiClock, FiArrowLeft } from 'react-icons/fi';
 
 export default function QuizPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -12,12 +15,21 @@ export default function QuizPage() {
 
   useEffect(() => {
     loadQuizzes();
-  }, []);
+  }, [id]);
 
   const loadQuizzes = async () => {
     try {
+      setLoading(true);
       const res = await getPublishedQuizzes();
       setQuizzes(res.data);
+      if (id) {
+        const q = res.data.find(q => q.id === parseInt(id));
+        if (q) {
+          startQuiz(q);
+        }
+      } else {
+        closeQuizStateOnly();
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -70,6 +82,11 @@ export default function QuizPage() {
   };
 
   const closeQuiz = () => {
+    closeQuizStateOnly();
+    navigate('/quiz');
+  };
+
+  const closeQuizStateOnly = () => {
     setActiveQuiz(null);
     setAnswers({});
     setSubmitted(false);

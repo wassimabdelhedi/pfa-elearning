@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCourseById } from '../../api/courseApi';
-import { enrollInCourse } from '../../api/userApi';
-import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay } from 'react-icons/fi';
+import { getCourseById, downloadCourse } from '../../api/courseApi';
+import { enrollInCourse, updateProgressByCourse } from '../../api/userApi';
+import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay, FiCheckCircle } from 'react-icons/fi';
 
 const VIDEO_EXTENSIONS = ['.mp4', '.avi', '.mov', '.webm', '.mkv'];
 
@@ -18,6 +18,7 @@ export default function CourseViewPage() {
   const [loading, setLoading] = useState(true);
   const [enrollMsg, setEnrollMsg] = useState('');
   const [activeTab, setActiveTab] = useState('content');
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     loadCourse();
@@ -49,9 +50,36 @@ export default function CourseViewPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (course.filePath) {
-      window.open(`http://localhost:8081/api/courses/${course.id}/download`, '_blank');
+      try {
+        const response = await downloadCourse(course.id);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const fileName = course.originalFileName || `cours_${course.id}`;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      } catch (err) {
+        console.error('Erreur lors du téléchargement', err);
+        setEnrollMsg('Erreur lors du téléchargement');
+        setTimeout(() => setEnrollMsg(''), 3000);
+      }
+    }
+  };
+
+  const handleMarkAsCompleted = async () => {
+    try {
+      await updateProgressByCourse(id, 100);
+      setIsCompleted(true);
+      setEnrollMsg('✅ Cours marqué comme terminé !');
+      setTimeout(() => setEnrollMsg(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setEnrollMsg("Erreur lors de la mise à jour de la progression");
+      setTimeout(() => setEnrollMsg(''), 3000);
     }
   };
 
@@ -130,6 +158,14 @@ export default function CourseViewPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button className="btn btn-primary" onClick={handleEnroll}>
               S'inscrire au cours
+            </button>
+            <button 
+              className={`btn ${isCompleted ? 'btn-secondary' : 'btn-success'}`} 
+              onClick={handleMarkAsCompleted}
+              disabled={isCompleted}
+            >
+              <FiCheckCircle size={16} style={{ marginRight: 6 }} /> 
+              {isCompleted ? 'Terminé' : 'Marquer comme terminé'}
             </button>
             {course.filePath && (
               <button className="btn btn-secondary" onClick={handleDownload}>

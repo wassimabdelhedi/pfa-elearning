@@ -66,6 +66,23 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
+    @Transactional
+    public Enrollment updateProgressByCourseId(Long courseId, double progress, User student) {
+        Enrollment enrollment = enrollmentRepository.findByStudentId(student.getId()).stream()
+                .filter(e -> e.getCourse().getId().equals(courseId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment", "courseId", courseId));
+
+        enrollment.setProgressPercentage(Math.min(progress, 100.0));
+
+        if (progress >= 100.0 && !enrollment.isCompleted()) {
+            enrollment.setCompleted(true);
+            enrollment.setCompletedAt(LocalDateTime.now());
+        }
+
+        return enrollmentRepository.save(enrollment);
+    }
+
     public boolean isEnrolled(Long studentId, Long courseId) {
         return enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId);
     }

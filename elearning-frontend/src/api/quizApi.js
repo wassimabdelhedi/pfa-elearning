@@ -23,3 +23,6 @@ export const getQuizResults = (quizId) =>
 
 export const getMyQuizResults = () =>
   api.get('/quizzes/my-results');
+
+export const getMyStudentResults = () =>
+  api.get('/quizzes/my-student-results');

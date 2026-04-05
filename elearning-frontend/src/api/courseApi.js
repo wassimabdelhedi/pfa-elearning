@@ -24,3 +24,6 @@ export const updateCourse = (id, formData) =>
 
 export const deleteCourse = (id) =>
   api.delete(`/courses/${id}`);
+
+export const downloadCourse = (id) =>
+  api.get(`/courses/${id}/download`, { responseType: 'blob' });

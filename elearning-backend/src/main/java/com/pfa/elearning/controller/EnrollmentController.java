@@ -71,4 +71,20 @@ public class EnrollmentController {
                 "completed", enrollment.isCompleted()
         ));
     }
+
+    @PutMapping("/course/{courseId}/progress")
+    public ResponseEntity<Map<String, Object>> updateProgressByCourse(
+            @PathVariable Long courseId,
+            @RequestBody Map<String, Double> body,
+            Authentication authentication) {
+        User student = userService.getUserByEmail(authentication.getName());
+        double progress = body.getOrDefault("progress", 0.0);
+        Enrollment enrollment = enrollmentService.updateProgressByCourseId(courseId, progress, student);
+
+        return ResponseEntity.ok(Map.of(
+                "id", enrollment.getId(),
+                "progress", enrollment.getProgressPercentage(),
+                "completed", enrollment.isCompleted()
+        ));
+    }
 }

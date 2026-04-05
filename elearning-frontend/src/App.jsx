@@ -69,7 +69,17 @@ function App() {
             <ExercisesPage />
           </ProtectedRoute>
         } />
+        <Route path="/exercises/:id" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <ExercisesPage />
+          </ProtectedRoute>
+        } />
         <Route path="/quiz" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <QuizPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/quiz/:id" element={
           <ProtectedRoute roles={['STUDENT']}>
             <QuizPage />
           </ProtectedRoute>

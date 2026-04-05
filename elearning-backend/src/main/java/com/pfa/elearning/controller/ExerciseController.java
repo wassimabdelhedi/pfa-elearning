@@ -4,6 +4,7 @@ import com.pfa.elearning.exception.ResourceNotFoundException;
 import com.pfa.elearning.exception.UnauthorizedException;
 import com.pfa.elearning.model.*;
 import com.pfa.elearning.repository.CategoryRepository;
+import com.pfa.elearning.repository.ExerciseCompletionRepository;
 import com.pfa.elearning.repository.ExerciseRepository;
 import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.FileStorageService;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class ExerciseController {
 
     private final ExerciseRepository exerciseRepository;
+    private final ExerciseCompletionRepository exerciseCompletionRepository;
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final CategoryRepository categoryRepository;
@@ -143,6 +145,51 @@ public class ExerciseController {
             log.error("Error downloading file for exercise {}: {}", id, e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // ===== STUDENT COMPLETIONS =====
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<Map<String, Object>> completeExercise(
+            @PathVariable Long id,
+            Authentication authentication) {
+        
+        User student = userService.getUserByEmail(authentication.getName());
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        if (exerciseCompletionRepository.existsByStudentIdAndExerciseId(student.getId(), exercise.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Exercise already completed"));
+        }
+
+        ExerciseCompletion completion = ExerciseCompletion.builder()
+                .student(student)
+                .exercise(exercise)
+                .build();
+
+        completion = exerciseCompletionRepository.save(completion);
+
+        return ResponseEntity.ok(Map.of(
+            "id", completion.getId(),
+            "exerciseId", exercise.getId(),
+            "completedAt", completion.getCompletedAt() != null ? completion.getCompletedAt() : ""
+        ));
+    }
+
+    @GetMapping("/my-completed-exercises")
+    public ResponseEntity<List<Map<String, Object>>> getMyCompletedExercises(Authentication authentication) {
+        User student = userService.getUserByEmail(authentication.getName());
+        List<ExerciseCompletion> completions = exerciseCompletionRepository.findByStudentId(student.getId());
+        
+        List<Map<String, Object>> result = completions.stream().map(c -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", c.getId());
+            map.put("exerciseId", c.getExercise().getId());
+            map.put("exerciseTitle", c.getExercise().getTitle());
+            map.put("completedAt", c.getCompletedAt());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
     }
 
     private Map<String, Object> toMap(Exercise e) {

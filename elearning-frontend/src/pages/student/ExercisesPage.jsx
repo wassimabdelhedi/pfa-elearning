@@ -1,20 +1,38 @@
 import { useState, useEffect } from 'react';
-import { getPublishedExercises } from '../../api/exerciseApi';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getPublishedExercises, completeExercise, getMyCompletedExercises } from '../../api/exerciseApi';
 import { enrollInCourse } from '../../api/userApi';
-import { FiFileText, FiUser } from 'react-icons/fi';
+import { FiFileText, FiUser, FiArrowLeft } from 'react-icons/fi';
 
 export default function ExercisesPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeExercise, setActiveExercise] = useState(null);
+  const [completedExIds, setCompletedExIds] = useState(new Set());
 
   useEffect(() => {
     loadExercises();
-  }, []);
+  }, [id]);
 
   const loadExercises = async () => {
     try {
+      setLoading(true);
       const res = await getPublishedExercises();
       setExercises(res.data);
+      if (id) {
+        const ex = res.data.find(e => e.id === parseInt(id));
+        if (ex) {
+          setActiveExercise(ex);
+        }
+      } else {
+        setActiveExercise(null);
+      }
+
+      // Fetch completed exercises for the user
+      const compRes = await getMyCompletedExercises();
+      setCompletedExIds(new Set(compRes.data.map(c => c.exerciseId)));
     } catch (err) {
       console.error(err);
     } finally {
@@ -36,8 +54,88 @@ export default function ExercisesPage() {
     window.open(`http://localhost:8081/api/exercises/${exerciseId}/download`, '_blank');
   };
 
+  const closeExercise = () => {
+    setActiveExercise(null);
+    navigate('/exercises');
+  };
+
+  const handleComplete = async (exerciseId) => {
+    try {
+      await completeExercise(exerciseId);
+      setCompletedExIds(prev => new Set([...prev, exerciseId]));
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la mise à jour");
+    }
+  };
+
   if (loading) {
     return <div className="loading-container"><div className="spinner"></div></div>;
+  }
+
+  if (activeExercise) {
+    return (
+      <div className="page" style={{ maxWidth: 800, margin: '0 auto' }}>
+        <button onClick={closeExercise} className="btn" style={{ marginBottom: 20, background: 'transparent', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          <FiArrowLeft /> Retour aux exercices
+        </button>
+        <div className="card" style={{ padding: 32 }}>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            {activeExercise.categoryName && (
+              <span className="badge badge-primary">{activeExercise.categoryName}</span>
+            )}
+            {activeExercise.level && (
+              <span className={`badge ${getLevelClass(activeExercise.level)}`}>
+                {getLevelLabel(activeExercise.level)}
+              </span>
+            )}
+          </div>
+          <h1 style={{ marginBottom: 16 }}>{activeExercise.title}</h1>
+          
+          <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: 12, marginBottom: 24 }}>
+            <p style={{ margin: 0, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <FiUser size={16} /> Par {activeExercise.teacherName}
+            </p>
+            {activeExercise.courseName && (
+              <p style={{ margin: 0, color: 'var(--accent-400)' }}>
+                📚 Associé au cours : <strong>{activeExercise.courseName}</strong>
+              </p>
+            )}
+          </div>
+
+          <div style={{ marginBottom: 32 }}>
+            <h3 style={{ marginBottom: 12 }}>Description</h3>
+            <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
+              {activeExercise.description || "Aucune description fournie."}
+            </p>
+          </div>
+
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, display: 'flex', justifyContent: 'center', gap: 16 }}>
+            {activeExercise.filePath ? (
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={() => handleDownload(activeExercise.id)}
+              >
+                <FiFileText size={18} style={{ marginRight: 8 }} />
+                Télécharger l'exercice
+              </button>
+            ) : (
+              <div style={{ padding: 16, background: 'rgba(255,255,255,0.05)', borderRadius: 8, color: 'var(--text-secondary)', textAlign: 'center', width: '100%' }}>
+                Aucun fichier n'a été attaché à cet exercice.
+              </div>
+            )}
+            
+            <button
+               className={`btn ${completedExIds.has(activeExercise.id) ? 'btn-secondary' : 'btn-success'} btn-lg`}
+               onClick={() => handleComplete(activeExercise.id)}
+               disabled={completedExIds.has(activeExercise.id)}
+            >
+               {completedExIds.has(activeExercise.id) ? '✅ Exercice Fait' : 'Marquer comme fait'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -77,9 +175,9 @@ export default function ExercisesPage() {
                 {exercise.filePath && (
                   <button
                     className="btn btn-primary btn-sm"
-                    onClick={() => handleDownload(exercise.id)}
+                    onClick={() => navigate(`/exercises/${exercise.id}`)}
                   >
-                    <FiFileText size={14} /> Télécharger
+                    Détails
                   </button>
                 )}
               </div>
