@@ -42,6 +42,10 @@ public class Exercise {
     private String filePath;
     private String originalFileName;
 
+    @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<ExerciseCompletion> completions = new java.util.ArrayList<>();
+
     @Builder.Default
     private boolean published = false;
 

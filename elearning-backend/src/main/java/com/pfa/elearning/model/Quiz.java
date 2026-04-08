@@ -42,6 +42,10 @@ public class Quiz {
     @Builder.Default
     private List<QuizQuestion> questions = new ArrayList<>();
 
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QuizResult> results = new ArrayList<>();
+
     @Builder.Default
     private boolean published = false;
 
