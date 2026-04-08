@@ -46,11 +46,8 @@ public class CourseService {
         Course course = Course.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .content(request.getContent())
                 .level(request.getLevel())
                 .published(request.isPublished())
-                .filePath(request.getFilePath())
-                .originalFileName(request.getOriginalFileName())
                 .teacher(teacher)
                 .build();
 
@@ -74,16 +71,8 @@ public class CourseService {
 
         course.setTitle(request.getTitle());
         course.setDescription(request.getDescription());
-        course.setContent(request.getContent());
         course.setLevel(request.getLevel());
         course.setPublished(request.isPublished());
-
-        if (request.getFilePath() != null) {
-            course.setFilePath(request.getFilePath());
-        }
-        if (request.getOriginalFileName() != null) {
-            course.setOriginalFileName(request.getOriginalFileName());
-        }
 
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
@@ -184,6 +173,7 @@ public class CourseService {
     public CourseResponse toResponse(Course course) {
         Double avgRating = courseRatingRepository.getAverageRatingByCourseId(course.getId());
         long enrollCount = enrollmentRepository.countByCourseId(course.getId());
+        int chapterCount = course.getChapters() != null ? course.getChapters().size() : 0;
 
         return CourseResponse.builder()
                 .id(course.getId())
@@ -195,12 +185,11 @@ public class CourseService {
                 .level(course.getLevel())
                 .teacherName(course.getTeacher().getFullName())
                 .teacherId(course.getTeacher().getId())
-                .filePath(course.getFilePath())
-                .originalFileName(course.getOriginalFileName())
                 .keywords(course.getKeywords())
                 .published(course.isPublished())
                 .averageRating(avgRating != null ? avgRating : 0.0)
                 .enrollmentCount(enrollCount)
+                .chapterCount(chapterCount)
                 .createdAt(course.getCreatedAt())
                 .updatedAt(course.getUpdatedAt())
                 .build();

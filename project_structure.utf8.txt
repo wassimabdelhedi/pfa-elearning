@@ -1,0 +1,160 @@
+pfa-elearning
+├── ai-recommendation-engine
+│   ├── app
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── nlp_processor.py
+│   │   │   └── recommender.py
+│   │   ├── routes
+│   │   │   ├── __init__.py
+│   │   │   └── recommendation_routes.py
+│   │   ├── schemas
+│   │   │   ├── __init__.py
+│   │   │   └── recommendation_schema.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   └── text_extractor.py
+│   │   └── __init__.py
+│   ├── main.py
+│   └── requirements.txt
+├── elearning-backend
+│   ├── .settings
+│   │   ├── org.eclipse.core.resources.prefs
+│   │   ├── org.eclipse.jdt.apt.core.prefs
+│   │   ├── org.eclipse.jdt.core.prefs
+│   │   ├── org.eclipse.m2e.core.prefs
+│   │   └── org.springframework.ide.eclipse.prefs
+│   ├── src
+│   │   └── main
+│   │       ├── java
+│   │       │   └── com
+│   │       │       └── pfa
+│   │       │           └── elearning
+│   │       │               ├── config
+│   │       │               │   ├── CorsConfig.java
+│   │       │               │   ├── SecurityConfig.java
+│   │       │               │   └── WebConfig.java
+│   │       │               ├── controller
+│   │       │               │   ├── AdminController.java
+│   │       │               │   ├── AuthController.java
+│   │       │               │   ├── CategoryController.java
+│   │       │               │   ├── CourseController.java
+│   │       │               │   ├── EnrollmentController.java
+│   │       │               │   ├── ExerciseController.java
+│   │       │               │   ├── QuizController.java
+│   │       │               │   ├── RecommendationController.java
+│   │       │               │   └── SearchController.java
+│   │       │               ├── dto
+│   │       │               │   ├── request
+│   │       │               │   │   ├── CourseRequest.java
+│   │       │               │   │   ├── LoginRequest.java
+│   │       │               │   │   ├── RegisterRequest.java
+│   │       │               │   │   └── SearchRequest.java
+│   │       │               │   └── response
+│   │       │               │       ├── AuthResponse.java
+│   │       │               │       ├── CourseResponse.java
+│   │       │               │       ├── RecommendationResponse.java
+│   │       │               │       └── SearchResponse.java
+│   │       │               ├── exception
+│   │       │               │   ├── GlobalExceptionHandler.java
+│   │       │               │   ├── ResourceNotFoundException.java
+│   │       │               │   └── UnauthorizedException.java
+│   │       │               ├── model
+│   │       │               │   ├── Category.java
+│   │       │               │   ├── Course.java
+│   │       │               │   ├── CourseRating.java
+│   │       │               │   ├── DifficultyLevel.java
+│   │       │               │   ├── Enrollment.java
+│   │       │               │   ├── Exercise.java
+│   │       │               │   ├── ExerciseCompletion.java
+│   │       │               │   ├── Quiz.java
+│   │       │               │   ├── QuizQuestion.java
+│   │       │               │   ├── QuizResult.java
+│   │       │               │   ├── Recommendation.java
+│   │       │               │   ├── Role.java
+│   │       │               │   ├── SearchHistory.java
+│   │       │               │   └── User.java
+│   │       │               ├── repository
+│   │       │               │   ├── CategoryRepository.java
+│   │       │               │   ├── CourseRatingRepository.java
+│   │       │               │   ├── CourseRepository.java
+│   │       │               │   ├── EnrollmentRepository.java
+│   │       │               │   ├── ExerciseCompletionRepository.java
+│   │       │               │   ├── ExerciseRepository.java
+│   │       │               │   ├── QuizRepository.java
+│   │       │               │   ├── QuizResultRepository.java
+│   │       │               │   ├── RecommendationRepository.java
+│   │       │               │   ├── SearchHistoryRepository.java
+│   │       │               │   └── UserRepository.java
+│   │       │               ├── security
+│   │       │               │   ├── CustomUserDetailsService.java
+│   │       │               │   ├── JwtAuthenticationFilter.java
+│   │       │               │   └── JwtTokenProvider.java
+│   │       │               ├── service
+│   │       │               │   ├── CourseService.java
+│   │       │               │   ├── EnrollmentService.java
+│   │       │               │   ├── FileStorageService.java
+│   │       │               │   ├── RecommendationService.java
+│   │       │               │   ├── SearchService.java
+│   │       │               │   └── UserService.java
+│   │       │               └── ElearningApplication.java
+│   │       └── resources
+│   │           ├── application.yml
+│   │           └── data.sql
+│   ├── .classpath
+│   ├── .factorypath
+│   ├── .project
+│   ├── error.log
+│   ├── pom.xml
+│   └── runner.log
+├── elearning-frontend
+│   ├── public
+│   │   ├── favicon.svg
+│   │   └── icons.svg
+│   ├── src
+│   │   ├── api
+│   │   │   ├── authApi.js
+│   │   │   ├── axiosConfig.js
+│   │   │   ├── courseApi.js
+│   │   │   ├── exerciseApi.js
+│   │   │   ├── quizApi.js
+│   │   │   ├── searchApi.js
+│   │   │   └── userApi.js
+│   │   ├── components
+│   │   │   ├── common
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── ProtectedRoute.jsx
+│   │   │   ├── course
+│   │   │   │   └── CourseCard.jsx
+│   │   │   └── search
+│   │   │       └── SearchBar.jsx
+│   │   ├── context
+│   │   │   └── AuthContext.jsx
+│   │   ├── pages
+│   │   │   ├── auth
+│   │   │   │   ├── LoginPage.jsx
+│   │   │   │   └── RegisterPage.jsx
+│   │   │   ├── student
+│   │   │   │   ├── CoursesPage.jsx
+│   │   │   │   ├── CourseViewPage.jsx
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── ExercisesPage.jsx
+│   │   │   │   ├── QuizPage.jsx
+│   │   │   │   └── SearchPage.jsx
+│   │   │   └── teacher
+│   │   │       ├── CreateCourse.jsx
+│   │   │       ├── CreateExercise.jsx
+│   │   │       ├── CreateQuiz.jsx
+│   │   │       └── TeacherDashboard.jsx
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
+
+└── README.md

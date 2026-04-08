@@ -30,3 +30,30 @@ export const togglePublishCourse = (id) =>
 
 export const downloadCourse = (id) =>
   api.get(`/courses/${id}/download`, { responseType: 'blob' });
+
+// ========== Chapter API ==========
+
+export const getChapters = (courseId) =>
+  api.get(`/chapters/course/${courseId}`);
+
+export const addChapter = (courseId, formData) =>
+  api.post(`/chapters/course/${courseId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+export const updateChapter = (chapterId, formData) =>
+  api.put(`/chapters/${chapterId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+export const deleteChapter = (chapterId) =>
+  api.delete(`/chapters/${chapterId}`);
+
+export const downloadChapterFile = (chapterId) =>
+  api.get(`/chapters/${chapterId}/download`, { responseType: 'blob' });
+
+export const markChapterComplete = (chapterId) =>
+  api.put(`/chapters/${chapterId}/complete`);
+
+export const getCourseChapterProgress = (courseId) =>
+  api.get(`/chapters/course/${courseId}/progress`);

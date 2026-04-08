@@ -7,7 +7,6 @@ export default function CreateCourse() {
   const [form, setForm] = useState({
     title: '', description: '', categoryId: '', level: 'BEGINNER', published: false
   });
-  const [file, setFile] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,21 +21,6 @@ export default function CreateCourse() {
     setForm({ ...form, [e.target.name]: value });
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      const allowedTypes = ['.pdf', '.docx', '.pptx', '.txt', '.mp4', '.avi', '.mov', '.webm', '.mkv'];
-      const ext = '.' + selectedFile.name.split('.').pop().toLowerCase();
-      if (!allowedTypes.includes(ext)) {
-        setError(`Type de fichier non supporté: ${ext}. Types acceptés: PDF, DOCX, PPTX, TXT, MP4, AVI, MOV, WEBM, MKV`);
-        e.target.value = '';
-        return;
-      }
-      setFile(selectedFile);
-      setError('');
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -49,10 +33,10 @@ export default function CreateCourse() {
       if (form.categoryId) formData.append('categoryId', form.categoryId);
       formData.append('level', form.level);
       formData.append('published', form.published);
-      if (file) formData.append('file', file);
 
-      await createCourse(formData);
-      navigate('/teacher/dashboard');
+      const res = await createCourse(formData);
+      // Redirect to chapter management page to add modules
+      navigate(`/teacher/course/${res.data.id}/chapters`);
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.detail || 'Erreur lors de la création');
     } finally {
@@ -64,7 +48,7 @@ export default function CreateCourse() {
     <div className="page" style={{ maxWidth: 700, margin: '0 auto' }}>
       <div className="page-header">
         <h1>📝 Nouveau cours</h1>
-        <p>Créez et publiez un nouveau cours pour vos étudiants</p>
+        <p>Créez un cours puis ajoutez-y des chapitres avec différents supports</p>
       </div>
 
       <div className="card" style={{ padding: 32 }}>
@@ -97,27 +81,6 @@ export default function CreateCourse() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="file">📄 Fichier du cours (PDF, DOCX, PPTX, TXT, MP4, AVI, MOV...)</label>
-            <input
-              id="file"
-              name="file"
-              type="file"
-              className="form-input"
-              accept=".pdf,.docx,.pptx,.txt,.mp4,.avi,.mov,.webm,.mkv"
-              onChange={handleFileChange}
-              style={{ padding: '12px' }}
-            />
-            {file && (
-              <p style={{ marginTop: 8, color: 'var(--primary-500)', fontSize: '0.9rem' }}>
-                ✅ Fichier sélectionné : {file.name} ({(file.size / (1024 * 1024)).toFixed(1)} MB)
-              </p>
-            )}
-            <p style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              Documents et vidéos acceptés. Le contenu texte sera extrait automatiquement.
-            </p>
-          </div>
-
-          <div className="form-group">
             <label htmlFor="level">Niveau</label>
             <select id="level" name="level" className="form-input"
               value={form.level} onChange={handleChange}>
@@ -137,7 +100,7 @@ export default function CreateCourse() {
 
           <div style={{ display: 'flex', gap: 12 }}>
             <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ flex: 1 }}>
-              {loading ? 'Création en cours...' : 'Créer le cours'}
+              {loading ? 'Création en cours...' : 'Créer et ajouter des chapitres →'}
             </button>
             <button type="button" className="btn btn-secondary btn-lg"
               onClick={() => navigate('/teacher/dashboard')}>

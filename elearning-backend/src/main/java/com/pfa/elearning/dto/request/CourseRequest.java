@@ -9,15 +9,9 @@ public class CourseRequest {
 
     private String description;
 
-    private String content;
-
     private Long categoryId;
 
     private DifficultyLevel level;
 
     private boolean published;
-
-    private String filePath;
-
-    private String originalFileName;
 }

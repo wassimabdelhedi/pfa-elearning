@@ -18,6 +18,7 @@ import QuizPage from './pages/student/QuizPage';
 // Teacher pages
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import CreateCourse from './pages/teacher/CreateCourse';
+import ManageCourseChapters from './pages/teacher/ManageCourseChapters';
 import CreateExercise from './pages/teacher/CreateExercise';
 import CreateQuiz from './pages/teacher/CreateQuiz';
 
@@ -98,6 +99,11 @@ function App() {
         <Route path="/teacher/create" element={
           <ProtectedRoute roles={['TEACHER']}>
             <CreateCourse />
+          </ProtectedRoute>
+        } />
+        <Route path="/teacher/course/:courseId/chapters" element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <ManageCourseChapters />
           </ProtectedRoute>
         } />
         <Route path="/teacher/courses" element={

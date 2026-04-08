@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getMyTeacherCourses, deleteCourse, togglePublishCourse } from '../../api/courseApi';
 import { getMyTeacherExercises, deleteExercise, togglePublishExercise } from '../../api/exerciseApi';
 import { getMyTeacherQuizzes, deleteQuiz, togglePublishQuiz, getMyQuizResults } from '../../api/quizApi';
-import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff, FiLayers } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function TeacherDashboard() {
@@ -49,7 +49,7 @@ export default function TeacherDashboard() {
     try {
       await deleteCourse(courseId);
       setCourses(courses.filter(c => c.id !== courseId));
-      showMsg('Cours supprimé avec succès');
+      showMsg('✅ Cours supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
     }
@@ -91,9 +91,19 @@ export default function TeacherDashboard() {
     try {
       await deleteQuiz(quizId);
       setQuizzes(quizzes.filter(q => q.id !== quizId));
-      showMsg('Quiz supprimé avec succès');
+      showMsg('✅ Quiz supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleTogglePublishQuiz = async (quizId) => {
+    try {
+      const res = await togglePublishQuiz(quizId);
+      setQuizzes(quizzes.map(q => q.id === quizId ? res.data : q));
+      showMsg(`✅ Quiz ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'Erreur lors de la modification');
     }
   };
 
@@ -201,6 +211,14 @@ export default function TeacherDashboard() {
                     title={course.published ? "Passer en brouillon" : "Publier ce cours"}
                   >
                     {course.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/course/${course.id}/chapters`); }}
+                    title="Gérer les chapitres"
+                    style={{ fontSize: '0.75rem' }}
+                  >
+                    <FiLayers size={14} /> {course.chapterCount || 0} ch.
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
@@ -386,7 +404,7 @@ export default function TeacherDashboard() {
             </thead>
             <tbody>
               {quizResults.map((result, index) => (
-                <tr key={result.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}
+                <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
