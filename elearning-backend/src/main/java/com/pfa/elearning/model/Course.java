@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "courses")
@@ -23,9 +24,6 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
     @Enumerated(EnumType.STRING)
     private DifficultyLevel level;
 
@@ -36,10 +34,6 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
-
-    private String filePath;
-
-    private String originalFileName;
 
     private String keywords;
 
@@ -52,6 +46,11 @@ public class Course {
     private LocalDateTime updatedAt;
 
     // === RELATIONS ===
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    @OrderBy("chapterOrder ASC")
+    private List<Chapter> chapters = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
@@ -87,5 +86,16 @@ public class Course {
     public double getAverageRating() {
         if (ratings == null || ratings.isEmpty()) return 0.0;
         return ratings.stream().mapToInt(CourseRating::getRating).average().orElse(0.0);
+    }
+
+    // Helper for AI compatibility since we removed `content` string
+    public String getContent() {
+        if (chapters == null || chapters.isEmpty()) {
+            return description != null ? description : "";
+        }
+        return chapters.stream()
+                .filter(ch -> ch.getContent() != null && !ch.getContent().isEmpty())
+                .map(Chapter::getContent)
+                .collect(Collectors.joining("\n\n"));
     }
 }

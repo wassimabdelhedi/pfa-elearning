@@ -71,6 +71,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/recommendations/**").hasRole("STUDENT")
                 .requestMatchers("/api/enrollments/**").hasRole("STUDENT")
 
+                // Chapter endpoints
+                .requestMatchers(HttpMethod.GET, "/api/chapters/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/chapters/*/complete").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/chapters/course/*/progress").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/chapters/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.PUT, "/api/chapters/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.DELETE, "/api/chapters/**").hasRole("TEACHER")
+
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

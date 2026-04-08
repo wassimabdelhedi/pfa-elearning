@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getMyTeacherCourses, deleteCourse } from '../../api/courseApi';
 import { getMyTeacherExercises, deleteExercise } from '../../api/exerciseApi';
 import { getMyTeacherQuizzes, deleteQuiz, getMyQuizResults } from '../../api/quizApi';
-import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward } from 'react-icons/fi';
+import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiLayers } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function TeacherDashboard() {
@@ -175,6 +175,14 @@ export default function TeacherDashboard() {
                   <span className="course-meta">
                     ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
                   </span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/course/${course.id}/chapters`); }}
+                    title="Gérer les chapitres"
+                    style={{ fontSize: '0.75rem' }}
+                  >
+                    <FiLayers size={14} /> {course.chapterCount || 0} ch.
+                  </button>
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleDeleteCourse(course.id); }}

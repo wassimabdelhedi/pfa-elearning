@@ -3,6 +3,8 @@ package com.pfa.elearning.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "enrollments", uniqueConstraints = {
@@ -35,6 +37,10 @@ public class Enrollment {
     private boolean completed = false;
 
     private LocalDateTime completedAt;
+
+    @OneToMany(mappedBy = "enrollment", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    private List<ChapterProgress> chapterProgresses = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

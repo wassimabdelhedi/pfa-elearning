@@ -22,12 +22,11 @@ public class CourseResponse {
     private DifficultyLevel level;
     private String teacherName;
     private Long teacherId;
-    private String filePath;
-    private String originalFileName;
     private String keywords;
     private boolean published;
     private double averageRating;
     private long enrollmentCount;
+    private int chapterCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
