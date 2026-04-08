@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPublishedQuizzes, submitQuizResult } from '../../api/quizApi';
+import { useAuth } from '../../context/AuthContext';
+import { getPublishedQuizzes, submitQuizResult, getQuizById } from '../../api/quizApi';
 import { FiCheckCircle, FiUser, FiClock, FiArrowLeft } from 'react-icons/fi';
 
 export default function QuizPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -23,9 +25,12 @@ export default function QuizPage() {
       const res = await getPublishedQuizzes();
       setQuizzes(res.data);
       if (id) {
-        const q = res.data.find(q => q.id === parseInt(id));
-        if (q) {
-          startQuiz(q);
+        try {
+          const qRes = await getQuizById(id);
+          startQuiz(qRes.data);
+        } catch (e) {
+          console.error("Quiz not found", e);
+          closeQuizStateOnly();
         }
       } else {
         closeQuizStateOnly();
@@ -165,14 +170,20 @@ export default function QuizPage() {
 
         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
           {!submitted ? (
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={submitQuiz}
-              disabled={Object.keys(answers).length < (activeQuiz.questions?.length || 0)}
-              style={{ flex: 1 }}
-            >
-              <FiCheckCircle size={16} /> Soumettre les réponses
-            </button>
+            user?.role !== 'TEACHER' ? (
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={submitQuiz}
+                disabled={Object.keys(answers).length < (activeQuiz.questions?.length || 0)}
+                style={{ flex: 1 }}
+              >
+                <FiCheckCircle size={16} /> Soumettre les réponses
+              </button>
+            ) : (
+              <div style={{ flex: 1, padding: 16, background: 'rgba(255,255,255,0.05)', borderRadius: 8, color: 'var(--text-secondary)', textAlign: 'center' }}>
+                Mode Aperçu Enseignant
+              </div>
+            )
           ) : (
             <button className="btn btn-primary btn-lg" onClick={closeQuiz} style={{ flex: 1 }}>
               Retour aux quiz

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPublishedExercises, completeExercise, getMyCompletedExercises } from '../../api/exerciseApi';
+import { useAuth } from '../../context/AuthContext';
+import { getPublishedExercises, completeExercise, getMyCompletedExercises, getExerciseById } from '../../api/exerciseApi';
 import { enrollInCourse } from '../../api/userApi';
 import { FiFileText, FiUser, FiArrowLeft } from 'react-icons/fi';
 
 export default function ExercisesPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeExercise, setActiveExercise] = useState(null);
@@ -22,17 +24,22 @@ export default function ExercisesPage() {
       const res = await getPublishedExercises();
       setExercises(res.data);
       if (id) {
-        const ex = res.data.find(e => e.id === parseInt(id));
-        if (ex) {
-          setActiveExercise(ex);
+        try {
+          const exRes = await getExerciseById(id);
+          setActiveExercise(exRes.data);
+        } catch (e) {
+          console.error("Exercise not found", e);
+          setActiveExercise(null);
         }
       } else {
         setActiveExercise(null);
       }
 
-      // Fetch completed exercises for the user
-      const compRes = await getMyCompletedExercises();
-      setCompletedExIds(new Set(compRes.data.map(c => c.exerciseId)));
+      // Fetch completed exercises for the user if not teacher
+      if (user?.role !== 'TEACHER') {
+        const compRes = await getMyCompletedExercises();
+        setCompletedExIds(new Set(compRes.data.map(c => c.exerciseId)));
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -111,27 +118,31 @@ export default function ExercisesPage() {
           </div>
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, display: 'flex', justifyContent: 'center', gap: 16 }}>
-            {activeExercise.filePath ? (
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={() => handleDownload(activeExercise.id)}
-              >
-                <FiFileText size={18} style={{ marginRight: 8 }} />
-                Télécharger l'exercice
-              </button>
-            ) : (
-              <div style={{ padding: 16, background: 'rgba(255,255,255,0.05)', borderRadius: 8, color: 'var(--text-secondary)', textAlign: 'center', width: '100%' }}>
-                Aucun fichier n'a été attaché à cet exercice.
-              </div>
+            {user?.role !== 'TEACHER' && (
+              <>
+                {activeExercise.filePath ? (
+                  <button
+                    className="btn btn-primary btn-lg"
+                    onClick={() => handleDownload(activeExercise.id)}
+                  >
+                    <FiFileText size={18} style={{ marginRight: 8 }} />
+                    Télécharger l'exercice
+                  </button>
+                ) : (
+                  <div style={{ padding: 16, background: 'rgba(255,255,255,0.05)', borderRadius: 8, color: 'var(--text-secondary)', textAlign: 'center', width: '100%' }}>
+                    Aucun fichier n'a été attaché à cet exercice.
+                  </div>
+                )}
+                
+                <button
+                   className={`btn ${completedExIds.has(activeExercise.id) ? 'btn-secondary' : 'btn-success'} btn-lg`}
+                   onClick={() => handleComplete(activeExercise.id)}
+                   disabled={completedExIds.has(activeExercise.id)}
+                >
+                   {completedExIds.has(activeExercise.id) ? '✅ Exercice Fait' : 'Marquer comme fait'}
+                </button>
+              </>
             )}
-            
-            <button
-               className={`btn ${completedExIds.has(activeExercise.id) ? 'btn-secondary' : 'btn-success'} btn-lg`}
-               onClick={() => handleComplete(activeExercise.id)}
-               disabled={completedExIds.has(activeExercise.id)}
-            >
-               {completedExIds.has(activeExercise.id) ? '✅ Exercice Fait' : 'Marquer comme fait'}
-            </button>
           </div>
         </div>
       </div>

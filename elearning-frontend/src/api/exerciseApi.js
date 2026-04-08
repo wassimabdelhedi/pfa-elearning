@@ -17,6 +17,9 @@ export const createExercise = (formData) =>
 export const deleteExercise = (id) =>
   api.delete(`/exercises/${id}`);
 
+export const togglePublishExercise = (id) =>
+  api.patch(`/exercises/${id}/toggle-publish`);
+
 export const downloadExercise = (id) =>
   api.get(`/exercises/${id}/download`, { responseType: 'blob' });
 

@@ -173,6 +173,15 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/toggle-publish")
+    public ResponseEntity<CourseResponse> togglePublish(
+            @PathVariable Long id,
+            Authentication authentication) {
+        User teacher = userService.getUserByEmail(authentication.getName());
+        Course course = courseService.togglePublishStatus(id, teacher);
+        return ResponseEntity.ok(courseService.toResponse(course));
+    }
+
     @GetMapping("/my-courses")
     public ResponseEntity<List<CourseResponse>> getMyTeacherCourses(Authentication authentication) {
         User teacher = userService.getUserByEmail(authentication.getName());

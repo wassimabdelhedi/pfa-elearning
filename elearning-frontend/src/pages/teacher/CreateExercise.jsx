@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createExercise } from '../../api/exerciseApi';
 import { getMyTeacherCourses } from '../../api/courseApi';
+import { getCategories } from '../../api/userApi';
 
 export default function CreateExercise() {
   const [form, setForm] = useState({
@@ -9,12 +10,19 @@ export default function CreateExercise() {
   });
   const [file, setFile] = useState(null);
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    getMyTeacherCourses().then(res => setCourses(res.data)).catch(() => {});
+    Promise.all([
+      getMyTeacherCourses().catch(() => ({ data: [] })),
+      getCategories().catch(() => ({ data: [] }))
+    ]).then(([coursesRes, catRes]) => {
+      setCourses(coursesRes.data);
+      setCategories(catRes.data);
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -46,6 +54,7 @@ export default function CreateExercise() {
       const formData = new FormData();
       formData.append('title', form.title);
       if (form.description) formData.append('description', form.description);
+      if (form.categoryId) formData.append('categoryId', form.categoryId);
       if (form.courseId) formData.append('courseId', form.courseId);
       formData.append('level', form.level);
       formData.append('published', form.published);
@@ -83,6 +92,17 @@ export default function CreateExercise() {
             <textarea id="description" name="description" className="form-input"
               placeholder="Décrivez l'exercice et les objectifs..."
               value={form.description} onChange={handleChange} rows={3} />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="categoryId">📂 Catégorie</label>
+            <select id="categoryId" name="categoryId" className="form-input"
+              value={form.categoryId} onChange={handleChange}>
+              <option value="">-- Aucune catégorie --</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

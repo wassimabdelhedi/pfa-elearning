@@ -126,6 +126,23 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/toggle-publish")
+    public ResponseEntity<Map<String, Object>> togglePublishQuiz(
+            @PathVariable Long id,
+            Authentication authentication) {
+        User teacher = userService.getUserByEmail(authentication.getName());
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz", "id", id));
+
+        if (!quiz.getTeacher().getId().equals(teacher.getId())) {
+            throw new UnauthorizedException("You can only modify your own quizzes");
+        }
+
+        quiz.setPublished(!quiz.isPublished());
+        quiz = quizRepository.save(quiz);
+        return ResponseEntity.ok(toMap(quiz));
+    }
+
     // ===== QUIZ SUBMIT (Student) =====
     @PostMapping("/{id}/submit")
     public ResponseEntity<Map<String, Object>> submitQuiz(

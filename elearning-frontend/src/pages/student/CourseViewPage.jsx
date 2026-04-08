@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { getCourseById, downloadCourse } from '../../api/courseApi';
 import { enrollInCourse, updateProgressByCourse } from '../../api/userApi';
 import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay, FiCheckCircle } from 'react-icons/fi';
@@ -14,6 +15,7 @@ function isVideoFile(fileName) {
 
 export default function CourseViewPage() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enrollMsg, setEnrollMsg] = useState('');
@@ -156,21 +158,25 @@ export default function CourseViewPage() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button className="btn btn-primary" onClick={handleEnroll}>
-              S'inscrire au cours
-            </button>
-            <button 
-              className={`btn ${isCompleted ? 'btn-secondary' : 'btn-success'}`} 
-              onClick={handleMarkAsCompleted}
-              disabled={isCompleted}
-            >
-              <FiCheckCircle size={16} style={{ marginRight: 6 }} /> 
-              {isCompleted ? 'Terminé' : 'Marquer comme terminé'}
-            </button>
-            {course.filePath && (
-              <button className="btn btn-secondary" onClick={handleDownload}>
-                <FiDownload size={16} /> Télécharger
-              </button>
+            {user?.role !== 'TEACHER' && (
+              <>
+                <button className="btn btn-primary" onClick={handleEnroll}>
+                  S'inscrire au cours
+                </button>
+                <button 
+                  className={`btn ${isCompleted ? 'btn-secondary' : 'btn-success'}`} 
+                  onClick={handleMarkAsCompleted}
+                  disabled={isCompleted}
+                >
+                  <FiCheckCircle size={16} style={{ marginRight: 6 }} /> 
+                  {isCompleted ? 'Terminé' : 'Marquer comme terminé'}
+                </button>
+                {course.filePath && (
+                  <button className="btn btn-secondary" onClick={handleDownload}>
+                    <FiDownload size={16} /> Télécharger
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -231,9 +237,11 @@ export default function CourseViewPage() {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
               🎬 {course.originalFileName}
             </span>
-            <button className="btn btn-secondary btn-sm" onClick={handleDownload}>
-              <FiDownload size={14} /> Télécharger la vidéo
-            </button>
+            {user?.role !== 'TEACHER' && (
+              <button className="btn btn-secondary btn-sm" onClick={handleDownload}>
+                <FiDownload size={14} /> Télécharger la vidéo
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -243,11 +251,13 @@ export default function CourseViewPage() {
           <FiFileText size={48} color="var(--primary-400)" style={{ marginBottom: 16 }} />
           <h3 style={{ marginBottom: 8 }}>{course.originalFileName}</h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: 20 }}>
-            Téléchargez le document pour le consulter
+            {user?.role !== 'TEACHER' ? 'Téléchargez le document pour le consulter' : 'Document associé à ce cours'}
           </p>
-          <button className="btn btn-primary" onClick={handleDownload}>
-            <FiDownload size={16} /> Télécharger
-          </button>
+          {user?.role !== 'TEACHER' && (
+            <button className="btn btn-primary" onClick={handleDownload}>
+              <FiDownload size={16} /> Télécharger
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -21,6 +21,10 @@ import CreateCourse from './pages/teacher/CreateCourse';
 import CreateExercise from './pages/teacher/CreateExercise';
 import CreateQuiz from './pages/teacher/CreateQuiz';
 
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+
 function App() {
   const { isAuthenticated, user } = useAuth();
 
@@ -65,22 +69,22 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="/exercises" element={
-          <ProtectedRoute roles={['STUDENT']}>
+          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <ExercisesPage />
           </ProtectedRoute>
         } />
         <Route path="/exercises/:id" element={
-          <ProtectedRoute roles={['STUDENT']}>
+          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <ExercisesPage />
           </ProtectedRoute>
         } />
         <Route path="/quiz" element={
-          <ProtectedRoute roles={['STUDENT']}>
+          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <QuizPage />
           </ProtectedRoute>
         } />
         <Route path="/quiz/:id" element={
-          <ProtectedRoute roles={['STUDENT']}>
+          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <QuizPage />
           </ProtectedRoute>
         } />
@@ -109,6 +113,18 @@ function App() {
         <Route path="/teacher/create-quiz" element={
           <ProtectedRoute roles={['TEACHER']}>
             <CreateQuiz />
+          </ProtectedRoute>
+        } />
+
+        {/* Admin routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute roles={['ADMIN']}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/users" element={
+          <ProtectedRoute roles={['ADMIN']}>
+            <AdminUsers />
           </ProtectedRoute>
         } />
 
