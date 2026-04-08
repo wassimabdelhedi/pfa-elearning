@@ -119,6 +119,23 @@ public class ExerciseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/toggle-publish")
+    public ResponseEntity<Map<String, Object>> togglePublishExercise(
+            @PathVariable Long id,
+            Authentication authentication) {
+        User teacher = userService.getUserByEmail(authentication.getName());
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        if (!exercise.getTeacher().getId().equals(teacher.getId())) {
+            throw new UnauthorizedException("You can only modify your own exercises");
+        }
+
+        exercise.setPublished(!exercise.isPublished());
+        exercise = exerciseRepository.save(exercise);
+        return ResponseEntity.ok(toMap(exercise));
+    }
+
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> downloadExerciseFile(@PathVariable Long id) {
         Exercise exercise = exerciseRepository.findById(id)

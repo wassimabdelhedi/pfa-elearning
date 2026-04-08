@@ -1,5 +1,6 @@
 package com.pfa.elearning.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -25,5 +26,6 @@ public class Category {
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @Builder.Default
+    @JsonIgnore
     private List<Course> courses = new ArrayList<>();
 }

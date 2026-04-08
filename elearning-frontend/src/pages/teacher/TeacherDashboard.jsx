@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getMyTeacherCourses, deleteCourse } from '../../api/courseApi';
-import { getMyTeacherExercises, deleteExercise } from '../../api/exerciseApi';
-import { getMyTeacherQuizzes, deleteQuiz, getMyQuizResults } from '../../api/quizApi';
-import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward } from 'react-icons/fi';
+import { getMyTeacherCourses, deleteCourse, togglePublishCourse } from '../../api/courseApi';
+import { getMyTeacherExercises, deleteExercise, togglePublishExercise } from '../../api/exerciseApi';
+import { getMyTeacherQuizzes, deleteQuiz, togglePublishQuiz, getMyQuizResults } from '../../api/quizApi';
+import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function TeacherDashboard() {
@@ -49,9 +49,19 @@ export default function TeacherDashboard() {
     try {
       await deleteCourse(courseId);
       setCourses(courses.filter(c => c.id !== courseId));
-      showMsg('✅ Cours supprimé avec succès');
+      showMsg('Cours supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleTogglePublishCourse = async (courseId) => {
+    try {
+      const res = await togglePublishCourse(courseId);
+      setCourses(courses.map(c => c.id === courseId ? res.data : c));
+      showMsg(`✅ Cours ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'Erreur lors de la modification');
     }
   };
 
@@ -66,12 +76,22 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleTogglePublishExercise = async (exerciseId) => {
+    try {
+      const res = await togglePublishExercise(exerciseId);
+      setExercises(exercises.map(e => e.id === exerciseId ? res.data : e));
+      showMsg(`✅ Exercice ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+    } catch (err) {
+      showMsg(err.response?.data?.message || 'Erreur lors de la modification');
+    }
+  };
+
   const handleDeleteQuiz = async (quizId) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce quiz ?')) return;
     try {
       await deleteQuiz(quizId);
       setQuizzes(quizzes.filter(q => q.id !== quizId));
-      showMsg('✅ Quiz supprimé avec succès');
+      showMsg('Quiz supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
     }
@@ -176,6 +196,13 @@ export default function TeacherDashboard() {
                     ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
                   </span>
                   <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); handleTogglePublishCourse(course.id); }}
+                    title={course.published ? "Passer en brouillon" : "Publier ce cours"}
+                  >
+                    {course.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  </button>
+                  <button
                     className="btn btn-danger btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleDeleteCourse(course.id); }}
                     title="Supprimer ce cours"
@@ -213,8 +240,8 @@ export default function TeacherDashboard() {
       {exercises.length > 0 ? (
         <div className="course-grid" style={{ marginBottom: 40 }}>
           {exercises.map(exercise => (
-            <div key={exercise.id} className="card course-card animate-in">
-              <div className="course-card-header">
+            <div key={exercise.id} className="card course-card animate-in" style={{ cursor: 'pointer' }}>
+              <div className="course-card-header" onClick={() => navigate(`/exercises/${exercise.id}`)}>
                 <span className={`badge ${exercise.published ? 'badge-success' : 'badge-warning'}`}>
                   {exercise.published ? 'Publié' : 'Brouillon'}
                 </span>
@@ -224,7 +251,7 @@ export default function TeacherDashboard() {
                   </span>
                 )}
               </div>
-              <div className="course-card-body">
+              <div className="course-card-body" onClick={() => navigate(`/exercises/${exercise.id}`)}>
                 <h3>{exercise.title}</h3>
                 <p>{exercise.description}</p>
                 {exercise.courseName && (
@@ -237,13 +264,22 @@ export default function TeacherDashboard() {
                 <span className="course-meta">
                   {exercise.originalFileName ? `📄 ${exercise.originalFileName}` : 'Pas de fichier'}
                 </span>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDeleteExercise(exercise.id)}
-                  title="Supprimer cet exercice"
-                >
-                  <FiTrash2 size={14} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); handleTogglePublishExercise(exercise.id); }}
+                    title={exercise.published ? "Passer en brouillon" : "Publier cet exercice"}
+                  >
+                    {exercise.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteExercise(exercise.id)}
+                    title="Supprimer cet exercice"
+                  >
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -274,8 +310,8 @@ export default function TeacherDashboard() {
       {quizzes.length > 0 ? (
         <div className="course-grid">
           {quizzes.map(quiz => (
-            <div key={quiz.id} className="card course-card animate-in">
-              <div className="course-card-header">
+            <div key={quiz.id} className="card course-card animate-in" style={{ cursor: 'pointer' }}>
+              <div className="course-card-header" onClick={() => navigate(`/quiz/${quiz.id}`)}>
                 <span className={`badge ${quiz.published ? 'badge-success' : 'badge-warning'}`}>
                   {quiz.published ? 'Publié' : 'Brouillon'}
                 </span>
@@ -285,7 +321,7 @@ export default function TeacherDashboard() {
                   </span>
                 )}
               </div>
-              <div className="course-card-body">
+              <div className="course-card-body" onClick={() => navigate(`/quiz/${quiz.id}`)}>
                 <h3>{quiz.title}</h3>
                 <p>{quiz.description}</p>
                 <p style={{ fontSize: '0.8rem', color: 'var(--accent-400)', marginTop: 8 }}>
@@ -296,13 +332,22 @@ export default function TeacherDashboard() {
                 <span className="course-meta">
                   {quiz.courseName ? `📚 ${quiz.courseName}` : 'Pas de cours associé'}
                 </span>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDeleteQuiz(quiz.id)}
-                  title="Supprimer ce quiz"
-                >
-                  <FiTrash2 size={14} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); handleTogglePublishQuiz(quiz.id); }}
+                    title={quiz.published ? "Passer en brouillon" : "Publier ce quiz"}
+                  >
+                    {quiz.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteQuiz(quiz.id)}
+                    title="Supprimer ce quiz"
+                  >
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

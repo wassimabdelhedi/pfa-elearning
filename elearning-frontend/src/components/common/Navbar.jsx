@@ -75,8 +75,14 @@ export default function Navbar() {
 
               {isAdmin && (
                 <>
-                  <Link to="/admin" className={isActive('/admin')}>Dashboard</Link>
-                  <Link to="/admin/users" className={isActive('/admin/users')}>Utilisateurs</Link>
+                  <Link to="/admin" className={isActive('/admin')}>
+                    <FiGrid size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Dashboard
+                  </Link>
+                  <Link to="/admin/users" className={isActive('/admin/users')}>
+                    <FiUser size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Utilisateurs
+                  </Link>
                 </>
               )}
 
