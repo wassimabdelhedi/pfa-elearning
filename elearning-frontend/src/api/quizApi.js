@@ -15,6 +15,9 @@ export const createQuiz = (data) =>
 export const deleteQuiz = (id) =>
   api.delete(`/quizzes/${id}`);
 
+export const togglePublishQuiz = (id) =>
+  api.patch(`/quizzes/${id}/toggle-publish`);
+
 export const submitQuizResult = (quizId, data) =>
   api.post(`/quizzes/${quizId}/submit`, data);
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createQuiz } from '../../api/quizApi';
 import { getMyTeacherCourses } from '../../api/courseApi';
+import { getCategories } from '../../api/userApi';
 import { FiPlusCircle, FiTrash2 } from 'react-icons/fi';
 
 export default function CreateQuiz() {
@@ -12,12 +13,19 @@ export default function CreateQuiz() {
     { text: '', options: ['', '', '', ''], correctAnswer: 0 }
   ]);
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    getMyTeacherCourses().then(res => setCourses(res.data)).catch(() => {});
+    Promise.all([
+      getMyTeacherCourses().catch(() => ({ data: [] })),
+      getCategories().catch(() => ({ data: [] }))
+    ]).then(([coursesRes, catRes]) => {
+      setCourses(coursesRes.data);
+      setCategories(catRes.data);
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -70,6 +78,7 @@ export default function CreateQuiz() {
     try {
       const payload = {
         ...form,
+        categoryId: form.categoryId || null,
         courseId: form.courseId || null,
         questions
       };
@@ -105,6 +114,17 @@ export default function CreateQuiz() {
             <textarea id="description" name="description" className="form-input"
               placeholder="Décrivez l'objectif de ce quiz..."
               value={form.description} onChange={handleChange} rows={2} />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="categoryId">📂 Catégorie</label>
+            <select id="categoryId" name="categoryId" className="form-input"
+              value={form.categoryId} onChange={handleChange}>
+              <option value="">-- Aucune catégorie --</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

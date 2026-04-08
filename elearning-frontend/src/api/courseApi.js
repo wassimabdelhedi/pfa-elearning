@@ -25,6 +25,12 @@ export const updateCourse = (id, formData) =>
 export const deleteCourse = (id) =>
   api.delete(`/courses/${id}`);
 
+export const togglePublishCourse = (id) =>
+  api.patch(`/courses/${id}/toggle-publish`);
+
+export const downloadCourse = (id) =>
+  api.get(`/courses/${id}/download`, { responseType: 'blob' });
+
 // ========== Chapter API ==========
 
 export const getChapters = (courseId) =>

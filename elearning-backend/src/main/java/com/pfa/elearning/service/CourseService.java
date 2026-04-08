@@ -95,6 +95,19 @@ public class CourseService {
         courseRepository.delete(course);
     }
 
+    @Transactional
+    public Course togglePublishStatus(Long courseId, User teacher) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+
+        if (!course.getTeacher().getId().equals(teacher.getId())) {
+            throw new UnauthorizedException("You can only modify your own courses");
+        }
+
+        course.setPublished(!course.isPublished());
+        return courseRepository.save(course);
+    }
+
     public Course getCourseById(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id", id));

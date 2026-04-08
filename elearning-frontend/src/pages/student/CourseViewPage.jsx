@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCourseById, getChapters, downloadChapterFile, markChapterComplete, getCourseChapterProgress } from '../../api/courseApi';
-import { enrollInCourse } from '../../api/userApi';
+import { useAuth } from '../../context/AuthContext';
+import { getCourseById, getChapters, downloadChapterFile, markChapterComplete, getCourseChapterProgress, downloadCourse } from '../../api/courseApi';
+import { enrollInCourse, updateProgressByCourse } from '../../api/userApi';
 import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay, FiCheckCircle, FiLock, FiLink, FiChevronRight } from 'react-icons/fi';
 
 const VIDEO_EXTENSIONS = ['.mp4', '.avi', '.mov', '.webm', '.mkv'];
@@ -14,6 +15,7 @@ function isVideoFile(fileName) {
 
 export default function CourseViewPage() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -183,51 +185,10 @@ export default function CourseViewPage() {
           )}
         </div>
       )}
+          )}
+        </div>
+      )}
 
-      <div className="page">
-        <Link to="/courses" className="btn btn-secondary btn-sm" style={{ marginBottom: 24, display: 'inline-flex' }}>
-          <FiArrowLeft size={14} /> Retour aux cours
-        </Link>
-
-        {enrollMsg && (
-          <div style={{
-            padding: '12px 16px', background: 'rgba(34,197,94,0.1)',
-            border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8,
-            color: '#4ade80', textAlign: 'center', marginBottom: 20
-          }}>
-            {enrollMsg}
-          </div>
-        )}
-
-        {/* Course Header */}
-        <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                {course.categoryName && <span className="badge badge-primary">{course.categoryName}</span>}
-                {course.level && <span className={`badge ${getLevelClass(course.level)}`}>{getLevelLabel(course.level)}</span>}
-                <span className="badge badge-success">{chapters.length} chapitre{chapters.length !== 1 ? 's' : ''}</span>
-              </div>
-              <h1 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 12, color: 'var(--text-primary)' }}>
-                {course.title}
-              </h1>
-              {course.description && (
-                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6, marginBottom: 16 }}>
-                  {course.description}
-                </p>
-              )}
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
-                  <FiUser size={15} /> {course.teacherName}
-                </span>
-                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
-                  ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
-                </span>
-                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
-                  <FiBookOpen size={15} /> {course.enrollmentCount} inscrits
-                </span>
-              </div>
-            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {!isEnrolled && (
                 <button className="btn btn-primary" onClick={handleEnroll}>
@@ -237,7 +198,10 @@ export default function CourseViewPage() {
             </div>
           </div>
         </div>
+          </div>
+        </div>
 
+<<<<<<< HEAD
         {/* Main content: Sidebar + Chapter Viewer */}
         {isEnrolled && chapters.length > 0 && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
