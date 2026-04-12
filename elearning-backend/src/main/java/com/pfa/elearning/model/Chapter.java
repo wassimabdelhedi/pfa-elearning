@@ -43,6 +43,11 @@ public class Chapter {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<ChapterProgress> chapterProgresses = new java.util.ArrayList<>();
+
     private LocalDateTime updatedAt;
 
     @PrePersist

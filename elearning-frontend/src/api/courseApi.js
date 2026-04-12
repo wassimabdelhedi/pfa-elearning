@@ -12,6 +12,9 @@ export const getCoursesByCategory = (categoryId) =>
 export const getMyTeacherCourses = () =>
   api.get('/courses/my-courses');
 
+export const getCourseStudents = (courseId) =>
+  api.get(`/courses/${courseId}/students`);
+
 export const createCourse = (formData) =>
   api.post('/courses', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

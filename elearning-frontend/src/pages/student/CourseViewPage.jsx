@@ -185,10 +185,50 @@ export default function CourseViewPage() {
           )}
         </div>
       )}
-          )}
-        </div>
-      )}
+      <div className="page">
+        <Link to="/courses" className="btn btn-secondary btn-sm" style={{ marginBottom: 24, display: 'inline-flex' }}>
+          <FiArrowLeft size={14} /> Retour aux cours
+        </Link>
 
+        {enrollMsg && (
+          <div style={{
+            padding: '12px 16px', background: 'rgba(34,197,94,0.1)',
+            border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8,
+            color: '#4ade80', textAlign: 'center', marginBottom: 20
+          }}>
+            {enrollMsg}
+          </div>
+        )}
+
+        {/* Course Header */}
+        <div className="card" style={{ padding: 32, marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                {course.categoryName && <span className="badge badge-primary">{course.categoryName}</span>}
+                {course.level && <span className={`badge ${getLevelClass(course.level)}`}>{getLevelLabel(course.level)}</span>}
+                <span className="badge badge-success">{chapters.length} chapitre{chapters.length !== 1 ? 's' : ''}</span>
+              </div>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 12, color: 'var(--text-primary)' }}>
+                {course.title}
+              </h1>
+              {course.description && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6, marginBottom: 16 }}>
+                  {course.description}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
+                  <FiUser size={15} /> {course.teacherName}
+                </span>
+                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
+                  ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
+                </span>
+                <span className="course-meta" style={{ fontSize: '0.9rem' }}>
+                  <FiBookOpen size={15} /> {course.enrollmentCount} inscrits
+                </span>
+              </div>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {!isEnrolled && (
                 <button className="btn btn-primary" onClick={handleEnroll}>
@@ -198,12 +238,10 @@ export default function CourseViewPage() {
             </div>
           </div>
         </div>
-          </div>
-        </div>
 
 <<<<<<< HEAD
         {/* Main content: Sidebar + Chapter Viewer */}
-        {isEnrolled && chapters.length > 0 && (
+        {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length > 0 && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
             {/* Chapter Sidebar */}
             <div style={{ width: 280, flexShrink: 0 }}>
@@ -257,31 +295,31 @@ export default function CourseViewPage() {
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', fontWeight: 'bold', fontSize: '0.95rem' }}>
                   📝 Évaluations
                 </div>
-                <Link to={isCompleted ? '/quiz' : '#'}
+                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/quizzes` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     borderBottom: '1px solid var(--border)', textDecoration: 'none',
-                    color: isCompleted ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: isCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isCompleted ? 1 : 0.5
+                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted) e.preventDefault(); }}>
-                  {isCompleted ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Quiz</span>
                 </Link>
-                <Link to={isCompleted ? '/exercises' : '#'}
+                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/exercises` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     textDecoration: 'none',
-                    color: isCompleted ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: isCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isCompleted ? 1 : 0.5
+                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted) e.preventDefault(); }}>
-                  {isCompleted ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Exercices</span>
                 </Link>
-                {!isCompleted && (
+                {(!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') && (
                   <div style={{ padding: '10px 20px', fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-page)' }}>
                     🔒 Terminez tous les chapitres pour débloquer
                   </div>
@@ -396,12 +434,15 @@ export default function CourseViewPage() {
         )}
 
         {/* No chapters */}
-        {isEnrolled && chapters.length === 0 && (
+        {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length === 0 && (
           <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
             <FiBookOpen size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
-            <p>L'enseignant n'a pas encore ajouté de chapitres à ce cours.</p>
+            <p>Ce cours ne contient aucun chapitre pour le moment.</p>
           </div>
         )}
+        )}
+      </div>
+    </>
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import com.pfa.elearning.model.*;
 import com.pfa.elearning.repository.CategoryRepository;
 import com.pfa.elearning.repository.QuizRepository;
 import com.pfa.elearning.repository.QuizResultRepository;
+import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class QuizController {
     private final UserService userService;
     private final CategoryRepository categoryRepository;
     private final CourseService courseService;
+    private final EnrollmentRepository enrollmentRepository;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getPublishedQuizzes() {
@@ -37,10 +39,42 @@ public class QuizController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getQuizById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getQuizById(@PathVariable Long id, Authentication authentication) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz", "id", id));
+
+        // Security check for students
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
+            User student = userService.getUserByEmail(authentication.getName());
+            if (quiz.getCourse() != null) {
+                Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), quiz.getCourse().getId());
+                if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+            } else {
+                // Quizzes not attached to a course are not accessible to students in this strict mode
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
         return ResponseEntity.ok(toMap(quiz));
+    }
+
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<Map<String, Object>>> getQuizzesByCourse(@PathVariable Long courseId, Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
+            User student = userService.getUserByEmail(authentication.getName());
+            Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), courseId);
+            if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
+        List<Quiz> quizzes = quizRepository.findByCourseId(courseId)
+                                           .stream()
+                                           .filter(Quiz::isPublished)
+                                           .collect(Collectors.toList());
+        return ResponseEntity.ok(quizzes.stream().map(this::toMap).collect(Collectors.toList()));
     }
 
     @GetMapping("/my-quizzes")
@@ -81,11 +115,12 @@ public class QuizController {
 
         // Course
         Object courseIdObj = body.get("courseId");
-        if (courseIdObj != null && !courseIdObj.toString().isEmpty()) {
-            Long courseId = Long.valueOf(courseIdObj.toString());
-            Course course = courseService.getCourseById(courseId);
-            quiz.setCourse(course);
+        if (courseIdObj == null || courseIdObj.toString().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Le cours est obligatoire pour créer un quiz"));
         }
+        Long courseId = Long.valueOf(courseIdObj.toString());
+        Course course = courseService.getCourseById(courseId);
+        quiz.setCourse(course);
 
         // Questions
         @SuppressWarnings("unchecked")

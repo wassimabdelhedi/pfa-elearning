@@ -60,6 +60,12 @@ export default function CreateQuiz() {
     setError('');
 
     // Validate questions
+    if (!form.courseId) {
+      setError('Veuillez associer le quiz à un cours');
+      setLoading(false);
+      return;
+    }
+
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].text.trim()) {
         setError(`La question ${i + 1} est vide`);
@@ -79,7 +85,6 @@ export default function CreateQuiz() {
       const payload = {
         ...form,
         categoryId: form.categoryId || null,
-        courseId: form.courseId || null,
         questions
       };
       await createQuiz(payload);
@@ -138,10 +143,10 @@ export default function CreateQuiz() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="courseId">Cours associé (optionnel)</label>
+            <label htmlFor="courseId">Cours associé (obligatoire)</label>
             <select id="courseId" name="courseId" className="form-input"
-              value={form.courseId} onChange={handleChange}>
-              <option value="">-- Aucun --</option>
+              value={form.courseId} onChange={handleChange} required>
+              <option value="">-- Sélectionnez un cours --</option>
               {courses.map(course => (
                 <option key={course.id} value={course.id}>{course.title}</option>
               ))}

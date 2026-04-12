@@ -5,6 +5,8 @@ import com.pfa.elearning.dto.response.CourseResponse;
 import com.pfa.elearning.model.Course;
 import com.pfa.elearning.model.DifficultyLevel;
 import com.pfa.elearning.model.User;
+import com.pfa.elearning.model.Enrollment;
+import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.FileStorageService;
 import com.pfa.elearning.service.SearchService;
@@ -18,6 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -29,6 +34,7 @@ public class CourseController {
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final SearchService searchService;
+    private final EnrollmentRepository enrollmentRepository;
 
     // ========== PUBLIC ENDPOINTS ==========
 
@@ -129,5 +135,33 @@ public class CourseController {
         User teacher = userService.getUserByEmail(authentication.getName());
         List<Course> courses = courseService.getTeacherCourses(teacher.getId());
         return ResponseEntity.ok(courseService.toResponseList(courses));
+    }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<List<Map<String, Object>>> getCourseStudents(
+            @PathVariable Long id,
+            Authentication authentication) {
+        
+        User teacher = userService.getUserByEmail(authentication.getName());
+        Course course = courseService.getCourseById(id);
+
+        if (!course.getTeacher().getId().equals(teacher.getId())) {
+            throw new com.pfa.elearning.exception.UnauthorizedException("You can only view students for your own courses");
+        }
+
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(id);
+        
+        List<Map<String, Object>> students = enrollments.stream().map(e -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", e.getStudent().getId());
+            map.put("fullName", e.getStudent().getFullName());
+            map.put("email", e.getStudent().getEmail());
+            map.put("progressPercentage", e.getProgressPercentage());
+            map.put("completed", e.isCompleted());
+            map.put("enrolledAt", e.getEnrolledAt());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(students);
     }
 }

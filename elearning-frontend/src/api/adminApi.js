@@ -11,8 +11,18 @@ export const getAllUsers = () =>
 export const toggleUserActive = (id) =>
   api.put(`/admin/users/${id}/toggle-active`);
 
+export const updateUserRole = (id, role) =>
+  api.put(`/admin/users/${id}/role`, { role });
+
 export const deleteUser = (id) =>
   api.delete(`/admin/users/${id}`);
+
+// Courses & Purge
+export const deleteAllCourses = () =>
+  api.delete('/admin/courses/all');
+
+export const seedMockData = () =>
+  api.post('/admin/system-reset-seed');
 
 // Categories
 export const getAdminCategories = () =>

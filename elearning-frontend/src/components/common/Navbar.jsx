@@ -41,14 +41,6 @@ export default function Navbar() {
                     Recherche
                   </Link>
                   <Link to="/courses" className={isActive('/courses')}>Cours</Link>
-                  <Link to="/exercises" className={isActive('/exercises')}>
-                    <FiFileText size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Exercices
-                  </Link>
-                  <Link to="/quiz" className={isActive('/quiz')}>
-                    <FiCheckSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Quiz
-                  </Link>
                 </>
               )}
 

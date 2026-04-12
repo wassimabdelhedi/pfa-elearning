@@ -6,6 +6,9 @@ export const getPublishedExercises = () =>
 export const getExerciseById = (id) =>
   api.get(`/exercises/${id}`);
 
+export const getExercisesByCourse = (courseId) =>
+  api.get(`/exercises/course/${courseId}`);
+
 export const getMyTeacherExercises = () =>
   api.get('/exercises/my-exercises');
 

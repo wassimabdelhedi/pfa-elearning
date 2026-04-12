@@ -6,6 +6,7 @@ import com.pfa.elearning.model.*;
 import com.pfa.elearning.repository.CategoryRepository;
 import com.pfa.elearning.repository.ExerciseCompletionRepository;
 import com.pfa.elearning.repository.ExerciseRepository;
+import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.FileStorageService;
 import com.pfa.elearning.service.UserService;
@@ -38,6 +39,7 @@ public class ExerciseController {
     private final FileStorageService fileStorageService;
     private final CategoryRepository categoryRepository;
     private final CourseService courseService;
+    private final EnrollmentRepository enrollmentRepository;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getPublishedExercises() {
@@ -46,10 +48,42 @@ public class ExerciseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getExerciseById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getExerciseById(@PathVariable Long id, Authentication authentication) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        // Security check for students
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
+            User student = userService.getUserByEmail(authentication.getName());
+            if (exercise.getCourse() != null) {
+                java.util.Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), exercise.getCourse().getId());
+                if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                }
+            } else {
+                // Exercises not attached to a course are not accessible to students
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
         return ResponseEntity.ok(toMap(exercise));
+    }
+
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<Map<String, Object>>> getExercisesByCourse(@PathVariable Long courseId, Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
+            User student = userService.getUserByEmail(authentication.getName());
+            java.util.Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), courseId);
+            if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
+        List<Exercise> exercises = exerciseRepository.findByCourseId(courseId)
+                                                     .stream()
+                                                     .filter(Exercise::isPublished)
+                                                     .collect(Collectors.toList());
+        return ResponseEntity.ok(exercises.stream().map(this::toMap).collect(Collectors.toList()));
     }
 
     @GetMapping("/my-exercises")
@@ -89,6 +123,8 @@ public class ExerciseController {
         if (courseId != null) {
             Course course = courseService.getCourseById(courseId);
             exercise.setCourse(course);
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "Le cours est obligatoire pour créer un exercice"));
         }
 
         if (file != null && !file.isEmpty()) {
