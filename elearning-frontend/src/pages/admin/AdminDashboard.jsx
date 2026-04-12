@@ -176,7 +176,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Categories table */}
-        {categories.length > 0 ? (
+        {Array.isArray(categories) && categories.length > 0 ? (
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>

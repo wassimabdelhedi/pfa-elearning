@@ -26,6 +26,7 @@ com\pfa\elearning\model\Exercise.class
 com\pfa\elearning\model\ExerciseCompletion$ExerciseCompletionBuilder.class
 com\pfa\elearning\model\SearchHistory$SearchHistoryBuilder.class
 com\pfa\elearning\controller\QuizController.class
+com\pfa\elearning\controller\ChapterController.class
 com\pfa\elearning\dto\response\AuthResponse.class
 com\pfa\elearning\service\RecommendationService.class
 com\pfa\elearning\controller\EnrollmentController.class
@@ -36,6 +37,7 @@ com\pfa\elearning\config\SecurityConfig.class
 com\pfa\elearning\model\Course$CourseBuilder.class
 com\pfa\elearning\model\Enrollment$EnrollmentBuilder.class
 com\pfa\elearning\dto\request\LoginRequest.class
+com\pfa\elearning\model\Chapter$ChapterBuilder.class
 com\pfa\elearning\model\Course.class
 com\pfa\elearning\repository\UserRepository.class
 com\pfa\elearning\model\User.class
@@ -49,12 +51,17 @@ com\pfa\elearning\model\Role.class
 com\pfa\elearning\repository\CategoryRepository.class
 com\pfa\elearning\model\Recommendation.class
 com\pfa\elearning\dto\response\CourseResponse.class
+com\pfa\elearning\model\Chapter.class
+com\pfa\elearning\model\SupportType.class
 com\pfa\elearning\model\ExerciseCompletion.class
 com\pfa\elearning\config\WebConfig.class
 com\pfa\elearning\model\SearchHistory.class
 com\pfa\elearning\config\CorsConfig.class
 com\pfa\elearning\model\QuizQuestion.class
 com\pfa\elearning\model\Quiz.class
+com\pfa\elearning\repository\ChapterRepository.class
+com\pfa\elearning\model\ChapterProgress$ChapterProgressBuilder.class
+com\pfa\elearning\repository\ChapterProgressRepository.class
 com\pfa\elearning\dto\request\CourseRequest.class
 com\pfa\elearning\model\Enrollment.class
 com\pfa\elearning\service\EnrollmentService.class
@@ -70,6 +77,7 @@ com\pfa\elearning\service\SearchService$1.class
 com\pfa\elearning\dto\response\SearchResponse$SearchResponseBuilder.class
 com\pfa\elearning\dto\response\SearchResponse.class
 com\pfa\elearning\controller\CourseController.class
+com\pfa\elearning\model\ChapterProgress.class
 com\pfa\elearning\repository\EnrollmentRepository.class
 com\pfa\elearning\exception\UnauthorizedException.class
 com\pfa\elearning\model\User$UserBuilder.class
