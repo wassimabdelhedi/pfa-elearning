@@ -41,43 +41,41 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/exercises/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/quizzes/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
 
                 // Teacher endpoints - courses
-                .requestMatchers(HttpMethod.POST, "/api/courses/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/courses/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasAnyRole("TEACHER", "ADMIN")
 
                 // Student exercise completions
-                .requestMatchers(HttpMethod.POST, "/api/exercises/*/complete").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/exercises/*/complete").hasAnyRole("STUDENT", "ADMIN")
 
                 // Teacher endpoints - exercises
-                .requestMatchers(HttpMethod.POST, "/api/exercises/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/exercises/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/exercises/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/exercises/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/exercises/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/exercises/**").hasAnyRole("TEACHER", "ADMIN")
 
                 // Student quiz submissions
-                .requestMatchers(HttpMethod.POST, "/api/quizzes/*/submit").hasRole("STUDENT")
+                .requestMatchers(HttpMethod.POST, "/api/quizzes/*/submit").hasAnyRole("STUDENT", "ADMIN")
 
                 // Teacher endpoints - quizzes
-                .requestMatchers(HttpMethod.POST, "/api/quizzes/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/quizzes/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/quizzes/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
 
                 // Student endpoints
-                .requestMatchers("/api/search/**").hasRole("STUDENT")
-                .requestMatchers("/api/recommendations/**").hasRole("STUDENT")
-                .requestMatchers("/api/enrollments/**").hasRole("STUDENT")
+                .requestMatchers("/api/search/**").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers("/api/recommendations/**").hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers("/api/enrollments/**").hasAnyRole("STUDENT", "ADMIN")
 
                 // Chapter endpoints
                 .requestMatchers(HttpMethod.GET, "/api/chapters/**").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/chapters/*/complete").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/chapters/course/*/progress").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/chapters/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.PUT, "/api/chapters/**").hasRole("TEACHER")
-                .requestMatchers(HttpMethod.DELETE, "/api/chapters/**").hasRole("TEACHER")
+                .requestMatchers(HttpMethod.POST, "/api/chapters/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/chapters/**").hasAnyRole("TEACHER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/chapters/**").hasAnyRole("TEACHER", "ADMIN")
 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

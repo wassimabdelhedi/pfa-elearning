@@ -61,6 +61,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void resetPassword(String email, String newPassword) {
+        User user = getUserByEmail(email);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     public void toggleUserActive(Long id) {
         User user = getUserById(id);
         user.setActive(!user.isActive());

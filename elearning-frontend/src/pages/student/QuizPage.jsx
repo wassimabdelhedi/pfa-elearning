@@ -5,7 +5,7 @@ import { getPublishedQuizzes, submitQuizResult, getQuizById } from '../../api/qu
 import { FiCheckCircle, FiUser, FiClock, FiArrowLeft } from 'react-icons/fi';
 
 export default function QuizPage() {
-  const { id } = useParams();
+  const { id, courseId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
@@ -22,7 +22,13 @@ export default function QuizPage() {
   const loadQuizzes = async () => {
     try {
       setLoading(true);
-      const res = await getPublishedQuizzes();
+      let res;
+      if (courseId) {
+        const { getQuizzesByCourse } = await import('../../api/quizApi');
+        res = await getQuizzesByCourse(courseId);
+      } else {
+        res = await getPublishedQuizzes();
+      }
       setQuizzes(res.data);
       if (id) {
         try {
@@ -88,7 +94,11 @@ export default function QuizPage() {
 
   const closeQuiz = () => {
     closeQuizStateOnly();
-    navigate('/quiz');
+    if (courseId) {
+      navigate(`/course/${courseId}/quizzes`);
+    } else {
+      navigate('/quiz');
+    }
   };
 
   const closeQuizStateOnly = () => {

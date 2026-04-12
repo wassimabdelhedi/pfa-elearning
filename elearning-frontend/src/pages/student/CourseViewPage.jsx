@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getCourseById, getChapters, downloadChapterFile, markChapterComplete, getCourseChapterProgress } from '../../api/courseApi';
-import { enrollInCourse } from '../../api/userApi';
+import { getCourseById, getChapters, downloadChapterFile, markChapterComplete, getCourseChapterProgress, downloadCourse } from '../../api/courseApi';
+import { enrollInCourse, updateProgressByCourse } from '../../api/userApi';
 import { FiArrowLeft, FiUser, FiDownload, FiBookOpen, FiFileText, FiPlay, FiCheckCircle, FiLock, FiLink, FiChevronRight } from 'react-icons/fi';
 
 const VIDEO_EXTENSIONS = ['.mp4', '.avi', '.mov', '.webm', '.mkv'];
@@ -185,7 +185,6 @@ export default function CourseViewPage() {
           )}
         </div>
       )}
-
       <div className="page">
         <Link to="/courses" className="btn btn-secondary btn-sm" style={{ marginBottom: 24, display: 'inline-flex' }}>
           <FiArrowLeft size={14} /> Retour aux cours
@@ -240,8 +239,9 @@ export default function CourseViewPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Main content: Sidebar + Chapter Viewer */}
-        {isEnrolled && chapters.length > 0 && (
+        {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length > 0 && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
             {/* Chapter Sidebar */}
             <div style={{ width: 280, flexShrink: 0 }}>
@@ -295,31 +295,31 @@ export default function CourseViewPage() {
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', fontWeight: 'bold', fontSize: '0.95rem' }}>
                   📝 Évaluations
                 </div>
-                <Link to={isCompleted ? '/quiz' : '#'}
+                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/quizzes` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     borderBottom: '1px solid var(--border)', textDecoration: 'none',
-                    color: isCompleted ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: isCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isCompleted ? 1 : 0.5
+                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted) e.preventDefault(); }}>
-                  {isCompleted ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Quiz</span>
                 </Link>
-                <Link to={isCompleted ? '/exercises' : '#'}
+                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/exercises` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     textDecoration: 'none',
-                    color: isCompleted ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: isCompleted ? 'pointer' : 'not-allowed',
-                    opacity: isCompleted ? 1 : 0.5
+                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted) e.preventDefault(); }}>
-                  {isCompleted ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Exercices</span>
                 </Link>
-                {!isCompleted && (
+                {(!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') && (
                   <div style={{ padding: '10px 20px', fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-page)' }}>
                     🔒 Terminez tous les chapitres pour débloquer
                   </div>
@@ -434,24 +434,15 @@ export default function CourseViewPage() {
         )}
 
         {/* No chapters */}
-        {isEnrolled && chapters.length === 0 && (
+        {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length === 0 && (
           <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
             <FiBookOpen size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
-            <p>L'enseignant n'a pas encore ajouté de chapitres à ce cours.</p>
+            <p>Ce cours ne contient aucun chapitre pour le moment.</p>
           </div>
         )}
-        
-        {/* Teacher logic view */}
-        {!isEnrolled && user?.role === 'TEACHER' && chapters.length > 0 && (
-          <div style={{ textAlign: 'center', padding: 40 }}>
-            <p style={{ color: 'var(--text-secondary)' }}>En tant qu'enseignant, vous pouvez visualiser les chapitres ci-dessous.</p>
-            {/* We can show the sidebar/viewer logic for teachers too if we want, 
-                but for simplicity let's just use the existing isEnrolled logic 
-                and maybe set isEnrolled to true for teachers? Or just allow viewing.
-                The current implementation of chapters.map above is inside isEnrolled.
-                Let's adjust it to allow teachers to view. */}
-          </div>
         )}
+      </div>
+    </>
       </div>
     </>
   );

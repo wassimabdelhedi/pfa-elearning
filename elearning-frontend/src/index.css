@@ -50,9 +50,9 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
-  --border-radius: 12px;
+  --border-radius: 16px;
   --border-radius-sm: 8px;
-  --border-radius-lg: 16px;
+  --border-radius-lg: 20px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -183,8 +183,8 @@ input, textarea, select {
 }
 
 .btn-sm {
-  padding: 8px 16px;
-  font-size: 0.8rem;
+  padding: 6px 12px;
+  font-size: 0.75rem;
 }
 
 .btn-lg {
@@ -639,6 +639,8 @@ select.form-input option {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .course-meta {

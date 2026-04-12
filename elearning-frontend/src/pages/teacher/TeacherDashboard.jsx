@@ -15,6 +15,11 @@ export default function TeacherDashboard() {
   const [quizResults, setQuizResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  
+  // Student modal state
+  const [showStudentsModal, setShowStudentsModal] = useState(false);
+  const [selectedCourseStudents, setSelectedCourseStudents] = useState([]);
+  const [selectedCourseName, setSelectedCourseName] = useState('');
 
   useEffect(() => {
     loadData();
@@ -49,7 +54,7 @@ export default function TeacherDashboard() {
     try {
       await deleteCourse(courseId);
       setCourses(courses.filter(c => c.id !== courseId));
-      showMsg('✅ Cours supprimé avec succès');
+      showMsg('Cours supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
     }
@@ -91,7 +96,7 @@ export default function TeacherDashboard() {
     try {
       await deleteQuiz(quizId);
       setQuizzes(quizzes.filter(q => q.id !== quizId));
-      showMsg('✅ Quiz supprimé avec succès');
+      showMsg('Quiz supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
     }
@@ -109,6 +114,18 @@ export default function TeacherDashboard() {
 
   const handleCourseClick = (courseId) => {
     navigate(`/course/${courseId}`);
+  };
+
+  const handleViewStudents = async (course) => {
+    try {
+      const { getCourseStudents } = await import('../../api/courseApi');
+      const res = await getCourseStudents(course.id);
+      setSelectedCourseStudents(res.data);
+      setSelectedCourseName(course.title);
+      setShowStudentsModal(true);
+    } catch (err) {
+      showMsg('❌ Impossible de charger la liste des étudiants');
+    }
   };
 
   const getLevelLabel = (level) => {
@@ -201,10 +218,18 @@ export default function TeacherDashboard() {
                 <span className="course-meta">
                   <FiUsers size={13} /> {course.enrollmentCount || 0} inscrits
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className="course-meta">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <span className="course-meta" style={{ marginRight: 'auto' }}>
                     ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
                   </span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/course/${course.id}/chapters`); }}
+                    title="Gérer les chapitres"
+                    style={{ fontSize: '0.75rem' }}
+                  >
+                    <FiLayers size={14} /> {course.chapterCount || 0} ch.
+                  </button>
                   <button
                     className="btn btn-secondary btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleTogglePublishCourse(course.id); }}
@@ -214,11 +239,11 @@ export default function TeacherDashboard() {
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
-                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/course/${course.id}/chapters`); }}
-                    title="Gérer les chapitres"
-                    style={{ fontSize: '0.75rem' }}
+                    style={{ fontSize: '0.75rem', background: 'rgba(34,197,94,0.1)', color: '#4ade80', borderColor: 'rgba(34,197,94,0.2)' }}
+                    onClick={(e) => { e.stopPropagation(); handleViewStudents(course); }}
+                    title="Voir l'avancement des étudiants inscrits"
                   >
-                    <FiLayers size={14} /> {course.chapterCount || 0} ch.
+                    <FiUsers size={14} /> Suivi
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
@@ -444,6 +469,69 @@ export default function TeacherDashboard() {
           <p style={{ color: 'var(--text-secondary)' }}>
             Aucun étudiant n'a encore répondu à vos quiz
           </p>
+        </div>
+      )}
+
+      {/* STUDENT MODAL */}
+      {showStudentsModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+        }}>
+          <div className="card animate-in" style={{ width: '100%', maxWidth: 700, padding: 30, maxHeight: '90vh', overflowY: 'auto' }}>
+            <h2 style={{ fontSize: '1.4rem', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+              <span>👨‍🎓 Étudiants : {selectedCourseName}</span>
+              <button 
+                onClick={() => setShowStudentsModal(false)}
+                className="btn btn-secondary btn-sm"
+              >
+                Fermer
+              </button>
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 20 }}>
+              {selectedCourseStudents.length} étudiant(s) inscrit(s)
+            </p>
+
+            {selectedCourseStudents.length > 0 ? (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: '0.85rem' }}>Étudiant</th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: '0.85rem' }}>Progression</th>
+                    <th style={{ padding: 12, textAlign: 'right', fontSize: '0.85rem' }}>Date d'inscription</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedCourseStudents.map((s, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ padding: 12 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{s.fullName}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.email}</div>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                          <div style={{ width: 100, height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${s.progressPercentage || 0}%`, background: s.completed ? '#4ade80' : 'var(--primary-500)' }} />
+                          </div>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: s.completed ? '#4ade80' : 'var(--text-primary)' }}>
+                            {Math.round(s.progressPercentage || 0)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        {s.enrolledAt ? new Date(s.enrolledAt).toLocaleDateString('fr-FR') : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 40, background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+                <p style={{ color: 'var(--text-secondary)' }}>Aucun étudiant n'est encore inscrit à ce cours.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

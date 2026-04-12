@@ -51,6 +51,12 @@ export default function CreateExercise() {
     setError('');
 
     try {
+      if (!form.courseId) {
+        setError("Veuillez associer l'exercice à un cours");
+        setLoading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append('title', form.title);
       if (form.description) formData.append('description', form.description);
@@ -128,10 +134,10 @@ export default function CreateExercise() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="courseId">Cours associé (optionnel)</label>
+            <label htmlFor="courseId">Cours associé (obligatoire)</label>
             <select id="courseId" name="courseId" className="form-input"
-              value={form.courseId} onChange={handleChange}>
-              <option value="">-- Aucun --</option>
+              value={form.courseId} onChange={handleChange} required>
+              <option value="">-- Sélectionnez un cours --</option>
               {courses.map(course => (
                 <option key={course.id} value={course.id}>{course.title}</option>
               ))}

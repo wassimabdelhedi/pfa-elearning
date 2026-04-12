@@ -6,6 +6,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
 // Student pages
 import Dashboard from './pages/student/Dashboard';
@@ -47,6 +48,9 @@ function App() {
         <Route path="/register" element={
           isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <RegisterPage />
         } />
+        <Route path="/forgot-password" element={
+          isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <ForgotPasswordPage />
+        } />
 
         {/* Student routes */}
         <Route path="/dashboard" element={
@@ -69,22 +73,22 @@ function App() {
             <CourseViewPage />
           </ProtectedRoute>
         } />
-        <Route path="/exercises" element={
-          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
-            <ExercisesPage />
-          </ProtectedRoute>
-        } />
         <Route path="/exercises/:id" element={
           <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <ExercisesPage />
           </ProtectedRoute>
         } />
-        <Route path="/quiz" element={
+        <Route path="/course/:courseId/exercises" element={
+          <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
+            <ExercisesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/quiz/:id" element={
           <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <QuizPage />
           </ProtectedRoute>
         } />
-        <Route path="/quiz/:id" element={
+        <Route path="/course/:courseId/quizzes" element={
           <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <QuizPage />
           </ProtectedRoute>

@@ -6,6 +6,9 @@ export const getPublishedQuizzes = () =>
 export const getQuizById = (id) =>
   api.get(`/quizzes/${id}`);
 
+export const getQuizzesByCourse = (courseId) =>
+  api.get(`/quizzes/course/${courseId}`);
+
 export const getMyTeacherQuizzes = () =>
   api.get('/quizzes/my-quizzes');
 

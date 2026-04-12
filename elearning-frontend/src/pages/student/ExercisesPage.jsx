@@ -6,7 +6,7 @@ import { enrollInCourse } from '../../api/userApi';
 import { FiFileText, FiUser, FiArrowLeft } from 'react-icons/fi';
 
 export default function ExercisesPage() {
-  const { id } = useParams();
+  const { id, courseId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [exercises, setExercises] = useState([]);
@@ -21,7 +21,13 @@ export default function ExercisesPage() {
   const loadExercises = async () => {
     try {
       setLoading(true);
-      const res = await getPublishedExercises();
+      let res;
+      if (courseId) {
+        const { getExercisesByCourse } = await import('../../api/exerciseApi');
+        res = await getExercisesByCourse(courseId);
+      } else {
+        res = await getPublishedExercises();
+      }
       setExercises(res.data);
       if (id) {
         try {
@@ -63,7 +69,11 @@ export default function ExercisesPage() {
 
   const closeExercise = () => {
     setActiveExercise(null);
-    navigate('/exercises');
+    if (courseId) {
+      navigate(`/course/${courseId}/exercises`);
+    } else {
+      navigate('/exercises');
+    }
   };
 
   const handleComplete = async (exerciseId) => {

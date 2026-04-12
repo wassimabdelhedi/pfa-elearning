@@ -57,6 +57,23 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<java.util.Map<String, String>> resetPassword(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        String newPassword = request.get("newPassword");
+        
+        if (email == null || newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", "Email and new password are required"));
+        }
+        
+        try {
+            userService.resetPassword(email, newPassword);
+            return ResponseEntity.ok(java.util.Map.of("message", "Password resetting successful"));
+        } catch (com.pfa.elearning.exception.ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("message", "User not found"));
+        }
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -67,15 +67,56 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAllCourses = async () => {
+    const word = prompt('Tapez "SUPPRIMER" pour confirmer la suppression de TOUS les cours. Cette action est irréversible.');
+    if (word !== 'SUPPRIMER') return;
+    try {
+      setLoading(true);
+      const { deleteAllCourses } = await import('../../api/adminApi');
+      await deleteAllCourses();
+      showMsg('✅ Tous les cours ont été supprimés');
+      loadData();
+    } catch (err) {
+      showMsg('❌ Erreur lors de la suppression des cours');
+      setLoading(false);
+    }
+  };
+
+  const handleSystemResetAndSeed = async () => {
+    const word = prompt('Tapez "RESET" pour purger la BD et générer des cours de test pour Amin Frikha (Action IRRÉVERSIBLE).');
+    if (word !== 'RESET') return;
+    try {
+      setLoading(true);
+      const { seedMockData } = await import('../../api/adminApi');
+      const res = await seedMockData();
+      showMsg('✅ ' + (res.data.message || 'Succès de la réinitialisation'));
+      loadData();
+    } catch (err) {
+      showMsg('❌ Erreur lors du Reset : ' + (err.response?.data?.message || err.message));
+      setLoading(false);
+    }
+  };
   if (loading) {
     return <div className="loading-container"><div className="spinner"></div></div>;
   }
 
   return (
     <div className="page">
-      <div className="page-header">
-        <h1>🛡️ Administration</h1>
-        <p>Gérez la plateforme LearnAgent</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>🛡️ Administration</h1>
+          <p>Gérez la plateforme LearnAgent</p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-secondary" onClick={handleSystemResetAndSeed} title="Purge DB et ajoute les données PFA">
+            <FiLayers size={16} style={{ marginRight: 8 }} />
+            Réinitialiser & Générer (PFA)
+          </button>
+          <button className="btn btn-danger" onClick={handleDeleteAllCourses} title="Attention: supprime tous les cours de la base de données">
+            <FiTrash2 size={16} style={{ marginRight: 8 }} />
+            Purger tous les cours
+          </button>
+        </div>
       </div>
 
       {msg && (

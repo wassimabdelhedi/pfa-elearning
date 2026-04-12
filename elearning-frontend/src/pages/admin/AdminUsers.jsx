@@ -38,6 +38,16 @@ export default function AdminUsers() {
     }
   };
 
+  const handleRoleChange = async (id, newRole) => {
+    try {
+      const { updateUserRole } = await import('../../api/adminApi');
+      await updateUserRole(id, newRole);
+      setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+      showMsg('✅ Rôle mis à jour');
+    } catch {
+      showMsg('❌ Erreur lors du changement de rôle');
+    }
+  };
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cet utilisateur ? Cette action est irréversible.')) return;
     try {
@@ -51,14 +61,29 @@ export default function AdminUsers() {
 
   const filtered = filter === 'ALL' ? users : users.filter(u => u.role === filter);
 
-  const getRoleBadge = (role) => {
-    const map = {
-      STUDENT: { label: 'Étudiant', cls: 'badge-primary' },
-      TEACHER: { label: 'Enseignant', cls: 'badge-success' },
-      ADMIN: { label: 'Admin', cls: 'badge-warning' }
-    };
-    const info = map[role] || { label: role, cls: 'badge-primary' };
-    return <span className={`badge ${info.cls}`}>{info.label}</span>;
+  const renderRoleSelect = (user) => {
+    return (
+      <select 
+        value={user.role}
+        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+        style={{
+          padding: '4px 8px',
+          borderRadius: '4px',
+          border: '1px solid var(--border-color)',
+          background: 'var(--bg-secondary)',
+          color: 'var(--text-primary)',
+          fontSize: '0.85rem',
+          cursor: 'pointer'
+        }}
+        disabled={user.role === 'ADMIN'}
+        title={user.role === 'ADMIN' ? "Impossible de modifier le rôle de l'administrateur principal" : "Changer le rôle"}
+      >
+        <option value="STUDENT">Étudiant</option>
+        <option value="TEACHER">Enseignant</option>
+        <option value="ADMIN">Admin</option>
+      </select>
+    );
+  };
   };
 
   if (loading) {
@@ -122,7 +147,7 @@ export default function AdminUsers() {
                 >
                   <td style={{ padding: '14px 20px', fontWeight: 600, fontSize: '0.9rem' }}>{user.fullName}</td>
                   <td style={{ padding: '14px 20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{user.email}</td>
-                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>{getRoleBadge(user.role)}</td>
+                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>{renderRoleSelect(user)}</td>
                   <td style={{ padding: '14px 20px', textAlign: 'center' }}>
                     <span style={{
                       padding: '4px 12px', borderRadius: 100, fontSize: '0.8rem', fontWeight: 600,

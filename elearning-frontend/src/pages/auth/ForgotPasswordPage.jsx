@@ -1,32 +1,28 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { login } from '../../api/authApi';
-import { FiMail, FiLock, FiBookOpen } from 'react-icons/fi';
+import { resetPassword } from '../../api/authApi';
+import { FiLock, FiBookOpen } from 'react-icons/fi';
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const { loginUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      const res = await login(email, password);
-      const { token, userId, fullName, role } = res.data;
-      loginUser({ id: userId, email, fullName, role }, token);
-
-      if (role === 'TEACHER') navigate('/teacher/dashboard');
-      else if (role === 'ADMIN') navigate('/admin');
-      else navigate('/dashboard');
+      await resetPassword(email, newPassword);
+      setSuccess('Votre mot de passe a été mis à jour avec succès.');
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Email ou mot de passe incorrect');
+      setError(err.response?.data?.message || 'Erreur lors de la mise à jour du mot de passe');
     } finally {
       setLoading(false);
     }
@@ -36,12 +32,21 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="card auth-card">
         <div style={{ textAlign: 'center', marginBottom: 8 }}>
-          <FiBookOpen size={40} color="var(--primary-400)" />
+          <FiLock size={40} color="var(--primary-400)" />
         </div>
-        <h1>Bienvenue 👋</h1>
-        <p className="subtitle">Connectez-vous à votre compte LearnAgent</p>
+        <h1>Récupération</h1>
+        <p className="subtitle">Réinitialisez votre mot de passe</p>
 
         {error && <div className="error-message">{error}</div>}
+        {success && (
+          <div style={{
+            padding: '12px 16px', background: 'rgba(34,197,94,0.1)',
+            border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8,
+            color: '#4ade80', textAlign: 'center', marginBottom: '16px'
+          }}>
+            {success}
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -58,30 +63,26 @@ export default function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Mot de passe</label>
+            <label htmlFor="newPassword">Nouveau mot de passe</label>
             <input
-              id="password"
+              id="newPassword"
               type="password"
               className="form-input"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
               required
             />
-            <div style={{ textAlign: 'right', marginTop: '8px' }}>
-              <Link to="/forgot-password" style={{ fontSize: '0.85rem' }}>Mot de passe oublié ?</Link>
-            </div>
           </div>
 
-          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading || success}
             style={{ width: '100%' }}>
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? 'Mise à jour...' : 'Mettre à jour'}
           </button>
         </form>
 
         <div className="auth-footer">
-          Pas encore de compte ?{' '}
-          <Link to="/register">Créer un compte</Link>
+          <Link to="/login">Retour à la connexion</Link>
         </div>
       </div>
     </div>
