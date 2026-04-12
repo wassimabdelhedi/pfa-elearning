@@ -66,7 +66,7 @@ export default function CoursesPage() {
       )}
 
       {/* Category filter */}
-      {categories.length > 0 && (
+      {Array.isArray(categories) && categories.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
           <button
             className={`btn ${!selectedCategory ? 'btn-primary' : 'btn-secondary'} btn-sm`}
@@ -86,7 +86,7 @@ export default function CoursesPage() {
         </div>
       )}
 
-      {filtered.length > 0 ? (
+      {Array.isArray(filtered) && filtered.length > 0 ? (
         <div className="course-grid">
           {filtered.map(course => (
             <CourseCard key={course.id} course={course} onEnroll={handleEnroll} />
