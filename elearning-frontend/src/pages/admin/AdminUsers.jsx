@@ -84,7 +84,6 @@ export default function AdminUsers() {
       </select>
     );
   };
-  };
 
   if (loading) {
     return <div className="loading-container"><div className="spinner"></div></div>;

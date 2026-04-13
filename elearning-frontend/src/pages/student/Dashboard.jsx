@@ -98,11 +98,6 @@ export default function Dashboard() {
           <div className="stat-value">{completedExercisesCount}</div>
           <div className="stat-label">Exercices faits</div>
         </div>
-        <div className="stat-card animate-in">
-          <div className="stat-icon">📈</div>
-          <div className="stat-value">{avgProgress}%</div>
-          <div className="stat-label">Progression</div>
-        </div>
       </div>
 
       {/* Quick search CTA */}
@@ -117,10 +112,15 @@ export default function Dashboard() {
       {/* Enrollments - clickable to open course */}
       {enrollments.length > 0 && (
         <>
-          <h2 style={{ fontSize: '1.3rem', marginBottom: 20 }}>
-            <FiBookOpen style={{ verticalAlign: 'middle', marginRight: 8 }} />
-            Mes cours en cours
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+            <h2 style={{ fontSize: '1.3rem', margin: 0 }}>
+              <FiBookOpen style={{ verticalAlign: 'middle', marginRight: 8 }} />
+              Mes cours en cours
+            </h2>
+            <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '6px 16px', borderRadius: 100, color: 'var(--primary-300)', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <FiTrendingUp /> Progression globale: {avgProgress}%
+            </div>
+          </div>
           <div className="course-grid" style={{ marginBottom: 40 }}>
             {enrollments.filter(e => !e.completed).slice(0, 3).map((enrollment) => (
               <div
