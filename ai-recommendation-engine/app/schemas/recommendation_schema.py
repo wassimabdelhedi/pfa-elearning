@@ -52,3 +52,21 @@ class IndexCourseResponse(BaseModel):
     status: str
     course_id: int
     keywords: str
+
+
+class WeakTopicQuestion(BaseModel):
+    text: str
+    topic: str
+    student_answer: str
+    correct_answer: str
+
+
+class WeakTopicItem(BaseModel):
+    topic: str
+    severity: str
+
+
+class WeakTopicResponse(BaseModel):
+    failed: bool
+    weak_topics: List[WeakTopicItem]
+    global_summary: str

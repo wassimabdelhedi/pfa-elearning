@@ -218,6 +218,79 @@ public class SearchService {
                 .build();
     }
 
+    @Transactional
+    public void generateRecommendationsForWeakTopics(User student, List<String> weakTopics) {
+        if (weakTopics == null || weakTopics.isEmpty()) return;
+
+        log.info("Generating specialized recommendations for student {} based on weak topics: {}", student.getId(), weakTopics);
+
+        // 1. Construct a query from weak topics
+        String query = "Cours pour renforcer les bases en : " + String.join(", ", weakTopics);
+        
+        // 2. Build request for AI
+        List<Course> allCourses = courseRepository.findByPublishedTrue();
+        List<Long> enrolledCourseIds = enrollmentRepository.findByStudentId(student.getId())
+                .stream().map(e -> e.getCourse().getId()).collect(Collectors.toList());
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("query", query);
+        requestBody.put("student_id", student.getId());
+        requestBody.put("enrolled_courses", enrolledCourseIds);
+        requestBody.put("courses", allCourses.stream().map(c -> {
+            Map<String, Object> courseMap = new HashMap<>();
+            courseMap.put("id", c.getId());
+            courseMap.put("title", c.getTitle());
+            courseMap.put("description", c.getDescription() != null ? c.getDescription() : "");
+            courseMap.put("content", c.getContent() != null ? c.getContent() : "");
+            courseMap.put("level", c.getLevel() != null ? c.getLevel().name() : "BEGINNER");
+            courseMap.put("category", c.getCategory() != null ? c.getCategory().getName() : "");
+            return courseMap;
+        }).collect(Collectors.toList()));
+
+        // 3. Call AI
+        try {
+            Map<String, Object> response = webClientBuilder.build()
+                    .post()
+                    .uri(aiServiceBaseUrl + "/api/recommend")
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+
+            if (response != null && response.get("recommendations") != null) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> aiResults = (List<Map<String, Object>>) response.get("recommendations");
+
+                for (Map<String, Object> result : aiResults) {
+                    Long courseId = ((Number) result.get("course_id")).longValue();
+                    double score = ((Number) result.get("score")).doubleValue();
+                    
+                    // Boost relevance because it targets a weakness
+                    double boostedScore = Math.min(1.0, score + 0.3);
+                    
+                    Course course = courseRepository.findById(courseId).orElse(null);
+                    if (course != null) {
+                        // Avoid duplicates
+                        List<Recommendation> existing = recommendationRepository.findByStudentIdAndCourseId(student.getId(), course.getId());
+                        if (!existing.isEmpty()) {
+                            recommendationRepository.deleteAll(existing);
+                        }
+
+                        Recommendation rec = Recommendation.builder()
+                                .student(student)
+                                .course(course)
+                                .relevanceScore(boostedScore)
+                                .reason("Recommandé pour combler vos lacunes identifiées : " + String.join(", ", weakTopics))
+                                .build();
+                        recommendationRepository.save(rec);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to generate weak topic recommendations: {}", e.getMessage());
+        }
+    }
+
     public void indexCourse(Course course) {
         try {
             Map<String, Object> requestBody = new HashMap<>();

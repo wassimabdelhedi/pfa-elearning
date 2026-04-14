@@ -49,3 +49,30 @@ out/
 # App specific
 elearning-backend/uploads/*
 !elearning-backend/uploads/.gitkeep
+
+# ======================
+# Python / AI services
+# ======================
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.ipynb_checkpoints/
+
+# ======================
+# Logs & runtime files
+# ======================
+*.log
+startup_output.txt
+startup_utf8.txt
+
+# ======================
+# OS specific
+# ======================
+.DS_Store
+Thumbs.db

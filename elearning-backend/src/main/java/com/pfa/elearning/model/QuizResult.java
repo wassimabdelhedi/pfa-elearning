@@ -25,6 +25,11 @@ public class QuizResult {
 
     private int score;
     private int totalQuestions;
+    
+    private boolean failed;
+    
+    @Column(columnDefinition = "TEXT")
+    private String weakTopics; // Stores JSON analysis from AI
 
     @Column(updatable = false)
     private LocalDateTime submittedAt;

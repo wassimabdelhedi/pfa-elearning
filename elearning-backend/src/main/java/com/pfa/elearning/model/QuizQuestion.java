@@ -28,6 +28,9 @@ public class QuizQuestion {
     private List<String> options = new ArrayList<>();
 
     private int correctAnswer;
+    
+    @Column(length = 100)
+    private String topic;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)

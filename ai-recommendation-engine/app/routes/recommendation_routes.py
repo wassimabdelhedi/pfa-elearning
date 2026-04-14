@@ -4,6 +4,7 @@ Endpoints appelés par Spring Boot
 """
 
 import logging
+from typing import List
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
 from app.schemas.recommendation_schema import (
@@ -12,10 +13,14 @@ from app.schemas.recommendation_schema import (
     RecommendationItem,
     IndexCourseRequest,
     IndexCourseResponse,
+    WeakTopicQuestion,
+    WeakTopicResponse,
 )
 from app.models.recommender import CourseRecommender
 from app.models.nlp_processor import NLPProcessor
 from app.services.text_extractor import extract_text
+from app.services.weak_topic_detector import detect_weak_topics
+
 
 logger = logging.getLogger(__name__)
 
@@ -155,3 +160,21 @@ async def extract_text_from_file(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Text extraction error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erreur d'extraction: {str(e)}")
+
+
+@router.post("/detect-weak-topics", response_model=WeakTopicResponse)
+async def analyze_quiz_failure(questions: List[WeakTopicQuestion]):
+    """
+    Analyse les questions d'un quiz pour identifier les lacunes.
+    Appelé par Spring Boot après la soumission d'un quiz.
+    """
+    try:
+        # Convertir les objets Pydantic en dictionnaires pour la fonction de service
+        questions_data = [q.model_dump() for q in questions]
+        
+        result = detect_weak_topics(questions_data)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Weak topic detection error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erreur d'analyse: {str(e)}")

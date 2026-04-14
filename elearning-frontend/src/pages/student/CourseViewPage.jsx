@@ -239,7 +239,7 @@ export default function CourseViewPage() {
           </div>
         </div>
 
-<<<<<<< HEAD
+
         {/* Main content: Sidebar + Chapter Viewer */}
         {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length > 0 && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
@@ -440,9 +440,6 @@ export default function CourseViewPage() {
             <p>Ce cours ne contient aucun chapitre pour le moment.</p>
           </div>
         )}
-        )}
-      </div>
-    </>
       </div>
     </>
   );

@@ -1,5 +1,7 @@
 package com.pfa.elearning.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pfa.elearning.exception.ResourceNotFoundException;
 import com.pfa.elearning.exception.UnauthorizedException;
 import com.pfa.elearning.model.*;
@@ -8,6 +10,7 @@ import com.pfa.elearning.repository.QuizRepository;
 import com.pfa.elearning.repository.QuizResultRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
+import com.pfa.elearning.service.SearchService;
 import com.pfa.elearning.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.core.ParameterizedTypeReference;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +37,13 @@ public class QuizController {
     private final UserService userService;
     private final CategoryRepository categoryRepository;
     private final CourseService courseService;
+    private final SearchService searchService;
+    private final WebClient.Builder webClientBuilder;
+    private final ObjectMapper objectMapper;
     private final EnrollmentRepository enrollmentRepository;
+
+    @Value("${app.ai-service.base-url}")
+    private String aiServiceBaseUrl;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getPublishedQuizzes() {
@@ -129,6 +142,7 @@ public class QuizController {
             for (Map<String, Object> qData : questionsData) {
                 QuizQuestion question = QuizQuestion.builder()
                         .text((String) qData.get("text"))
+                        .topic((String) qData.getOrDefault("topic", "General"))
                         .correctAnswer(((Number) qData.get("correctAnswer")).intValue())
                         .quiz(quiz)
                         .build();
@@ -191,13 +205,78 @@ public class QuizController {
 
         int score = ((Number) body.get("score")).intValue();
         int totalQuestions = ((Number) body.get("totalQuestions")).intValue();
+        double percentage = totalQuestions > 0 ? (double) score / totalQuestions * 100 : 0;
 
         QuizResult result = QuizResult.builder()
                 .quiz(quiz)
                 .student(student)
                 .score(score)
                 .totalQuestions(totalQuestions)
+                .failed(percentage < 60)
                 .build();
+
+        // Detect weak topics if failed and answers are provided
+        if (percentage < 60 && body.containsKey("answers")) {
+            try {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> studentAnswers = (List<Map<String, Object>>) body.get("answers");
+                List<Map<String, Object>> aiQuestionsPayload = new ArrayList<>();
+
+                for (Map<String, Object> ans : studentAnswers) {
+                    Long qId = ((Number) ans.get("questionId")).longValue();
+                    int studentAnsIdx = ((Number) ans.get("studentAnswerIndex")).intValue();
+
+                    quiz.getQuestions().stream()
+                            .filter(q -> q.getId().equals(qId))
+                            .findFirst()
+                            .ifPresent(question -> {
+                                Map<String, Object> qPayload = new HashMap<>();
+                                qPayload.put("text", question.getText());
+                                qPayload.put("topic", question.getTopic() != null ? question.getTopic() : "General Topics");
+                                
+                                List<String> options = question.getOptions();
+                                String studentAnsText = (studentAnsIdx >= 0 && studentAnsIdx < options.size()) ? options.get(studentAnsIdx) : "Unknown";
+                                String correctAnsText = (question.getCorrectAnswer() >= 0 && question.getCorrectAnswer() < options.size()) ? options.get(question.getCorrectAnswer()) : "Unknown";
+                                
+                                qPayload.put("student_answer", studentAnsText);
+                                qPayload.put("correct_answer", correctAnsText);
+                                aiQuestionsPayload.add(qPayload);
+                            });
+                }
+
+                if (!aiQuestionsPayload.isEmpty()) {
+                    log.info("Sending { } questions to AI detection for student {}", aiQuestionsPayload.size(), student.getId());
+                    Map<String, Object> aiResponse = webClientBuilder.build()
+                            .post()
+                            .uri(aiServiceBaseUrl + "/api/detect-weak-topics")
+                            .bodyValue(aiQuestionsPayload)
+                            .retrieve()
+                            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                            .block();
+
+                    if (aiResponse != null) {
+                        result.setWeakTopics(objectMapper.writeValueAsString(aiResponse.get("weak_topics")));
+                        
+                        // Generate specialized recommendations based on these weak topics
+                        try {
+                            @SuppressWarnings("unchecked")
+                            List<Map<String, String>> topicsList = (List<Map<String, String>>) aiResponse.get("weak_topics");
+                            if (topicsList != null && !topicsList.isEmpty()) {
+                                List<String> topicNames = topicsList.stream()
+                                        .map(m -> m.get("topic"))
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toList());
+                                searchService.generateRecommendationsForWeakTopics(student, topicNames);
+                            }
+                        } catch (Exception e) {
+                            log.error("Could not trigger specialized recommendations: {}", e.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to detect weak topics via AI: {}", e.getMessage());
+            }
+        }
 
         quizResultRepository.save(result);
 
@@ -205,6 +284,9 @@ public class QuizController {
         response.put("id", result.getId());
         response.put("score", result.getScore());
         response.put("totalQuestions", result.getTotalQuestions());
+        response.put("percentage", Math.round(percentage));
+        response.put("failed", result.isFailed());
+        response.put("weakTopics", result.getWeakTopics());
         response.put("studentName", student.getFullName());
         response.put("quizTitle", quiz.getTitle());
         response.put("submittedAt", result.getSubmittedAt());
@@ -236,6 +318,8 @@ public class QuizController {
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
+            map.put("failed", r.isFailed());
+            map.put("weakTopics", r.getWeakTopics());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());
@@ -265,6 +349,8 @@ public class QuizController {
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
+            map.put("failed", r.isFailed());
+            map.put("weakTopics", r.getWeakTopics());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());
@@ -286,6 +372,8 @@ public class QuizController {
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
+            map.put("failed", r.isFailed());
+            map.put("weakTopics", r.getWeakTopics());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());
@@ -315,6 +403,7 @@ public class QuizController {
                 Map<String, Object> qMap = new HashMap<>();
                 qMap.put("id", question.getId());
                 qMap.put("text", question.getText());
+                qMap.put("topic", question.getTopic());
                 qMap.put("options", question.getOptions());
                 qMap.put("correctAnswer", question.getCorrectAnswer());
                 return qMap;
