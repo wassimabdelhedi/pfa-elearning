@@ -239,7 +239,6 @@ export default function CourseViewPage() {
           </div>
         </div>
 
-
         {/* Main content: Sidebar + Chapter Viewer */}
         {(isEnrolled || user?.role === 'TEACHER' || user?.role === 'ADMIN') && chapters.length > 0 && (
           <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>

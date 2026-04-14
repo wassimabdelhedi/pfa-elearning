@@ -15,6 +15,12 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!email || !password) {
+      setError('Veuillez remplir tous les champs');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -53,7 +59,6 @@ export default function LoginPage() {
               placeholder="votre@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
             />
           </div>
 
@@ -66,7 +71,6 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
             />
             <div style={{ textAlign: 'right', marginTop: '8px' }}>
               <Link to="/forgot-password" style={{ fontSize: '0.85rem' }}>Mot de passe oublié ?</Link>
@@ -75,7 +79,7 @@ export default function LoginPage() {
 
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading}
             style={{ width: '100%' }}>
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? 'Connexion...' : 'Connexion'}
           </button>
         </form>
 
