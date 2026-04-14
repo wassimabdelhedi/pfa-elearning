@@ -76,3 +76,4 @@ startup_utf8.txt
 # ======================
 .DS_Store
 Thumbs.db
+* text=auto eol=lf

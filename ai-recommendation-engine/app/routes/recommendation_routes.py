@@ -14,6 +14,7 @@ from app.schemas.recommendation_schema import (
     IndexCourseRequest,
     IndexCourseResponse,
     WeakTopicQuestion,
+    DetectWeakTopicsRequest,
     WeakTopicResponse,
 )
 from app.models.recommender import CourseRecommender
@@ -162,17 +163,20 @@ async def extract_text_from_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Erreur d'extraction: {str(e)}")
 
 
+
+
 @router.post("/detect-weak-topics", response_model=WeakTopicResponse)
-async def analyze_quiz_failure(questions: List[WeakTopicQuestion]):
+async def analyze_quiz_failure(request: DetectWeakTopicsRequest):
     """
     Analyse les questions d'un quiz pour identifier les lacunes.
-    Appelé par Spring Boot après la soumission d'un quiz.
+    Si les topics sont absents des questions, utilise les chapitres pour mapper.
     """
     try:
-        # Convertir les objets Pydantic en dictionnaires pour la fonction de service
-        questions_data = [q.model_dump() for q in questions]
+        # Convertir les objets Pydantic en dictionnaires
+        questions_data = [q.model_dump() for q in request.questions]
+        chapters_data = [c.model_dump() for c in request.chapters] if request.chapters else None
         
-        result = detect_weak_topics(questions_data)
+        result = detect_weak_topics(questions_data, chapters_data, recommender)
         return result
         
     except Exception as e:

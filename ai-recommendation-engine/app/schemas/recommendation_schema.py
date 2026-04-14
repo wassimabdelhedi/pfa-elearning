@@ -56,9 +56,20 @@ class IndexCourseResponse(BaseModel):
 
 class WeakTopicQuestion(BaseModel):
     text: str
-    topic: str
+    topic: Optional[str] = None
     student_answer: str
     correct_answer: str
+
+
+class ChapterData(BaseModel):
+    id: int
+    title: str
+    content: str = ""
+
+
+class DetectWeakTopicsRequest(BaseModel):
+    questions: List[WeakTopicQuestion]
+    chapters: List[ChapterData] = []
 
 
 class WeakTopicItem(BaseModel):

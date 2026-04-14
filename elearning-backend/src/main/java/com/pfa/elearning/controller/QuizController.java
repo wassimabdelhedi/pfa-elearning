@@ -245,11 +245,29 @@ public class QuizController {
                 }
 
                 if (!aiQuestionsPayload.isEmpty()) {
-                    log.info("Sending { } questions to AI detection for student {}", aiQuestionsPayload.size(), student.getId());
+                    // Method 1: Get chapters for automated topic mapping
+                    List<Map<String, Object>> aiChaptersPayload = new ArrayList<>();
+                    if (quiz.getCourse() != null && quiz.getCourse().getChapters() != null) {
+                        for (Chapter chapter : quiz.getCourse().getChapters()) {
+                            Map<String, Object> cMap = new HashMap<>();
+                            cMap.put("id", chapter.getId());
+                            cMap.put("title", chapter.getTitle());
+                            cMap.put("content", chapter.getContent() != null ? chapter.getContent() : "");
+                            aiChaptersPayload.add(cMap);
+                        }
+                    }
+
+                    Map<String, Object> finalPayload = new HashMap<>();
+                    finalPayload.put("questions", aiQuestionsPayload);
+                    finalPayload.put("chapters", aiChaptersPayload);
+
+                    log.info("Sending {} questions and {} chapters to AI detection for student {}", 
+                             aiQuestionsPayload.size(), aiChaptersPayload.size(), student.getId());
+
                     Map<String, Object> aiResponse = webClientBuilder.build()
                             .post()
                             .uri(aiServiceBaseUrl + "/api/detect-weak-topics")
-                            .bodyValue(aiQuestionsPayload)
+                            .bodyValue(finalPayload)
                             .retrieve()
                             .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                             .block();
