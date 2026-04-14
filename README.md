@@ -350,6 +350,20 @@ classDiagram
         -LocalDateTime updatedAt
     }
 
+    class Chapter {
+        -Long id
+        -String title
+        -String content
+        -int position
+        -SupportType supportType
+    }
+
+    class ChapterProgress {
+        -Long id
+        -boolean isCompleted
+        -LocalDateTime completedAt
+    }
+
     class Category {
         -Long id
         -String name
@@ -439,6 +453,9 @@ classDiagram
     Category "1" -- "*" Course : contient
     User "1" -- "*" Enrollment : s'inscrit
     Course "1" -- "*" Enrollment : a des inscriptions
+    Course "1" -- "*" Chapter : composé de
+    Chapter "1" -- "*" ChapterProgress : suivi par
+    User "1" -- "*" ChapterProgress : complète
 
     User "1" -- "*" Exercise : crée (teacher)
     Category "1" -- "*" Exercise : catégorise
@@ -480,6 +497,8 @@ classDiagram
 | **Course** | `N → 1` | **Category** | `@ManyToOne` | Un cours appartient à une catégorie |
 | **Course** | `N → 1` | **User** | `@ManyToOne` | Un cours est créé par un enseignant |
 | **Course** | `1 → N` | **Enrollment** | `@OneToMany` | Un cours a plusieurs inscriptions |
+| **Course** | `1 → N` | **Chapter** | `@OneToMany` | Un cours est subdivisé en chapitres |
+| **Chapter** | `1 → N` | **ChapterProgress** | `@OneToMany` | Un chapitre a plusieurs suivis de progression |
 | **Course** | `1 → N` | **Exercise** | `@OneToMany` | Un cours peut avoir des exercices |
 | **Course** | `1 → N` | **Quiz** | `@OneToMany` | Un cours peut avoir des quiz |
 | **Course** | `1 → N` | **CourseRating** | `@OneToMany` | Un cours a plusieurs notes |
@@ -858,6 +877,7 @@ graph TB
 | `POST` | `/api/index-course` | Indexer un cours + extraire mots-clés |
 | `POST` | `/api/extract-text` | Extraire texte d'un fichier (PDF/DOCX/PPTX) |
 | `POST` | `/api/extract-keywords` | Extraire mots-clés d'un texte |
+| `POST` | `/api/detect-weak-topics` | Détection des lacunes suite à un quiz |
 | `GET` | `/health` | Health check du service |
 
 ---

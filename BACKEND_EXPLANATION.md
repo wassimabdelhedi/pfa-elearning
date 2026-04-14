@@ -52,17 +52,21 @@ elearning-backend/
     │   └── UnauthorizedException.java
     ├── model/                                # Database Entities (JPA)
     │   ├── Category.java
+    │   ├── Chapter.java
+    │   ├── ChapterProgress.java
     │   ├── Course.java
     │   ├── CourseRating.java
     │   ├── DifficultyLevel.java
     │   ├── Enrollment.java
     │   ├── Exercise.java
+    │   ├── ExerciseCompletion.java
     │   ├── Quiz.java
     │   ├── QuizQuestion.java
     │   ├── QuizResult.java
     │   ├── Recommendation.java
     │   ├── Role.java
     │   ├── SearchHistory.java
+    │   ├── SupportType.java
     │   └── User.java
     ├── repository/                           # Database Interfaces (Hibernate)
     │   ├── CategoryRepository.java
@@ -121,17 +125,21 @@ flowchart TD
 ## 2. Models (`com.pfa.elearning.model`)
 This package contains the JPA (Java Persistence API) Entity classes. These classes directly map to database tables in PostgreSQL.
 - **`Category.java`**: Classifies courses into domains (e.g., "Computer Science", "Arts").
-- **`Course.java`**: The core entity representing a learning program. It holds metadata like title, description, instructor ID, and references to its category.
+- **`Chapter.java`**: Represents a specific module or logical chunk within a `Course`. It allows for structured, step-by-step learning.
+- **`ChapterProgress.java`**: Tracks whether a specific student has completed a particular `Chapter`. Ensures strict sequential access.
+- **`Course.java`**: The core entity representing a learning program. It holds metadata like title, description, instructor ID, and references to its category and chapters.
 - **`CourseRating.java`**: Records student reviews (stars/comments) for specific courses.
-- **`DifficultyLevel.java`**: An ENUM defining the difficulty of a course (e.g., BEGINNER, INTERMEDIATE, ADVANCED).
+- **`DifficultyLevel.java`**: An ENUM defining the difficulty of a course.
 - **`Enrollment.java`**: A mapping/join entity tracking which `User` (Student) is participating in which `Course`.
-- **`Exercise.java`**: Represents homework or practical assignments linked to a course.
+- **`Exercise.java`**: Represents homework or practical assignments linked to a core course or chapter.
+- **`ExerciseCompletion.java`**: Tracks if a user has completed a specific exercise, serving as a gate for progression.
 - **`Quiz.java`**: Represents an assessment module for testing a student's knowledge after chapters/courses.
 - **`QuizQuestion.java`**: Contains an individual question prompt, expected answers, and ties back to a specific `Quiz`.
 - **`QuizResult.java`**: Tracks a student's score and statistics when they attempt a `Quiz`.
 - **`Recommendation.java`**: Stores the AI-generated course suggestions tailored to individual students. 
 - **`Role.java`**: An ENUM defining user privileges (e.g., STUDENT, INSTRUCTOR, ADMIN).
 - **`SearchHistory.java`**: A tracking entity that logs a user's search queries. The AI uses this data to improve recommendations.
+- **`SupportType.java`**: An ENUM defining the format of the course material (e.g. VIDEO, PDF).
 - **`User.java`**: Defines the user profiles in the system, storing credentials (email, hashed password), their `Role`, and personal details.
 
 ---

@@ -76,14 +76,15 @@ The system relies on three distinct main modules:
   - `controller/`: REST API endpoints. Defines the URL paths and delegates to services.
   - `dto/`: Data Transfer Objects. Objects used to shape requests/responses across the network without exposing internal DB models directly.
   - `exception/`: Global Exception Handlers that intercept system errors and return clean JSON error responses to the frontend.
-  - `model/`: Entity classes mapping to database tables managed by JPA.
+  - `model/`: Entity classes mapping to database tables managed by JPA. Includes new multi-chapter structures (`Chapter`, `ChapterProgress`, `ExerciseCompletion`).
   - `repository/`: Spring Data JPA interfaces. Provides automatic CRUD database queries.
   - `security/`: Components defining the JWT filters, Authentication providers, and user details services.
-  - `service/`: The "Heart" of the backend. Contains business logic.
+  - `service/`: The "Heart" of the backend. Contains business logic. Handles strict access control validating chapter completion before allowing quiz/exercise access.
 - `uploads/`: Used for storing files uploaded by users/professors (like PDFs or PPTX files for courses).
 
 ### `/ai-recommendation-engine` (Python + FastAPI)
 - `requirements.txt`: Python package manager dependencies listing.
+- See `/AI_ENGINE.md` in the root directory: A detailed specific documentation for the AI logic.
 - `app/`: Source package.
   - `main.py`: Entry point for the FastAPI server, defining app instance and registering routes.
   - `models/`: Database models or internal python structural models.
@@ -94,6 +95,7 @@ The system relies on three distinct main modules:
     - Text extraction functions (PDF, word reading).
     - Embedding logic using `sentence-transformers`.
     - Recommendation functions utilizing similarity matrices.
+    - `weak_topic_detector.py`: Detects a student's weak concepts by analyzing wrong quiz answers vs chapter contents.
 
 ---
 
