@@ -41,6 +41,22 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    // STUDENT SPECIFIC FIELDS
+    @Column
+    private String niveau;
+
+    @Column
+    private String domaineInteret;
+    
+    @Column
+    private String autreDomaineInteret;
+
+    @Column
+    private String objectif;
+    
+    @Column
+    private String autreObjectif;
+
     // === RELATIONS ===
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

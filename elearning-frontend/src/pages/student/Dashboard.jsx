@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMyEnrollments } from '../../api/userApi';
 import { getRecommendations } from '../../api/searchApi';
+import { getTopEnrolledCourses, getPersonalizedCourses } from '../../api/courseApi';
 import { getPublishedQuizzes, getMyStudentResults } from '../../api/quizApi';
 import { getMyCompletedExercises } from '../../api/exerciseApi';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,6 +14,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [personalizedCourses, setPersonalizedCourses] = useState([]);
+  const [topCourses, setTopCourses] = useState([]);
   const [completedQuizzesCount, setCompletedQuizzesCount] = useState(0);
   const [completedExercisesCount, setCompletedExercisesCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,14 +26,18 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [enrollRes, recRes, myQuizRes, myExRes] = await Promise.all([
+      const [enrollRes, recRes, myQuizRes, myExRes, topRes, persRes] = await Promise.all([
         getMyEnrollments().catch(() => ({ data: [] })),
         getRecommendations().catch(() => ({ data: [] })),
         getMyStudentResults().catch(() => ({ data: [] })),
-        getMyCompletedExercises().catch(() => ({ data: [] }))
+        getMyCompletedExercises().catch(() => ({ data: [] })),
+        getTopEnrolledCourses().catch(() => ({ data: [] })),
+        getPersonalizedCourses().catch(() => ({ data: [] }))
       ]);
       setEnrollments(enrollRes.data);
       setRecommendations(recRes.data);
+      setTopCourses(topRes.data);
+      setPersonalizedCourses(persRes.data);
       setCompletedQuizzesCount(new Set(myQuizRes.data.map(q => q.quizId || q.id)).size);
       setCompletedExercisesCount(new Set(myExRes.data.map(e => e.exerciseId || e.id)).size);
     } catch (err) {
@@ -151,11 +158,41 @@ export default function Dashboard() {
         <>
           <h2 style={{ fontSize: '1.3rem', marginBottom: 20 }}>
             <FiTrendingUp style={{ verticalAlign: 'middle', marginRight: 8 }} />
-            Recommandés pour vous
+            Recommandés par notre IA
           </h2>
-          <div className="course-grid">
+          <div className="course-grid" style={{ marginBottom: 40 }}>
             {recommendations.slice(0, 6).map((rec, i) => (
               <CourseCard key={i} course={rec} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Personalized Recommendations */}
+      {personalizedCourses.length > 0 && (
+        <>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: 20 }}>
+            <FiAward style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Cours correspondants à votre profil
+          </h2>
+          <div className="course-grid" style={{ marginBottom: 40 }}>
+            {personalizedCourses.slice(0, 6).map((course) => (
+              <CourseCard key={`pers-${course.id}`} course={course} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Top Enrolled Recommendations */}
+      {topCourses.length > 0 && (
+        <>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: 20 }}>
+            <FiTrendingUp style={{ verticalAlign: 'middle', marginRight: 8 }} />
+            Cours les plus populaires
+          </h2>
+          <div className="course-grid" style={{ marginBottom: 40 }}>
+            {topCourses.slice(0, 6).map((course) => (
+              <CourseCard key={`top-${course.id}`} course={course} />
             ))}
           </div>
         </>

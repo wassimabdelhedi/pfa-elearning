@@ -6,7 +6,12 @@ import { FiBookOpen } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', password: '', role: 'STUDENT'
+    firstName: '', lastName: '', email: '', password: '', role: 'STUDENT',
+    niveau: 'Débutant',
+    domaineInteret: 'Web',
+    autreDomaineInteret: '',
+    objectif: 'Apprendre',
+    autreObjectif: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,19 +58,18 @@ export default function RegisterPage() {
         {error && <div className="error-message">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div className="form-group">
-              <label htmlFor="firstName">Prénom</label>
-              <input id="firstName" name="firstName" className="form-input"
-                placeholder="Ahmed" value={form.firstName}
-                onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label htmlFor="lastName">Nom</label>
-              <input id="lastName" name="lastName" className="form-input"
-                placeholder="Ben Ali" value={form.lastName}
-                onChange={handleChange} required />
-            </div>
+          <div className="form-group">
+            <label htmlFor="firstName">Prénom</label>
+            <input id="firstName" name="firstName" className="form-input"
+              placeholder="Ahmed" value={form.firstName}
+              onChange={handleChange} required />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="lastName">Nom</label>
+            <input id="lastName" name="lastName" className="form-input"
+              placeholder="Ben Ali" value={form.lastName}
+              onChange={handleChange} required />
           </div>
 
           <div className="form-group">
@@ -90,6 +94,42 @@ export default function RegisterPage() {
               <option value="TEACHER">👨‍🏫 Enseignant</option>
             </select>
           </div>
+
+          {form.role === 'STUDENT' && (
+            <>
+              <div className="form-group">
+                <label htmlFor="niveau">Niveau</label>
+                <select id="niveau" name="niveau" className="form-input"
+                  value={form.niveau} onChange={handleChange}>
+                  <option value="Débutant">Débutant</option>
+                  <option value="Intermédiaire">Intermédiaire</option>
+                  <option value="Avancé">Avancé</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="domaineInteret">Domaine d'intérêt principal</label>
+                <select id="domaineInteret" name="domaineInteret" className="form-input"
+                  value={form.domaineInteret} onChange={handleChange}>
+                  <option value="Web">Web</option>
+                  <option value="IA">IA</option>
+                  <option value="Data">Data</option>
+                  <option value="Autre">Autre</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="objectif">Objectif</label>
+                <select id="objectif" name="objectif" className="form-input"
+                  value={form.objectif} onChange={handleChange}>
+                  <option value="Apprendre">Apprendre</option>
+                  <option value="Se perfectionner">Se perfectionner</option>
+                  <option value="Réussir un examen">Réussir un examen</option>
+                  <option value="Autre">Autre</option>
+                </select>
+              </div>
+            </>
+          )}
 
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading}
             style={{ width: '100%' }}>

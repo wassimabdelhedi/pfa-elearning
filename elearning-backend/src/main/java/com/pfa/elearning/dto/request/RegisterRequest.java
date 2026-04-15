@@ -22,4 +22,10 @@ public class RegisterRequest {
 
     @NotNull(message = "Role is required")
     private Role role; // STUDENT or TEACHER
+    
+    private String niveau;
+    private String domaineInteret;
+    private String autreDomaineInteret;
+    private String objectif;
+    private String autreObjectif;
 }

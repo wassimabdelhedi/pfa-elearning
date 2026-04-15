@@ -133,6 +133,38 @@ export default function TeacherDashboard() {
     return labels[level] || level;
   };
 
+  const calculateTopStudents = () => {
+    if (!quizResults || quizResults.length === 0) return [];
+    const studentMap = {};
+    quizResults.forEach(r => {
+      const email = r.studentEmail;
+      if (!studentMap[email]) {
+        studentMap[email] = {
+          email: r.studentEmail,
+          fullName: r.studentName,
+          totalScore: 0,
+          totalQuestions: 0,
+          quizCount: 0,
+        };
+      }
+      studentMap[email].totalScore += r.score;
+      studentMap[email].totalQuestions += r.totalQuestions;
+      studentMap[email].quizCount += 1;
+    });
+    const studentsArray = Object.values(studentMap).map(s => ({
+      ...s,
+      averagePercentage: s.totalQuestions > 0 ? Math.round((s.totalScore / s.totalQuestions) * 100) : 0
+    }));
+    return studentsArray.sort((a, b) => b.averagePercentage - a.averagePercentage || b.quizCount - a.quizCount).slice(0, 5);
+  };
+
+  const topEnrolledCourses = [...courses]
+    .filter(c => c.enrollmentCount > 0)
+    .sort((a, b) => (b.enrollmentCount || 0) - (a.enrollmentCount || 0))
+    .slice(0, 3);
+
+  const topStudents = calculateTopStudents();
+
   const publishedCourses = courses.filter(c => c.published).length;
   const totalEnrollments = courses.reduce((acc, c) => acc + (c.enrollmentCount || 0), 0);
 
@@ -184,6 +216,69 @@ export default function TeacherDashboard() {
           <div className="stat-label">Inscriptions totales</div>
         </div>
       </div>
+
+      {/* ====== HIGHLIGHTS SECTION ====== */}
+      {(topEnrolledCourses.length > 0 || topStudents.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+          
+          {/* Top Enrolled Courses */}
+          {topEnrolledCourses.length > 0 && (
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiUsers color="var(--primary-400)" /> Mes cours les plus populaires
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {topEnrolledCourses.map(course => (
+                  <li key={`top-${course.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }} onClick={() => handleCourseClick(course.id)}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{course.title}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        ⭐ {course.averageRating ? course.averageRating.toFixed(1) : '—'}
+                      </div>
+                    </div>
+                    <span className="badge badge-primary">{course.enrollmentCount} inscrits</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Top Students */}
+          {topStudents.length > 0 && (
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiAward color="var(--primary-400)" /> Top Étudiants (Meilleurs Résultats)
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {topStudents.map((student, idx) => (
+                  <li key={`student-${idx}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{student.fullName}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{student.email}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{
+                          display: 'inline-block',
+                          padding: '4px 8px',
+                          borderRadius: 8,
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          background: student.averagePercentage >= 70 ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: student.averagePercentage >= 70 ? '#4ade80' : '#fbbf24'
+                      }}>
+                        {student.averagePercentage}%
+                      </span>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                        {student.quizCount} quiz fait{student.quizCount > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ====== COURSES SECTION ====== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -411,59 +506,80 @@ export default function TeacherDashboard() {
       <div style={{ marginTop: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ fontSize: '1.3rem' }}>
           <FiAward style={{ verticalAlign: 'middle', marginRight: 8 }} />
-          Résultats des étudiants
+          Résultats des quiz
         </h2>
       </div>
 
-      {quizResults.length > 0 ? (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Étudiant</th>
-                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Quiz</th>
-                <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Score</th>
-                <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>%</th>
-                <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quizResults.map((result, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <td style={{ padding: '14px 20px' }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{result.studentName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{result.studentEmail}</div>
-                  </td>
-                  <td style={{ padding: '14px 20px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>📋 {result.quizTitle}</td>
-                  <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 700 }}>
-                    {result.score} / {result.totalQuestions}
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>
-                    <span style={{
-                      padding: '4px 12px',
-                      borderRadius: 100,
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      background: result.percentage >= 70 ? 'rgba(34,197,94,0.15)' : result.percentage >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                      color: result.percentage >= 70 ? '#4ade80' : result.percentage >= 40 ? '#fbbf24' : '#f87171'
-                    }}>
-                      {result.percentage}%
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {result.submittedAt ? new Date(result.submittedAt).toLocaleDateString('fr-FR', {
-                      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                    }) : '-'}
-                  </td>
+      {quizResults.length > 0 ? (() => {
+        const quizSummary = quizResults.reduce((acc, curr) => {
+          if (!acc[curr.quizId]) {
+            acc[curr.quizId] = {
+              quizId: curr.quizId,
+              quizTitle: curr.quizTitle,
+              attempts: 0,
+              totalPercentage: 0
+            };
+          }
+          acc[curr.quizId].attempts += 1;
+          acc[curr.quizId].totalPercentage += curr.percentage;
+          return acc;
+        }, {});
+
+        const quizSummaryArray = Object.values(quizSummary).map(q => ({
+          ...q,
+          averagePercentage: Math.round(q.totalPercentage / q.attempts)
+        })).sort((a, b) => b.attempts - a.attempts);
+
+        return (
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
+                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Quiz</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Participations</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Score Moyen</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
+              </thead>
+              <tbody>
+                {quizSummaryArray.map((quiz, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '14px 20px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                      📋 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{quiz.quizTitle}</span>
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 600 }}>
+                      <span className="badge" style={{ background: 'var(--bg-lighter)' }}>{quiz.attempts}</span>
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'center' }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: 100,
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        background: quiz.averagePercentage >= 70 ? 'rgba(34,197,94,0.15)' : quiz.averagePercentage >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                        color: quiz.averagePercentage >= 70 ? '#4ade80' : quiz.averagePercentage >= 40 ? '#fbbf24' : '#f87171'
+                      }}>
+                        {quiz.averagePercentage}%
+                      </span>
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => navigate(`/teacher/quiz/${quiz.quizId}/results`)}
+                      >
+                        Voir les résultats
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })() : (
         <div className="card" style={{ textAlign: 'center', padding: 40 }}>
           <FiAward size={40} color="var(--text-muted)" style={{ marginBottom: 12 }} />
           <p style={{ color: 'var(--text-secondary)' }}>

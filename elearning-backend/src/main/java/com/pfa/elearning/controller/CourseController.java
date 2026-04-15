@@ -56,6 +56,17 @@ public class CourseController {
         return ResponseEntity.ok(courseService.toResponseList(courses));
     }
 
+    @GetMapping("/top-enrolled")
+    public ResponseEntity<List<CourseResponse>> getTopEnrolledCourses() {
+        return ResponseEntity.ok(courseService.toResponseList(courseService.getTopEnrolledCourses()));
+    }
+
+    @GetMapping("/personalized")
+    public ResponseEntity<List<CourseResponse>> getPersonalizedCourses(Authentication authentication) {
+        User student = userService.getUserByEmail(authentication.getName());
+        return ResponseEntity.ok(courseService.toResponseList(courseService.getPersonalizedCourses(student)));
+    }
+
     // ========== TEACHER ENDPOINTS ==========
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

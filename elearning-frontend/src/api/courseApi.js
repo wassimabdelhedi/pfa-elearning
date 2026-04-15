@@ -12,6 +12,12 @@ export const getCoursesByCategory = (categoryId) =>
 export const getMyTeacherCourses = () =>
   api.get('/courses/my-courses');
 
+export const getTopEnrolledCourses = () =>
+  api.get('/courses/top-enrolled');
+
+export const getPersonalizedCourses = () =>
+  api.get('/courses/personalized');
+
 export const getCourseStudents = (courseId) =>
   api.get(`/courses/${courseId}/students`);
 

@@ -129,6 +129,27 @@ public class CourseService {
         return courseRepository.searchByKeyword(keyword);
     }
 
+    public List<Course> getTopEnrolledCourses() {
+        return courseRepository.findTopEnrolledCourses();
+    }
+
+    public List<Course> getPersonalizedCourses(User student) {
+        String level = student.getNiveau();
+        String domain = student.getDomaineInteret() != null ? student.getDomaineInteret() : "";
+        String goal = student.getObjectif() != null ? student.getObjectif() : "";
+
+        // Map French level to DifficultyLevel enum string representation if needed:
+        // Débutant -> BEGINNER, Intermédiaire -> INTERMEDIATE, Avancé -> ADVANCED
+        String difficultyLevel = "BEGINNER";
+        if ("Intermédiaire".equalsIgnoreCase(level)) {
+            difficultyLevel = "INTERMEDIATE";
+        } else if ("Avancé".equalsIgnoreCase(level)) {
+            difficultyLevel = "ADVANCED";
+        }
+
+        return courseRepository.findPersonalizedCourses(difficultyLevel, domain, goal);
+    }
+
     /**
      * Calls the AI service to extract text from an uploaded file.
      * Returns the extracted text, or null if extraction fails.

@@ -30,6 +30,11 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .active(true)
+                .niveau(request.getNiveau())
+                .domaineInteret(request.getDomaineInteret())
+                .autreDomaineInteret(request.getAutreDomaineInteret())
+                .objectif(request.getObjectif())
+                .autreObjectif(request.getAutreObjectif())
                 .build();
 
         return userRepository.save(user);

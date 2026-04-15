@@ -159,6 +159,53 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Top Active Users */}
+      {stats && (stats.topTeachers?.length > 0 || stats.topStudents?.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '24px' }}>
+          
+          {/* Top Teachers */}
+          {stats.topTeachers?.length > 0 && (
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiAward color="var(--primary-400)" /> Enseignants les plus actifs
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {stats.topTeachers.map(teacher => (
+                  <li key={teacher.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{teacher.fullName}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{teacher.email}</div>
+                    </div>
+                    <span className="badge badge-primary">{teacher.courseCount} cours</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Top Students */}
+          {stats.topStudents?.length > 0 && (
+            <div className="card">
+              <h3 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FiUsers color="var(--primary-400)" /> Étudiants les plus actifs
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {stats.topStudents.map(student => (
+                  <li key={student.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{student.fullName}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{student.email}</div>
+                    </div>
+                    <span className="badge" style={{ background: 'var(--bg-lighter)', color: 'var(--text-secondary)' }}>{student.enrollmentCount} inscr.</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+        </div>
+      )}
+
       {/* ========== CATEGORY MANAGEMENT ========== */}
       <div style={{ marginTop: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -240,7 +287,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '14px 20px', fontWeight: 600, fontSize: '0.95rem' }}>{cat.name}</td>
                     <td style={{ padding: '14px 20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{cat.description || '—'}</td>
                     <td style={{ padding: '14px 20px', textAlign: 'center' }}>
-                      <span className="badge badge-primary">{cat.courses?.length || 0}</span>
+                      <span className="badge badge-primary">{cat.courseCount || 0}</span>
                     </td>
                     <td style={{ padding: '14px 20px', textAlign: 'right' }}>
                       <button

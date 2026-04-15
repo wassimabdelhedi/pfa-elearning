@@ -24,6 +24,9 @@ public class Category {
 
     private String icon;
 
+    @org.hibernate.annotations.Formula("(SELECT COUNT(*) FROM courses c WHERE c.category_id = id)")
+    private Integer courseCount;
+
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @Builder.Default
     @JsonIgnore

@@ -39,11 +39,27 @@ public class AdminController {
         long totalCourses = courseRepository.count();
         long totalEnrollments = enrollmentRepository.count();
 
+        List<Map<String, Object>> topTeachersList = userRepository.findTopTeachers().stream().map(u -> Map.<String, Object>of(
+                "id", u.getId(),
+                "fullName", u.getFullName(),
+                "email", u.getEmail(),
+                "courseCount", courseRepository.countByTeacherId(u.getId())
+        )).collect(Collectors.toList());
+
+        List<Map<String, Object>> topStudentsList = userRepository.findTopStudents().stream().map(u -> Map.<String, Object>of(
+                "id", u.getId(),
+                "fullName", u.getFullName(),
+                "email", u.getEmail(),
+                "enrollmentCount", enrollmentRepository.countByStudentId(u.getId())
+        )).collect(Collectors.toList());
+
         return ResponseEntity.ok(Map.of(
                 "totalStudents", totalStudents,
                 "totalTeachers", totalTeachers,
                 "totalCourses", totalCourses,
-                "totalEnrollments", totalEnrollments
+                "totalEnrollments", totalEnrollments,
+                "topTeachers", topTeachersList,
+                "topStudents", topStudentsList
         ));
     }
 
