@@ -4,6 +4,10 @@ Moteur de recommandation intelligent pour e-learning
 Utilise Sentence-BERT multilingue (FR/EN) pour la similarité sémantique
 """
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.recommendation_routes import router as recommendation_router

@@ -31,6 +31,9 @@ public class QuizResult {
     @Column(columnDefinition = "TEXT")
     private String weakTopics; // Stores JSON analysis from AI
 
+    @Column(columnDefinition = "TEXT")
+    private String recommendedLearningPath; // Stores generated learning path JSON
+
     @Column(updatable = false)
     private LocalDateTime submittedAt;
 

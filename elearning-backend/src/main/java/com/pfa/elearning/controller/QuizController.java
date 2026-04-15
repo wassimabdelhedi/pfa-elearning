@@ -289,6 +289,49 @@ public class QuizController {
                         } catch (Exception e) {
                             log.error("Could not trigger specialized recommendations: {}", e.getMessage());
                         }
+                        
+                        // --- Generate AI Tutor Feedback (Replaces Learning Path) ---
+                        List<Map<String, Object>> tutorFeedbacks = new ArrayList<>();
+                        
+                        for (Map<String, Object> q : aiQuestionsPayload) {
+                            String stuAns = (String) q.get("student_answer");
+                            String corAns = (String) q.get("correct_answer");
+                            
+                            if (!stuAns.equals(corAns) && !stuAns.equals("Unknown")) {
+                                Map<String, String> tutorReq = new HashMap<>();
+                                tutorReq.put("question_text", (String) q.get("text"));
+                                tutorReq.put("student_answer", stuAns);
+                                tutorReq.put("correct_answer", corAns);
+                                
+                                try {
+                                    Map<String, Object> tutorRes = webClientBuilder.build()
+                                        .post()
+                                        .uri(aiServiceBaseUrl + "/api/tutor-feedback")
+                                        .bodyValue(tutorReq)
+                                        .retrieve()
+                                        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                                        .block();
+                                        
+                                    if (tutorRes != null && tutorRes.containsKey("feedback")) {
+                                        Map<String, Object> feedbackNode = new LinkedHashMap<>();
+                                        feedbackNode.put("question", q.get("text"));
+                                        feedbackNode.put("feedback", tutorRes.get("feedback"));
+                                        tutorFeedbacks.add(feedbackNode);
+                                    }
+                                } catch (Exception e) {
+                                    log.error("AI Tutor feedback error for question: {}", e.getMessage());
+                                }
+                            }
+                        }
+                        
+                        if (!tutorFeedbacks.isEmpty()) {
+                            try {
+                                result.setRecommendedLearningPath(objectMapper.writeValueAsString(tutorFeedbacks));
+                            } catch (Exception e) {
+                                log.error("Failed to serialize: {}", e.getMessage());
+                            }
+                        }
+                        // ---------------------------------------------------------------------
                     }
                 }
             } catch (Exception e) {
@@ -305,6 +348,7 @@ public class QuizController {
         response.put("percentage", Math.round(percentage));
         response.put("failed", result.isFailed());
         response.put("weakTopics", result.getWeakTopics());
+        response.put("recommendedLearningPath", result.getRecommendedLearningPath());
         response.put("studentName", student.getFullName());
         response.put("quizTitle", quiz.getTitle());
         response.put("submittedAt", result.getSubmittedAt());
@@ -338,6 +382,7 @@ public class QuizController {
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
             map.put("failed", r.isFailed());
             map.put("weakTopics", r.getWeakTopics());
+            map.put("recommendedLearningPath", r.getRecommendedLearningPath());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());
@@ -369,6 +414,7 @@ public class QuizController {
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
             map.put("failed", r.isFailed());
             map.put("weakTopics", r.getWeakTopics());
+            map.put("recommendedLearningPath", r.getRecommendedLearningPath());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());
@@ -392,6 +438,7 @@ public class QuizController {
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);
             map.put("failed", r.isFailed());
             map.put("weakTopics", r.getWeakTopics());
+            map.put("recommendedLearningPath", r.getRecommendedLearningPath());
             map.put("submittedAt", r.getSubmittedAt());
             return map;
         }).collect(Collectors.toList());

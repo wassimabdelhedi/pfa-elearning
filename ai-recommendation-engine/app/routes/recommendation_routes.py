@@ -21,6 +21,7 @@ from app.models.recommender import CourseRecommender
 from app.models.nlp_processor import NLPProcessor
 from app.services.text_extractor import extract_text
 from app.services.weak_topic_detector import detect_weak_topics
+from app.services.tutor_service import generate_tutor_feedback, QuestionFeedbackRequest, TutorFeedbackResponse
 
 
 logger = logging.getLogger(__name__)
@@ -182,3 +183,16 @@ async def analyze_quiz_failure(request: DetectWeakTopicsRequest):
     except Exception as e:
         logger.error(f"Weak topic detection error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erreur d'analyse: {str(e)}")
+
+
+@router.post("/tutor-feedback", response_model=TutorFeedbackResponse)
+async def get_tutor_feedback(request: QuestionFeedbackRequest):
+    """
+    Génère un feedback pédagogique personnalisé pour une erreur d'un étudiant.
+    Utilise l'API Google Gemini via tutor_service.
+    """
+    try:
+        return generate_tutor_feedback(request)
+    except Exception as e:
+        logger.error(f"Tutor feedback error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erreur génération tuteur: {str(e)}")

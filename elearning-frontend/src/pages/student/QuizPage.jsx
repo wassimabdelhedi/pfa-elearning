@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getPublishedQuizzes, submitQuizResult, getQuizById } from '../../api/quizApi';
-import { FiCheckCircle, FiUser, FiClock, FiArrowLeft } from 'react-icons/fi';
+import { FiCheckCircle, FiUser } from 'react-icons/fi';
+
+const cleanMarkdown = (text) => {
+  if (!text) return '';
+  return text.split('**').join('').split('*').join('').trim();
+};
 
 export default function QuizPage() {
   const { id, courseId } = useParams();
@@ -14,6 +19,9 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
+  const [quizResultDetails, setQuizResultDetails] = useState(null);
+  const [isGeneratingPath, setIsGeneratingPath] = useState(false);
+  const [showCorrection, setShowCorrection] = useState(false);
 
   useEffect(() => {
     loadQuizzes();
@@ -35,7 +43,7 @@ export default function QuizPage() {
           const qRes = await getQuizById(id);
           startQuiz(qRes.data);
         } catch (e) {
-          console.error("Quiz not found", e);
+          console.error('Quiz not found', e);
           closeQuizStateOnly();
         }
       } else {
@@ -63,6 +71,9 @@ export default function QuizPage() {
     setAnswers({});
     setSubmitted(false);
     setScore(null);
+    setQuizResultDetails(null);
+    setIsGeneratingPath(false);
+    setShowCorrection(false);
   };
 
   const selectAnswer = (questionIndex, optionIndex) => {
@@ -81,14 +92,27 @@ export default function QuizPage() {
     setScore(correct);
     setSubmitted(true);
 
-    // Save result to backend
+    const percentage = (correct / activeQuiz.questions.length) * 100;
+    if (percentage < 60) {
+      setIsGeneratingPath(true);
+    }
+
     try {
-      await submitQuizResult(activeQuiz.id, {
+      const answersPayload = Object.keys(answers).map(key => ({
+        questionId: activeQuiz.questions[key].id,
+        studentAnswerIndex: answers[key]
+      }));
+
+      const res = await submitQuizResult(activeQuiz.id, {
         score: correct,
-        totalQuestions: activeQuiz.questions.length
+        totalQuestions: activeQuiz.questions.length,
+        answers: answersPayload
       });
+      setQuizResultDetails(res.data);
     } catch (err) {
       console.error('Could not save quiz result:', err);
+    } finally {
+      setIsGeneratingPath(false);
     }
   };
 
@@ -106,6 +130,9 @@ export default function QuizPage() {
     setAnswers({});
     setSubmitted(false);
     setScore(null);
+    setQuizResultDetails(null);
+    setIsGeneratingPath(false);
+    setShowCorrection(false);
   };
 
   if (loading) {
@@ -114,6 +141,15 @@ export default function QuizPage() {
 
   // Active quiz view
   if (activeQuiz) {
+    let tutorFeedbacks = [];
+    try {
+      if (quizResultDetails && quizResultDetails.recommendedLearningPath) {
+        tutorFeedbacks = JSON.parse(quizResultDetails.recommendedLearningPath);
+      }
+    } catch (e) {
+      tutorFeedbacks = [];
+    }
+
     return (
       <div className="page" style={{ maxWidth: 800, margin: '0 auto' }}>
         <div className="page-header">
@@ -121,6 +157,7 @@ export default function QuizPage() {
           <p>{activeQuiz.description}</p>
         </div>
 
+        {/* Score Block */}
         {submitted && (
           <div className="card" style={{ padding: 24, marginBottom: 24, textAlign: 'center' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: 8 }}>
@@ -133,7 +170,21 @@ export default function QuizPage() {
           </div>
         )}
 
-        {activeQuiz.questions && activeQuiz.questions.map((question, qIndex) => (
+        {/* Button to reveal correction */}
+        {submitted && !showCorrection && (
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => setShowCorrection(true)}
+              style={{ padding: '12px 32px', fontSize: '1.1rem' }}
+            >
+              Voir les réponses du quiz
+            </button>
+          </div>
+        )}
+
+        {/* Questions (hidden after submit, shown when "Voir les réponses" clicked) */}
+        {(!submitted || showCorrection) && activeQuiz.questions && activeQuiz.questions.map((question, qIndex) => (
           <div key={qIndex} className="card" style={{ padding: 24, marginBottom: 16 }}>
             <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>
               <span style={{ color: 'var(--primary-400)', marginRight: 8 }}>Q{qIndex + 1}.</span>
@@ -178,6 +229,47 @@ export default function QuizPage() {
           </div>
         ))}
 
+        {/* AI Loading indicator */}
+        {isGeneratingPath && (
+          <div className="card animate-in" style={{ padding: 40, marginTop: 32, marginBottom: 24, textAlign: 'center', border: '1px dashed var(--primary-400)', background: 'rgba(99,102,241,0.03)' }}>
+            <div className="spinner" style={{ margin: '0 auto', marginBottom: 20, width: 40, height: 40, borderTopColor: 'var(--primary-400)' }}></div>
+            <h3 style={{ color: 'var(--primary-300)', fontSize: '1.3rem', marginBottom: 12 }}>Analyse vos résultats...</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', margin: 0 }}>
+              Veuillez patienter quelques secondes.
+            </p>
+          </div>
+        )}
+
+        {/* AI Tutor Feedback Block */}
+        {submitted && tutorFeedbacks.length > 0 && (
+          <div className="card animate-in" style={{ padding: 32, marginTop: 32, marginBottom: 24, border: '1px solid rgba(99,102,241,0.3)', background: 'linear-gradient(145deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.05) 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+              <div style={{ background: 'var(--primary-500)', color: 'white', padding: 12, borderRadius: '50%', display: 'flex', boxShadow: '0 0 15px rgba(99,102,241,0.5)' }}>
+                <span style={{ fontSize: '1.5rem' }}>🧑‍🏫</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'white' }}>
+                Explication des réponses incorrectes
+              </h3>
+            </div>
+            
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {tutorFeedbacks.map((node, i) => (
+                <div key={i} style={{ padding: 24, background: 'rgba(0,0,0,0.3)', borderRadius: 12, borderLeft: '4px solid var(--primary-500)' }}>
+                  <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span style={{ color: 'var(--primary-400)', fontWeight: 700, marginRight: 8, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1 }}>Question</span>
+                    <span style={{ color: 'white', fontSize: '1rem' }}>"{node.question}"</span>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                    {cleanMarkdown(node.feedback)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons */}
         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
           {!submitted ? (
             user?.role !== 'TEACHER' ? (

@@ -31,8 +31,8 @@ export default function Dashboard() {
       ]);
       setEnrollments(enrollRes.data);
       setRecommendations(recRes.data);
-      setCompletedQuizzesCount(myQuizRes.data.length);
-      setCompletedExercisesCount(myExRes.data.length);
+      setCompletedQuizzesCount(new Set(myQuizRes.data.map(q => q.quizId || q.id)).size);
+      setCompletedExercisesCount(new Set(myExRes.data.map(e => e.exerciseId || e.id)).size);
     } catch (err) {
       console.error('Dashboard error:', err);
     } finally {
@@ -56,7 +56,8 @@ export default function Dashboard() {
     }
   };
 
-  const completedCount = enrollments.filter(e => e.completed).length;
+  // Ensure uniqueness by course ID to avoid duplicate counting of retakes
+  const completedCount = new Set(enrollments.filter(e => e.completed).map(e => e.courseId)).size;
   const avgProgress = enrollments.length > 0
     ? Math.round(enrollments.reduce((acc, e) => acc + e.progress, 0) / enrollments.length)
     : 0;
@@ -80,7 +81,7 @@ export default function Dashboard() {
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <div className="stat-card animate-in">
           <div className="stat-icon">📚</div>
-          <div className="stat-value">{enrollments.length}</div>
+          <div className="stat-value">{new Set(enrollments.map(e => e.courseId)).size}</div>
           <div className="stat-label">Cours inscrits</div>
         </div>
         <div className="stat-card animate-in">
