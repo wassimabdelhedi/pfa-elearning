@@ -13,8 +13,8 @@ The application is built using **React** with the **Vite** bundler for fast deve
   - `/search`: Search bars and filter sidebars.
 - **`/pages`**: Full-page views separated by roles:
   - `/auth`: Login and Registration pages.
-  - `/student`: Student dashboard, enrolled courses list, quiz taking views.
-  - `/teacher`: Instructor dashboard, course creation forms, analytic views.
+  - `/student`: Student dashboard, enrolled courses list, quiz taking views, and strict chapter-by-chapter progression interfaces.
+  - `/teacher`: Instructor dashboard, course creation forms (multi-chapter), analytic views.
 - **`/context`**: React Context API providers (`AuthContext.jsx`) to manage global state like whether a user is currently logged in.
 
 ---
