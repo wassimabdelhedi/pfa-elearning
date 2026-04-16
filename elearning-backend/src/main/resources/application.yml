@@ -7,13 +7,14 @@ spring:
 
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://aws-1-eu-west-3.pooler.supabase.com:5432/postgres?tcpKeepAlive=true&prepareThreshold=0}
+    url: ${DB_URL:jdbc:postgresql://aws-1-eu-west-3.pooler.supabase.com:6543/postgres?tcpKeepAlive=true&prepareThreshold=0}
     username: ${DB_USERNAME:postgres.qgwpbqwvopzmwluziade}
     password: ${DB_PASSWORD:PFAdatabaseLAAZEZ}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
-      maximum-pool-size: 15
+      maximum-pool-size: 5
+      minimum-idle: 1
       max-lifetime: 180000
       keepalive-time: 30000
       idle-timeout: 60000
