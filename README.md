@@ -188,6 +188,8 @@ npm run dev
 
 Le frontend démarre sur **http://localhost:5173**
 
+
+
 ### Résumé des commandes
 
 ```bash
