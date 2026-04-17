@@ -3,7 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { getMyTeacherCourses, deleteCourse, togglePublishCourse } from '../../api/courseApi';
 import { getMyTeacherExercises, deleteExercise, togglePublishExercise } from '../../api/exerciseApi';
 import { getMyTeacherQuizzes, deleteQuiz, togglePublishQuiz, getMyQuizResults } from '../../api/quizApi';
-import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff, FiLayers } from 'react-icons/fi';
+import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff, FiLayers, FiEdit } from 'react-icons/fi';
+
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function TeacherDashboard() {
@@ -327,9 +328,17 @@ export default function TeacherDashboard() {
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/edit-course/${course.id}`); }}
+                    title="Modifier ce cours"
+                  >
+                    <FiEdit size={14} />
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleTogglePublishCourse(course.id); }}
                     title={course.published ? "Passer en brouillon" : "Publier ce cours"}
                   >
+
                     {course.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
                   </button>
                   <button
@@ -405,11 +414,19 @@ export default function TeacherDashboard() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button
                     className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/edit-exercise/${exercise.id}`); }}
+                    title="Modifier cet exercice"
+                  >
+                    <FiEdit size={14} />
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleTogglePublishExercise(exercise.id); }}
                     title={exercise.published ? "Passer en brouillon" : "Publier cet exercice"}
                   >
                     {exercise.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
                   </button>
+
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleDeleteExercise(exercise.id)}
@@ -473,9 +490,17 @@ export default function TeacherDashboard() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button
                     className="btn btn-secondary btn-sm"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/teacher/edit-quiz/${quiz.id}`); }}
+                    title="Modifier ce quiz"
+                  >
+                    <FiEdit size={14} />
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm"
                     onClick={(e) => { e.stopPropagation(); handleTogglePublishQuiz(quiz.id); }}
                     title={quiz.published ? "Passer en brouillon" : "Publier ce quiz"}
                   >
+
                     {quiz.published ? <FiEyeOff size={14} /> : <FiEye size={14} />}
                   </button>
                   <button

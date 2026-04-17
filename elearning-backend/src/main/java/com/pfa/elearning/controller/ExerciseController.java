@@ -137,6 +137,59 @@ public class ExerciseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toMap(exercise));
     }
 
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> updateExercise(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "courseId", required = false) Long courseId,
+            @RequestParam(value = "level", required = false) String level,
+            @RequestParam(value = "published", defaultValue = "false") boolean published,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            Authentication authentication) {
+
+        User teacher = userService.getUserByEmail(authentication.getName());
+
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise", "id", id));
+
+        if (!exercise.getTeacher().getId().equals(teacher.getId())) {
+            throw new UnauthorizedException("You can only modify your own exercises");
+        }
+
+        exercise.setTitle(title);
+        exercise.setDescription(description);
+        exercise.setLevel(level != null ? DifficultyLevel.valueOf(level) : DifficultyLevel.BEGINNER);
+        exercise.setPublished(published);
+
+        if (categoryId != null) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+            exercise.setCategory(category);
+        } else {
+            exercise.setCategory(null);
+        }
+
+        if (courseId != null) {
+            Course course = courseService.getCourseById(courseId);
+            exercise.setCourse(course);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            if (exercise.getFilePath() != null) {
+                fileStorageService.deleteFile(exercise.getFilePath());
+            }
+            String storedFileName = fileStorageService.storeFile(file);
+            exercise.setFilePath(storedFileName);
+            exercise.setOriginalFileName(file.getOriginalFilename());
+        }
+
+        exercise = exerciseRepository.save(exercise);
+        return ResponseEntity.ok(toMap(exercise));
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExercise(@PathVariable Long id, Authentication authentication) {
         User teacher = userService.getUserByEmail(authentication.getName());

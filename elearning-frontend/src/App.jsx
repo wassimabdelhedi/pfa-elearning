@@ -22,7 +22,11 @@ import CreateCourse from './pages/teacher/CreateCourse';
 import ManageCourseChapters from './pages/teacher/ManageCourseChapters';
 import CreateExercise from './pages/teacher/CreateExercise';
 import CreateQuiz from './pages/teacher/CreateQuiz';
+import EditCourse from './pages/teacher/EditCourse';
+import EditExercise from './pages/teacher/EditExercise';
+import EditQuiz from './pages/teacher/EditQuiz';
 import QuizResultsPage from './pages/teacher/QuizResultsPage';
+
 
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -106,6 +110,12 @@ function App() {
             <CreateCourse />
           </ProtectedRoute>
         } />
+        <Route path="/teacher/edit-course/:id" element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <EditCourse />
+          </ProtectedRoute>
+        } />
+
         <Route path="/teacher/course/:courseId/chapters" element={
           <ProtectedRoute roles={['TEACHER']}>
             <ManageCourseChapters />
@@ -121,11 +131,23 @@ function App() {
             <CreateExercise />
           </ProtectedRoute>
         } />
+        <Route path="/teacher/edit-exercise/:id" element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <EditExercise />
+          </ProtectedRoute>
+        } />
+
         <Route path="/teacher/create-quiz" element={
           <ProtectedRoute roles={['TEACHER']}>
             <CreateQuiz />
           </ProtectedRoute>
         } />
+        <Route path="/teacher/edit-quiz/:id" element={
+          <ProtectedRoute roles={['TEACHER']}>
+            <EditQuiz />
+          </ProtectedRoute>
+        } />
+
         <Route path="/teacher/quiz/:id/results" element={
           <ProtectedRoute roles={['TEACHER']}>
             <QuizResultsPage />

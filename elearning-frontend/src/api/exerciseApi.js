@@ -17,6 +17,12 @@ export const createExercise = (formData) =>
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 
+export const updateExercise = (id, formData) =>
+  api.put(`/exercises/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+
 export const deleteExercise = (id) =>
   api.delete(`/exercises/${id}`);
 
