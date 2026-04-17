@@ -1,71 +1,59 @@
 import os
-import logging
-from google import genai
-from app.schemas.recommendation_schema import QuestionFeedbackRequest, TutorFeedbackResponse
+import google.generativeai as genai
+from pydantic import BaseModel
+from typing import List, Optional
 
-logger = logging.getLogger(__name__)
+class QuestionFeedbackRequest(BaseModel):
+    question_text: str
+    student_answer: str
+    correct_answer: str
 
-# Configure Gemini Client
-api_key = os.getenv("GEMINI_API_KEY")
+class TutorFeedbackResponse(BaseModel):
+    feedback: str
+
+# Try to configure Gemini
+api_key = os.getenv("GEMINI_API_KEY", "")
 if api_key:
-    client = genai.Client(api_key=api_key)
-    # Test avec un modèle Gemma qui a souvent des quotas différents
-    MODEL_ID = "gemma-3-27b-it"
-else:
-    logger.warning("GEMINI_API_KEY not found in environment variables")
-    client = None
+    genai.configure(api_key=api_key)
 
 def generate_tutor_feedback(request: QuestionFeedbackRequest) -> TutorFeedbackResponse:
-    """
-    Génère un feedback pédagogique utilisant Gemini 2.0 Flash.
-    """
-    if not client:
-        return TutorFeedbackResponse(feedback="Le service de tutorat IA est actuellement indisponible (Clé API manquante).")
-
-    prompt = f"""
-    Tu es un tuteur pédagogique bienveillant et expert. 
-    Un étudiant a répondu à une question de quiz mais s'est trompé.
-    
-    Question: {request.question_text}
-    Réponse de l'étudiant: {request.student_answer}
-    Bonne réponse: {request.correct_answer}
-    
-    Instructions:
-    1. Ne donne pas directement la réponse si elle n'est pas déjà évidente, mais explique le CONCEPT derrière l'erreur.
-    2. Sois encourageant et empathique.
-    3. Utilise le tutoiement si approprié ou un ton professionnel mais chaleureux.
-    4. Réponds en FRANÇAIS.
-    5. Ta réponse doit être concise (max 3-4 phrases).
-    
-    Format de sortie: Juste le texte du feedback, sans fioritures.
-    """
-
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt
+    if not api_key:
+        return TutorFeedbackResponse(
+            feedback=(
+                "⚠️ **Clé d'API manquante** : Pour activer l'IA du tuteur pédagogique, "
+                "veuillez ajouter `GEMINI_API_KEY=votre_cle` dans votre système ou fichier .env."
+            )
         )
-        feedback_text = response.text.strip()
-        return TutorFeedbackResponse(feedback=feedback_text)
+    
+    prompt = f"""
+Tu es un tuteur pédagogique numérique spécialisé dans l’enseignement universitaire.
+
+Contexte :
+Un étudiant a répondu incorrectement à une question de quiz.
+Ton rôle est de l’aider à comprendre son erreur de manière claire, bienveillante et pédagogique,
+sans jugement et sans donner immédiatement la réponse comme un simple corrigé.
+
+Règles importantes :
+- Sois TRÈS CONCIS et direct (maximum 3 phrases courtes).
+- Explique rapidement pourquoi c'est incorrect et donne le bon concept.
+- N'utilise pas de longs paragraphes ni d'introduction inutile.
+- Le ton doit rester bienveillant et professionnel.
+- Ne donnes pas directement la solution finale sous forme de réponse brute, guide vers la compréhension.
+
+Données de la question :
+Question : {request.question_text}
+Réponse donnée par l’étudiant : {request.student_answer}
+Réponse correcte : {request.correct_answer}
+
+Structure attendue de ta réponse :
+1. Une brève correction bienveillante.
+2. L'explication courte du concept clé (1 ou 2 phrases maximum).
+"""
+    
+    try:
+        model = genai.GenerativeModel('gemini-flash-latest')
+        response = model.generate_content(prompt)
+        return TutorFeedbackResponse(feedback=response.text)
     except Exception as e:
-        logger.error(f"Error generating Gemini feedback: {str(e)}")
-        return TutorFeedbackResponse(feedback="Désolé, je n'ai pas pu générer de feedback pour le moment. Révise bien ton cours !")
+        return TutorFeedbackResponse(feedback=f"⚠️ Erreur lors de la génération du feedback : {str(e)}")
 
-
-async def generate_batch_tutor_feedback(requests: list) -> list:
-    """
-    Exécute plusieurs générations de feedback en parallèle.
-    """
-    import asyncio
-    
-    # On utilise asyncio.to_thread pour ne pas bloquer l'évent loop avec les appels synchrones du SDK
-    tasks = [asyncio.to_thread(generate_tutor_feedback, req) for req in requests]
-    
-    # Lancement en parallèle
-    responses = await asyncio.gather(*tasks)
-    
-    # Formatage pour correspondre à ce que le backend Java attend
-    return [
-        {"question": req.question_text, "feedback": res.feedback} 
-        for req, res in zip(requests, responses)
-    ]

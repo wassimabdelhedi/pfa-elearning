@@ -22,7 +22,6 @@ export default function QuizPage() {
   const [quizResultDetails, setQuizResultDetails] = useState(null);
   const [isGeneratingPath, setIsGeneratingPath] = useState(false);
   const [showCorrection, setShowCorrection] = useState(false);
-  const [expandedExplanations, setExpandedExplanations] = useState({}); // Clés : index des questions
 
   useEffect(() => {
     loadQuizzes();
@@ -94,7 +93,9 @@ export default function QuizPage() {
     setSubmitted(true);
 
     const percentage = (correct / activeQuiz.questions.length) * 100;
-    setIsGeneratingPath(true);
+    if (percentage < 60) {
+      setIsGeneratingPath(true);
+    }
 
     try {
       const answersPayload = Object.keys(answers).map(key => ({
@@ -132,7 +133,6 @@ export default function QuizPage() {
     setQuizResultDetails(null);
     setIsGeneratingPath(false);
     setShowCorrection(false);
-    setExpandedExplanations({});
   };
 
   if (loading) {
@@ -226,46 +226,6 @@ export default function QuizPage() {
                 );
               })}
             </div>
-
-            {/* Contextual AI Explanation Button */}
-            {submitted && answers[qIndex] !== question.correctAnswer && tutorFeedbacks.find(f => f.question === question.text) && (
-              <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
-                <button
-                  onClick={() => setExpandedExplanations(prev => ({ ...prev, [qIndex]: !prev[qIndex] }))}
-                  style={{
-                    background: 'rgba(99, 102, 241, 0.15)',
-                    color: 'var(--primary-300)',
-                    border: '1px solid rgba(99, 102, 241, 0.3)',
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <span>{expandedExplanations[qIndex] ? 'Masquer' : '💡 Pourquoi ?'}</span>
-                </button>
-
-                {expandedExplanations[qIndex] && (
-                  <div className="animate-in" style={{ 
-                    marginTop: 12, 
-                    padding: 16, 
-                    background: 'rgba(99, 102, 241, 0.05)', 
-                    borderRadius: 12, 
-                    borderLeft: '3px solid var(--primary-500)',
-                    fontSize: '0.95rem',
-                    lineHeight: 1.6,
-                    color: 'var(--text-secondary)'
-                  }}>
-                    {cleanMarkdown(tutorFeedbacks.find(f => f.question === question.text).feedback)}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         ))}
 
@@ -280,6 +240,34 @@ export default function QuizPage() {
           </div>
         )}
 
+        {/* AI Tutor Feedback Block */}
+        {submitted && tutorFeedbacks.length > 0 && (
+          <div className="card animate-in" style={{ padding: 32, marginTop: 32, marginBottom: 24, border: '1px solid rgba(99,102,241,0.3)', background: 'linear-gradient(145deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.05) 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+              <div style={{ background: 'var(--primary-500)', color: 'white', padding: 12, borderRadius: '50%', display: 'flex', boxShadow: '0 0 15px rgba(99,102,241,0.5)' }}>
+                <span style={{ fontSize: '1.5rem' }}>🧑‍🏫</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'white' }}>
+                Explication des réponses incorrectes
+              </h3>
+            </div>
+            
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {tutorFeedbacks.map((node, i) => (
+                <div key={i} style={{ padding: 24, background: 'rgba(0,0,0,0.3)', borderRadius: 12, borderLeft: '4px solid var(--primary-500)' }}>
+                  <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span style={{ color: 'var(--primary-400)', fontWeight: 700, marginRight: 8, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1 }}>Question</span>
+                    <span style={{ color: 'white', fontSize: '1rem' }}>"{node.question}"</span>
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                    {cleanMarkdown(node.feedback)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>

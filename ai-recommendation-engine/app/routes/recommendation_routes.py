@@ -16,14 +16,12 @@ from app.schemas.recommendation_schema import (
     WeakTopicQuestion,
     DetectWeakTopicsRequest,
     WeakTopicResponse,
-    QuestionFeedbackRequest,
-    TutorFeedbackResponse,
 )
 from app.models.recommender import CourseRecommender
 from app.models.nlp_processor import NLPProcessor
 from app.services.text_extractor import extract_text
 from app.services.weak_topic_detector import detect_weak_topics
-from app.services.tutor_service import generate_tutor_feedback
+from app.services.tutor_service import generate_tutor_feedback, QuestionFeedbackRequest, TutorFeedbackResponse
 
 
 logger = logging.getLogger(__name__)
@@ -198,16 +196,3 @@ async def get_tutor_feedback(request: QuestionFeedbackRequest):
     except Exception as e:
         logger.error(f"Tutor feedback error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erreur génération tuteur: {str(e)}")
-
-
-@router.post("/batch-tutor-feedback")
-async def get_batch_tutor_feedback(requests: List[QuestionFeedbackRequest]):
-    """
-    Version groupée pour traiter plusieurs questions en une seule requête réseau.
-    """
-    try:
-        from app.services.tutor_service import generate_batch_tutor_feedback
-        return await generate_batch_tutor_feedback(requests)
-    except Exception as e:
-        logger.error(f"Batch tutor feedback error: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Erreur batch tuteur: {str(e)}")

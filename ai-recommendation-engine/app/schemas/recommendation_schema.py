@@ -81,13 +81,3 @@ class WeakTopicResponse(BaseModel):
     failed: bool
     weak_topics: List[WeakTopicItem]
     global_summary: str
-
-
-class QuestionFeedbackRequest(BaseModel):
-    question_text: str
-    student_answer: str
-    correct_answer: str
-
-
-class TutorFeedbackResponse(BaseModel):
-    feedback: str
