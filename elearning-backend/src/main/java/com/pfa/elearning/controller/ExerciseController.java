@@ -1,5 +1,6 @@
 package com.pfa.elearning.controller;
 
+import com.pfa.elearning.exception.ForbiddenException;
 import com.pfa.elearning.exception.ResourceNotFoundException;
 import com.pfa.elearning.exception.UnauthorizedException;
 import com.pfa.elearning.model.*;
@@ -8,6 +9,7 @@ import com.pfa.elearning.repository.ExerciseCompletionRepository;
 import com.pfa.elearning.repository.ExerciseRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
+import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.FileStorageService;
 import com.pfa.elearning.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class ExerciseController {
     private final CategoryRepository categoryRepository;
     private final CourseService courseService;
     private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentService enrollmentService;
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> getPublishedExercises() {
@@ -57,8 +60,8 @@ public class ExerciseController {
             User student = userService.getUserByEmail(authentication.getName());
             if (exercise.getCourse() != null) {
                 java.util.Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), exercise.getCourse().getId());
-                if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                if (enrollmentOpt.isEmpty() || !enrollmentService.isChaptersFinished(enrollmentOpt.get())) {
+                    throw new ForbiddenException("Terminez tous les chapitres pour débloquer les exercices");
                 }
             } else {
                 // Exercises not attached to a course are not accessible to students
@@ -74,8 +77,8 @@ public class ExerciseController {
         if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
             User student = userService.getUserByEmail(authentication.getName());
             java.util.Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), courseId);
-            if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            if (enrollmentOpt.isEmpty() || !enrollmentService.isChaptersFinished(enrollmentOpt.get())) {
+                throw new ForbiddenException("Terminez tous les chapitres pour débloquer les exercices");
             }
         }
 
@@ -221,6 +224,12 @@ public class ExerciseController {
 
         completion = exerciseCompletionRepository.save(completion);
 
+        // Update enrollment status/progress
+        if (exercise.getCourse() != null) {
+            enrollmentRepository.findByStudentIdAndCourseId(student.getId(), exercise.getCourse().getId())
+                    .ifPresent(enrollment -> enrollmentService.updateEnrollmentStatus(enrollment.getId()));
+        }
+
         return ResponseEntity.ok(Map.of(
             "id", completion.getId(),
             "exerciseId", exercise.getId(),
@@ -237,7 +246,11 @@ public class ExerciseController {
             Map<String, Object> map = new HashMap<>();
             map.put("id", c.getId());
             map.put("exerciseId", c.getExercise().getId());
-            map.put("exerciseTitle", c.getExercise().getTitle());
+            map.put("title", c.getExercise().getTitle());
+            map.put("description", c.getExercise().getDescription());
+            map.put("courseTitle", c.getExercise().getCourse() != null ? c.getExercise().getCourse().getTitle() : "N/A");
+            map.put("courseId", c.getExercise().getCourse() != null ? c.getExercise().getCourse().getId() : null);
+            map.put("fileName", c.getExercise().getOriginalFileName());
             map.put("completedAt", c.getCompletedAt());
             return map;
         }).collect(Collectors.toList());

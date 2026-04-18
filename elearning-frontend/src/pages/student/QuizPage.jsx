@@ -22,6 +22,7 @@ export default function QuizPage() {
   const [quizResultDetails, setQuizResultDetails] = useState(null);
   const [isGeneratingPath, setIsGeneratingPath] = useState(false);
   const [showCorrection, setShowCorrection] = useState(false);
+  const [visibleExplanations, setVisibleExplanations] = useState({});
 
   useEffect(() => {
     loadQuizzes();
@@ -74,6 +75,7 @@ export default function QuizPage() {
     setQuizResultDetails(null);
     setIsGeneratingPath(false);
     setShowCorrection(false);
+    setVisibleExplanations({});
   };
 
   const selectAnswer = (questionIndex, optionIndex) => {
@@ -83,12 +85,21 @@ export default function QuizPage() {
 
   const submitQuiz = async () => {
     if (!activeQuiz || !activeQuiz.questions) return;
+
+    // Validation: check if all questions are answered
+    if (Object.keys(answers).length < activeQuiz.questions.length) {
+      alert(`Veuillez répondre à toutes les questions (${Object.keys(answers).length}/${activeQuiz.questions.length} répondues).`);
+      return;
+    }
+
     let correct = 0;
     activeQuiz.questions.forEach((q, i) => {
       if (answers[i] === q.correctAnswer) {
         correct++;
       }
     });
+    
+    // Immediate feedback: show score right away
     setScore(correct);
     setSubmitted(true);
 
@@ -133,6 +144,7 @@ export default function QuizPage() {
     setQuizResultDetails(null);
     setIsGeneratingPath(false);
     setShowCorrection(false);
+    setVisibleExplanations({});
   };
 
   if (loading) {
@@ -161,17 +173,17 @@ export default function QuizPage() {
         {submitted && (
           <div className="card" style={{ padding: 24, marginBottom: 24, textAlign: 'center' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: 8 }}>
-              {score >= activeQuiz.questions.length * 0.7 ? '🎉' : '📊'} Résultat
+              {score >= activeQuiz.questions.length * 0.6 ? '🎉' : '❌'} Résultat
             </h2>
-            <p style={{ fontSize: '1.2rem', color: score >= activeQuiz.questions.length * 0.7 ? '#4ade80' : '#fbbf24' }}>
+            <p style={{ fontSize: '1.2rem', color: score >= activeQuiz.questions.length * 0.6 ? '#10b981' : '#ef4444' }}>
               {score} / {activeQuiz.questions.length} réponses correctes
               ({Math.round((score / activeQuiz.questions.length) * 100)}%)
             </p>
           </div>
         )}
 
-        {/* Button to reveal correction */}
-        {submitted && !showCorrection && (
+        {/* Button to reveal correction (only shown after AI analysis) */}
+        {submitted && !showCorrection && !isGeneratingPath && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <button
               className="btn btn-secondary btn-lg"
@@ -226,6 +238,46 @@ export default function QuizPage() {
                 );
               })}
             </div>
+
+            {/* AI Explanation Button for incorrect answers */}
+            {submitted && showCorrection && answers[qIndex] !== question.correctAnswer && (
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setVisibleExplanations(prev => ({ ...prev, [qIndex]: !prev[qIndex] }))}
+                  style={{ 
+                    fontSize: '0.85rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 8,
+                    background: 'rgba(99, 102, 241, 0.1)',
+                    border: '1px solid rgba(99, 102, 241, 0.2)'
+                  }}
+                >
+                  {visibleExplanations[qIndex] ? '📖 Masquer l\'explication' : '💡 Voir l\'explication de l\'IA'}
+                </button>
+                
+                {visibleExplanations[qIndex] && (
+                  <div className="animate-in" style={{ 
+                    marginTop: 12, 
+                    padding: 16, 
+                    background: 'rgba(0,0,0,0.2)', 
+                    borderRadius: 8, 
+                    borderLeft: '4px solid var(--primary-500)',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.6,
+                    color: 'var(--text-secondary)'
+                  }}>
+                    {(() => {
+                      const feedback = tutorFeedbacks.find(f => 
+                        f.question.trim().toLowerCase() === question.text.trim().toLowerCase()
+                      )?.feedback;
+                      return feedback ? cleanMarkdown(feedback) : "Aucune explication disponible pour cette question.";
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
 
@@ -240,34 +292,6 @@ export default function QuizPage() {
           </div>
         )}
 
-        {/* AI Tutor Feedback Block */}
-        {submitted && tutorFeedbacks.length > 0 && (
-          <div className="card animate-in" style={{ padding: 32, marginTop: 32, marginBottom: 24, border: '1px solid rgba(99,102,241,0.3)', background: 'linear-gradient(145deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.05) 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-              <div style={{ background: 'var(--primary-500)', color: 'white', padding: 12, borderRadius: '50%', display: 'flex', boxShadow: '0 0 15px rgba(99,102,241,0.5)' }}>
-                <span style={{ fontSize: '1.5rem' }}>🧑‍🏫</span>
-              </div>
-              <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'white' }}>
-                Explication des réponses incorrectes
-              </h3>
-            </div>
-            
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {tutorFeedbacks.map((node, i) => (
-                <div key={i} style={{ padding: 24, background: 'rgba(0,0,0,0.3)', borderRadius: 12, borderLeft: '4px solid var(--primary-500)' }}>
-                  <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                    <span style={{ color: 'var(--primary-400)', fontWeight: 700, marginRight: 8, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1 }}>Question</span>
-                    <span style={{ color: 'white', fontSize: '1rem' }}>"{node.question}"</span>
-                  </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-                    {cleanMarkdown(node.feedback)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
@@ -276,7 +300,6 @@ export default function QuizPage() {
               <button
                 className="btn btn-primary btn-lg"
                 onClick={submitQuiz}
-                disabled={Object.keys(answers).length < (activeQuiz.questions?.length || 0)}
                 style={{ flex: 1 }}
               >
                 <FiCheckCircle size={16} /> Soumettre les réponses

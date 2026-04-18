@@ -2,6 +2,7 @@ import os
 import google.generativeai as genai
 from pydantic import BaseModel
 from typing import List, Optional
+import json
 
 class QuestionFeedbackRequest(BaseModel):
     question_text: str
@@ -10,6 +11,12 @@ class QuestionFeedbackRequest(BaseModel):
 
 class TutorFeedbackResponse(BaseModel):
     feedback: str
+
+class BatchQuestionFeedbackRequest(BaseModel):
+    questions: List[QuestionFeedbackRequest]
+
+class BatchTutorFeedbackResponse(BaseModel):
+    feedbacks: List[dict] # List of {"question": "...", "feedback": "..."}
 
 # Try to configure Gemini
 api_key = os.getenv("GEMINI_API_KEY", "")
@@ -56,4 +63,45 @@ Structure attendue de ta réponse :
         return TutorFeedbackResponse(feedback=response.text)
     except Exception as e:
         return TutorFeedbackResponse(feedback=f"⚠️ Erreur lors de la génération du feedback : {str(e)}")
+
+
+def generate_batch_tutor_feedback(request: BatchQuestionFeedbackRequest) -> BatchTutorFeedbackResponse:
+    if not api_key:
+        return BatchTutorFeedbackResponse(feedbacks=[])
+    
+    if not request.questions:
+        return BatchTutorFeedbackResponse(feedbacks=[])
+
+    # Build a single prompt for all questions to be much faster
+    prompt = """
+Tu es un tuteur pédagogique numérique. Analyse les erreurs suivantes de l'étudiant.
+Pour chaque question, fournis une explication TRÈS CONCISE (max 2 phrases).
+Sois bienveillant et pédagogique.
+
+Réponds UNIQUEMENT sous forme de liste JSON d'objets : [{"question": "...", "feedback": "..."}]
+"""
+
+    for i, q in enumerate(request.questions):
+        prompt += f"\n--- Question {i+1} ---\n"
+        prompt += f"Texte: {q.question_text}\n"
+        prompt += f"Réponse étudiant: {q.student_answer}\n"
+        prompt += f"Réponse correcte: {q.correct_answer}\n"
+
+    try:
+        model = genai.GenerativeModel('gemini-flash-latest')
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        # Clean potential markdown code blocks
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.endswith("```"):
+            text = text[:-3]
+        
+        feedbacks = json.loads(text)
+        return BatchTutorFeedbackResponse(feedbacks=feedbacks)
+    except Exception as e:
+        print(f"Batch tutor error: {e}")
+        # Fallback: empty list
+        return BatchTutorFeedbackResponse(feedbacks=[])
 

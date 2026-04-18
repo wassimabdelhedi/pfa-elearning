@@ -21,7 +21,14 @@ from app.models.recommender import CourseRecommender
 from app.models.nlp_processor import NLPProcessor
 from app.services.text_extractor import extract_text
 from app.services.weak_topic_detector import detect_weak_topics
-from app.services.tutor_service import generate_tutor_feedback, QuestionFeedbackRequest, TutorFeedbackResponse
+from app.services.tutor_service import (
+    generate_tutor_feedback, 
+    generate_batch_tutor_feedback,
+    QuestionFeedbackRequest, 
+    TutorFeedbackResponse,
+    BatchQuestionFeedbackRequest,
+    BatchTutorFeedbackResponse
+)
 
 
 logger = logging.getLogger(__name__)
@@ -196,3 +203,16 @@ async def get_tutor_feedback(request: QuestionFeedbackRequest):
     except Exception as e:
         logger.error(f"Tutor feedback error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erreur génération tuteur: {str(e)}")
+
+
+@router.post("/batch-tutor-feedback", response_model=BatchTutorFeedbackResponse)
+async def get_batch_tutor_feedback(request: BatchQuestionFeedbackRequest):
+    """
+    Génère des feedbacks pédagogiques pour plusieurs questions en une seule fois.
+    Beaucoup plus rapide que des appels individuels.
+    """
+    try:
+        return generate_batch_tutor_feedback(request)
+    except Exception as e:
+        logger.error(f"Batch tutor feedback error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erreur génération batch tuteur: {str(e)}")

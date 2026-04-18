@@ -24,6 +24,7 @@ export default function CourseViewPage() {
   // Progress
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isChaptersCompleted, setIsChaptersCompleted] = useState(false);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedChapterIds, setCompletedChapterIds] = useState(new Set());
 
@@ -47,6 +48,7 @@ export default function CourseViewPage() {
         if (progressRes.data.enrolled) {
           setIsEnrolled(true);
           setIsCompleted(progressRes.data.courseCompleted || false);
+          setIsChaptersCompleted(progressRes.data.chaptersCompleted || false);
           setOverallProgress(progressRes.data.overallProgress || 0);
           const completed = new Set(
             (progressRes.data.chapters || [])
@@ -92,6 +94,9 @@ export default function CourseViewPage() {
       const data = res.data;
       setCompletedChapterIds(prev => new Set([...prev, chapterId]));
       setOverallProgress(data.courseProgress || 0);
+      if (data.chaptersCompleted) {
+        setIsChaptersCompleted(true);
+      }
       if (data.courseCompleted) {
         setIsCompleted(true);
         setEnrollMsg('🎉 Félicitations ! Vous avez terminé ce cours ! Quiz et exercices débloqués !');
@@ -294,31 +299,31 @@ export default function CourseViewPage() {
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', fontWeight: 'bold', fontSize: '0.95rem' }}>
                   📝 Évaluations
                 </div>
-                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/quizzes` : '#'}
+                <Link to={isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/quizzes` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     borderBottom: '1px solid var(--border)', textDecoration: 'none',
-                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
-                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
+                    color: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
-                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isChaptersCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Quiz</span>
                 </Link>
-                <Link to={isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/exercises` : '#'}
+                <Link to={isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN' ? `/course/${course.id}/exercises` : '#'}
                   style={{
                     padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
                     textDecoration: 'none',
-                    color: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
-                    cursor: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
-                    opacity: (isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
+                    color: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 'pointer' : 'not-allowed',
+                    opacity: (isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? 1 : 0.5
                   }}
-                  onClick={(e) => { if (!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
-                  {(isCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
+                  onClick={(e) => { if (!isChaptersCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') e.preventDefault(); }}>
+                  {(isChaptersCompleted || user?.role === 'TEACHER' || user?.role === 'ADMIN') ? <FiCheckCircle size={16} color="#10b981" /> : <FiLock size={16} />}
                   <span style={{ fontSize: '0.9rem' }}>Exercices</span>
                 </Link>
-                {(!isCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') && (
+                {(!isChaptersCompleted && user?.role !== 'TEACHER' && user?.role !== 'ADMIN') && (
                   <div style={{ padding: '10px 20px', fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-page)' }}>
                     🔒 Terminez tous les chapitres pour débloquer
                   </div>

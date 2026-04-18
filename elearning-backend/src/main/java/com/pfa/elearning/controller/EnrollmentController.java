@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,13 +30,19 @@ public class EnrollmentController {
         User student = userService.getUserByEmail(authentication.getName());
         Enrollment enrollment = enrollmentService.enrollStudent(student, courseId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "id", enrollment.getId(),
-                "courseId", enrollment.getCourse().getId(),
-                "courseTitle", enrollment.getCourse().getTitle(),
-                "enrolledAt", enrollment.getEnrolledAt().toString(),
-                "progress", enrollment.getProgressPercentage()
-        ));
+        Map<String, Double> progressDetails = enrollmentService.calculateDetailedProgress(enrollment);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("id", enrollment.getId());
+        result.put("courseId", enrollment.getCourse().getId());
+        result.put("courseTitle", enrollment.getCourse().getTitle());
+        result.put("enrolledAt", enrollment.getEnrolledAt().toString());
+        result.put("progress", progressDetails.get("overallProgress"));
+        result.put("chaptersProgress", progressDetails.get("chaptersProgress"));
+        result.put("quizzesProgress", progressDetails.get("quizzesProgress"));
+        result.put("exercisesProgress", progressDetails.get("exercisesProgress"));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping
@@ -43,15 +50,21 @@ public class EnrollmentController {
         User student = userService.getUserByEmail(authentication.getName());
         List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(student.getId());
 
-        List<Map<String, Object>> result = enrollments.stream().map(e -> Map.<String, Object>of(
-                "id", e.getId(),
-                "courseId", e.getCourse().getId(),
-                "courseTitle", e.getCourse().getTitle(),
-                "teacherName", e.getCourse().getTeacher().getFullName(),
-                "enrolledAt", e.getEnrolledAt().toString(),
-                "progress", e.getProgressPercentage(),
-                "completed", e.isCompleted()
-        )).collect(Collectors.toList());
+        List<Map<String, Object>> result = enrollments.stream().map(e -> {
+            Map<String, Double> progressDetails = enrollmentService.calculateDetailedProgress(e);
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", e.getId());
+            map.put("courseId", e.getCourse().getId());
+            map.put("courseTitle", e.getCourse().getTitle());
+            map.put("teacherName", e.getCourse().getTeacher().getFullName());
+            map.put("enrolledAt", e.getEnrolledAt().toString());
+            map.put("progress", progressDetails.get("overallProgress"));
+            map.put("chaptersProgress", progressDetails.get("chaptersProgress"));
+            map.put("quizzesProgress", progressDetails.get("quizzesProgress"));
+            map.put("exercisesProgress", progressDetails.get("exercisesProgress"));
+            map.put("completed", e.isCompleted());
+            return map;
+        }).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }

@@ -2,6 +2,7 @@ package com.pfa.elearning.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pfa.elearning.exception.ForbiddenException;
 import com.pfa.elearning.exception.ResourceNotFoundException;
 import com.pfa.elearning.exception.UnauthorizedException;
 import com.pfa.elearning.model.*;
@@ -10,6 +11,7 @@ import com.pfa.elearning.repository.QuizRepository;
 import com.pfa.elearning.repository.QuizResultRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
+import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.SearchService;
 import com.pfa.elearning.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class QuizController {
     private final WebClient.Builder webClientBuilder;
     private final ObjectMapper objectMapper;
     private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentService enrollmentService;
 
     @Value("${app.ai-service.base-url}")
     private String aiServiceBaseUrl;
@@ -61,8 +64,8 @@ public class QuizController {
             User student = userService.getUserByEmail(authentication.getName());
             if (quiz.getCourse() != null) {
                 Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), quiz.getCourse().getId());
-                if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                if (enrollmentOpt.isEmpty() || !enrollmentService.isChaptersFinished(enrollmentOpt.get())) {
+                    throw new ForbiddenException("Terminez tous les chapitres pour débloquer les quiz");
                 }
             } else {
                 // Quizzes not attached to a course are not accessible to students in this strict mode
@@ -78,8 +81,8 @@ public class QuizController {
         if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
             User student = userService.getUserByEmail(authentication.getName());
             Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), courseId);
-            if (enrollmentOpt.isEmpty() || !enrollmentOpt.get().isCompleted()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            if (enrollmentOpt.isEmpty() || !enrollmentService.isChaptersFinished(enrollmentOpt.get())) {
+                throw new ForbiddenException("Terminez tous les chapitres pour débloquer les quiz");
             }
         }
 
@@ -290,9 +293,8 @@ public class QuizController {
                             log.error("Could not trigger specialized recommendations: {}", e.getMessage());
                         }
                         
-                        // --- Generate AI Tutor Feedback (Replaces Learning Path) ---
-                        List<Map<String, Object>> tutorFeedbacks = new ArrayList<>();
-                        
+                        // --- Generate AI Tutor Feedback in BATCH (Replaces individual calls) ---
+                        List<Map<String, String>> batchQuestions = new ArrayList<>();
                         for (Map<String, Object> q : aiQuestionsPayload) {
                             String stuAns = (String) q.get("student_answer");
                             String corAns = (String) q.get("correct_answer");
@@ -302,33 +304,30 @@ public class QuizController {
                                 tutorReq.put("question_text", (String) q.get("text"));
                                 tutorReq.put("student_answer", stuAns);
                                 tutorReq.put("correct_answer", corAns);
-                                
-                                try {
-                                    Map<String, Object> tutorRes = webClientBuilder.build()
-                                        .post()
-                                        .uri(aiServiceBaseUrl + "/api/tutor-feedback")
-                                        .bodyValue(tutorReq)
-                                        .retrieve()
-                                        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                                        .block();
-                                        
-                                    if (tutorRes != null && tutorRes.containsKey("feedback")) {
-                                        Map<String, Object> feedbackNode = new LinkedHashMap<>();
-                                        feedbackNode.put("question", q.get("text"));
-                                        feedbackNode.put("feedback", tutorRes.get("feedback"));
-                                        tutorFeedbacks.add(feedbackNode);
-                                    }
-                                } catch (Exception e) {
-                                    log.error("AI Tutor feedback error for question: {}", e.getMessage());
-                                }
+                                batchQuestions.add(tutorReq);
                             }
                         }
-                        
-                        if (!tutorFeedbacks.isEmpty()) {
+
+                        if (!batchQuestions.isEmpty()) {
                             try {
-                                result.setRecommendedLearningPath(objectMapper.writeValueAsString(tutorFeedbacks));
+                                Map<String, Object> batchReq = new HashMap<>();
+                                batchReq.put("questions", batchQuestions);
+
+                                Map<String, Object> batchRes = webClientBuilder.build()
+                                    .post()
+                                    .uri(aiServiceBaseUrl + "/api/batch-tutor-feedback")
+                                    .bodyValue(batchReq)
+                                    .retrieve()
+                                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                                    .block();
+                                    
+                                if (batchRes != null && batchRes.containsKey("feedbacks")) {
+                                    @SuppressWarnings("unchecked")
+                                    List<Map<String, Object>> tutorFeedbacks = (List<Map<String, Object>>) batchRes.get("feedbacks");
+                                    result.setRecommendedLearningPath(objectMapper.writeValueAsString(tutorFeedbacks));
+                                }
                             } catch (Exception e) {
-                                log.error("Failed to serialize: {}", e.getMessage());
+                                log.error("Batch AI Tutor feedback error: {}", e.getMessage());
                             }
                         }
                         // ---------------------------------------------------------------------
@@ -340,6 +339,12 @@ public class QuizController {
         }
 
         quizResultRepository.save(result);
+
+        // Update enrollment status/progress
+        if (quiz.getCourse() != null) {
+            enrollmentRepository.findByStudentIdAndCourseId(student.getId(), quiz.getCourse().getId())
+                    .ifPresent(enrollment -> enrollmentService.updateEnrollmentStatus(enrollment.getId()));
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("id", result.getId());
@@ -433,6 +438,7 @@ public class QuizController {
             map.put("id", r.getId());
             map.put("quizId", r.getQuiz().getId());
             map.put("quizTitle", r.getQuiz().getTitle());
+            map.put("courseTitle", r.getQuiz().getCourse() != null ? r.getQuiz().getCourse().getTitle() : "N/A");
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());
             map.put("percentage", r.getTotalQuestions() > 0 ? Math.round((double) r.getScore() / r.getTotalQuestions() * 100) : 0);

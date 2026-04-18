@@ -86,22 +86,22 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-        <div className="stat-card animate-in">
+        <div className="stat-card animate-in" onClick={() => navigate('/enrolled-courses')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon">📚</div>
           <div className="stat-value">{new Set(enrollments.map(e => e.courseId)).size}</div>
           <div className="stat-label">Cours inscrits</div>
         </div>
-        <div className="stat-card animate-in">
+        <div className="stat-card animate-in" onClick={() => navigate('/completed-courses')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon">🎓</div>
           <div className="stat-value">{completedCount}</div>
           <div className="stat-label">Cours terminés</div>
         </div>
-        <div className="stat-card animate-in">
+        <div className="stat-card animate-in" onClick={() => navigate('/done-quizzes')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon">📝</div>
           <div className="stat-value">{completedQuizzesCount}</div>
           <div className="stat-label">Quiz faits</div>
         </div>
-        <div className="stat-card animate-in">
+        <div className="stat-card animate-in" onClick={() => navigate('/done-exercises')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon">✅</div>
           <div className="stat-value">{completedExercisesCount}</div>
           <div className="stat-label">Exercices faits</div>
@@ -137,16 +137,51 @@ export default function Dashboard() {
                 style={{ cursor: 'pointer' }}
                 onClick={() => navigate(`/course/${enrollment.courseId}`)}
               >
-                <h3 style={{ marginBottom: 8 }}>{enrollment.courseTitle}</h3>
-                <p className="course-meta" style={{ marginBottom: 12 }}>
+                <h3 style={{ marginBottom: 4, fontSize: '1.1rem' }}>{enrollment.courseTitle}</h3>
+                <p className="course-meta" style={{ marginBottom: 12, fontSize: '0.85rem' }}>
                   Par {enrollment.teacherName}
                 </p>
-                <div className="score-bar" style={{ marginBottom: 8 }}>
-                  <div className="score-bar-fill" style={{ width: `${enrollment.progress}%` }}></div>
+                
+                <div className="progress-details" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="progress-item">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 4 }}>
+                      <span><FiFile style={{ verticalAlign: 'middle', marginRight: 4 }} /> Chapitres</span>
+                      <span>{Math.round(enrollment.chaptersProgress)}%</span>
+                    </div>
+                    <div className="score-bar" style={{ height: 6 }}>
+                      <div className="score-bar-fill" style={{ width: `${enrollment.chaptersProgress}%`, background: 'var(--primary-400)' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="progress-item">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 4 }}>
+                      <span><FiCheckSquare style={{ verticalAlign: 'middle', marginRight: 4 }} /> Quiz</span>
+                      <span>{Math.round(enrollment.quizzesProgress)}%</span>
+                    </div>
+                    <div className="score-bar" style={{ height: 6 }}>
+                      <div className="score-bar-fill" style={{ width: `${enrollment.quizzesProgress}%`, background: '#10b981' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="progress-item">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 4 }}>
+                      <span><FiAward style={{ verticalAlign: 'middle', marginRight: 4 }} /> Exercices</span>
+                      <span>{Math.round(enrollment.exercisesProgress)}%</span>
+                    </div>
+                    <div className="score-bar" style={{ height: 6 }}>
+                      <div className="score-bar-fill" style={{ width: `${enrollment.exercisesProgress}%`, background: '#f59e0b' }}></div>
+                    </div>
+                  </div>
                 </div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  {Math.round(enrollment.progress)}% complété
-                </span>
+
+                <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary-300)' }}>
+                    Total: {Math.round(enrollment.progress)}%
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    Dernière activité
+                  </span>
+                </div>
               </div>
             ))}
           </div>

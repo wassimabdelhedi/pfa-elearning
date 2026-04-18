@@ -7,6 +7,7 @@ import com.pfa.elearning.repository.ChapterProgressRepository;
 import com.pfa.elearning.repository.ChapterRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
+import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.FileStorageService;
 import com.pfa.elearning.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class ChapterController {
     private final CourseService courseService;
     private final FileStorageService fileStorageService;
     private final UserService userService;
+    private final EnrollmentService enrollmentService;
 
     // ========== TEACHER: Manage Chapters ==========
 
@@ -258,28 +260,20 @@ public class ChapterController {
             chapterProgressRepository.save(progress);
         }
 
-        // Recalculate overall course progress
+        // Recalculate overall course progress using centralized service
+        Enrollment updatedEnrollment = enrollmentService.updateEnrollmentStatus(enrollment.getId());
+
         List<Chapter> allChapters = chapterRepository.findByCourseIdOrderByChapterOrderAsc(courseId);
-        List<ChapterProgress> allProgresses = chapterProgressRepository.findByEnrollmentId(enrollment.getId());
-
+        List<ChapterProgress> allProgresses = chapterProgressRepository.findByEnrollmentId(updatedEnrollment.getId());
         long completedChapters = allProgresses.stream().filter(ChapterProgress::isCompleted).count();
-        double overallProgress = allChapters.isEmpty() ? 0.0 :
-                (completedChapters * 100.0) / allChapters.size();
-
-        enrollment.setProgressPercentage(Math.min(overallProgress, 100.0));
-
-        if (overallProgress >= 100.0 && !enrollment.isCompleted()) {
-            enrollment.setCompleted(true);
-            enrollment.setCompletedAt(LocalDateTime.now());
-        }
-
-        enrollmentRepository.save(enrollment);
+        boolean chaptersCompleted = enrollmentService.isChaptersFinished(updatedEnrollment);
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("chapterId", chapterId);
         result.put("chapterCompleted", true);
-        result.put("courseProgress", Math.round(overallProgress));
-        result.put("courseCompleted", enrollment.isCompleted());
+        result.put("chaptersCompleted", chaptersCompleted);
+        result.put("courseProgress", Math.round(updatedEnrollment.getProgressPercentage()));
+        result.put("courseCompleted", updatedEnrollment.isCompleted());
         result.put("completedChapters", completedChapters);
         result.put("totalChapters", allChapters.size());
 
@@ -316,9 +310,12 @@ public class ChapterController {
             return map;
         }).collect(Collectors.toList());
 
+        boolean chaptersCompleted = enrollmentService.isChaptersFinished(enrollment);
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("enrolled", true);
         result.put("courseCompleted", enrollment.isCompleted());
+        result.put("chaptersCompleted", chaptersCompleted);
         result.put("overallProgress", Math.round(enrollment.getProgressPercentage()));
         result.put("completedChapters", completedChapterIds.size());
         result.put("totalChapters", chapters.size());

@@ -15,6 +15,10 @@ import CoursesPage from './pages/student/CoursesPage';
 import CourseViewPage from './pages/student/CourseViewPage';
 import ExercisesPage from './pages/student/ExercisesPage';
 import QuizPage from './pages/student/QuizPage';
+import EnrolledCourses from './pages/student/EnrolledCourses';
+import CompletedCourses from './pages/student/CompletedCourses';
+import DoneQuizzes from './pages/student/DoneQuizzes';
+import DoneExercises from './pages/student/DoneExercises';
 
 // Teacher pages
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
@@ -92,6 +96,26 @@ function App() {
         <Route path="/course/:courseId/quizzes" element={
           <ProtectedRoute roles={['STUDENT', 'TEACHER']}>
             <QuizPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/enrolled-courses" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <EnrolledCourses />
+          </ProtectedRoute>
+        } />
+        <Route path="/completed-courses" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <CompletedCourses />
+          </ProtectedRoute>
+        } />
+        <Route path="/done-quizzes" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <DoneQuizzes />
+          </ProtectedRoute>
+        } />
+        <Route path="/done-exercises" element={
+          <ProtectedRoute roles={['STUDENT']}>
+            <DoneExercises />
           </ProtectedRoute>
         } />
 

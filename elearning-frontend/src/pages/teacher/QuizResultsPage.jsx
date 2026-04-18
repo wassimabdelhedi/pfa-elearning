@@ -89,8 +89,8 @@ export default function QuizResultsPage() {
                       borderRadius: 100,
                       fontSize: '0.8rem',
                       fontWeight: 700,
-                      background: result.percentage >= 70 ? 'rgba(34,197,94,0.15)' : result.percentage >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                      color: result.percentage >= 70 ? '#4ade80' : result.percentage >= 40 ? '#fbbf24' : '#f87171'
+                      background: result.percentage >= 60 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                      color: result.percentage >= 60 ? '#10b981' : '#ef4444'
                     }}>
                       {result.percentage}%
                     </span>
