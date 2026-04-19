@@ -7,10 +7,10 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
-  const [newCat, setNewCat] = useState({ name: '', description: '', icon: '📚' });
+  const [newCat, setNewCat] = useState({ name: '', description: '' });
   const [creating, setCreating] = useState(false);
 
-  const iconOptions = ['📚', '💻', '📐', '🔬', '🤖', '📊', '🎨', '🌍', '⚡', '🧪', '📖', '🏗️', '🧠', '🎯', '🔧'];
+
 
   useEffect(() => {
     loadData();
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
     try {
       const res = await createCategory(newCat);
       setCategories([...categories, res.data]);
-      setNewCat({ name: '', description: '', icon: '📚' });
+      setNewCat({ name: '', description: '' });
       showMsg('✅ Catégorie créée avec succès');
     } catch (err) {
       if (err.response?.status === 409) {
@@ -225,19 +225,7 @@ export default function AdminDashboard() {
             Ajouter une catégorie
           </h3>
           <form onSubmit={handleCreateCategory} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div className="form-group" style={{ flex: '0 0 auto' }}>
-              <label>Icône</label>
-              <select
-                className="form-input"
-                value={newCat.icon}
-                onChange={e => setNewCat({ ...newCat, icon: e.target.value })}
-                style={{ width: 80, textAlign: 'center', fontSize: '1.2rem' }}
-              >
-                {iconOptions.map(icon => (
-                  <option key={icon} value={icon}>{icon}</option>
-                ))}
-              </select>
-            </div>
+
             <div className="form-group" style={{ flex: '1 1 200px' }}>
               <label>Nom *</label>
               <input
@@ -269,7 +257,7 @@ export default function AdminDashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Icône</th>
+
                   <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Nom</th>
                   <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Description</th>
                   <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Cours</th>
@@ -283,7 +271,7 @@ export default function AdminDashboard() {
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    <td style={{ padding: '14px 20px', fontSize: '1.4rem' }}>{cat.icon || '📚'}</td>
+
                     <td style={{ padding: '14px 20px', fontWeight: 600, fontSize: '0.95rem' }}>{cat.name}</td>
                     <td style={{ padding: '14px 20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{cat.description || '—'}</td>
                     <td style={{ padding: '14px 20px', textAlign: 'center' }}>

@@ -144,9 +144,9 @@ public class AdminController {
             }
 
             // 3. Create Categories
-            Category catWeb = Category.builder().name("Développement Web").icon("🌐").description("Technologies du web").build();
-            Category catData = Category.builder().name("Data Science").icon("📊").description("Données et intelligence artificielle").build();
-            Category catDev = Category.builder().name("Développement Logiciel").icon("💻").description("Architecture et concepts de programmation").build();
+            Category catWeb = Category.builder().name("Développement Web").description("Technologies du web").build();
+            Category catData = Category.builder().name("Data Science").description("Données et intelligence artificielle").build();
+            Category catDev = Category.builder().name("Développement Logiciel").description("Architecture et concepts de programmation").build();
             catWeb = categoryRepository.save(catWeb);
             catData = categoryRepository.save(catData);
             catDev = categoryRepository.save(catDev);
@@ -213,7 +213,6 @@ public class AdminController {
     public ResponseEntity<Category> createCategory(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         String description = body.getOrDefault("description", "");
-        String icon = body.getOrDefault("icon", "📚");
 
         if (categoryRepository.existsByName(name)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -222,7 +221,6 @@ public class AdminController {
         Category category = Category.builder()
                 .name(name)
                 .description(description)
-                .icon(icon)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryRepository.save(category));

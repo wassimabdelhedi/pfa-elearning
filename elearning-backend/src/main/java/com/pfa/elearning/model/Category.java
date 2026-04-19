@@ -22,8 +22,6 @@ public class Category {
 
     private String description;
 
-    private String icon;
-
     @org.hibernate.annotations.Formula("(SELECT COUNT(*) FROM courses c WHERE c.category_id = id)")
     private Integer courseCount;
 

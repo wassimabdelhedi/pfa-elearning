@@ -80,7 +80,7 @@ export default function CoursesPage() {
               className={`btn ${selectedCategory === cat.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
               onClick={() => setSelectedCategory(cat.id)}
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </button>
           ))}
         </div>
