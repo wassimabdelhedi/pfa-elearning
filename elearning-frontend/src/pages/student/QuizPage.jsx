@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getPublishedQuizzes, submitQuizResult, getQuizById } from '../../api/quizApi';
+import { getPublishedQuizzes, submitQuizResult, getQuizById, getMyStudentResults } from '../../api/quizApi';
 import { FiCheckCircle, FiUser } from 'react-icons/fi';
 
 const cleanMarkdown = (text) => {
@@ -15,6 +15,7 @@ export default function QuizPage() {
   const { user } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [passedQuizzes, setPassedQuizzes] = useState(new Set());
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -39,6 +40,17 @@ export default function QuizPage() {
         res = await getPublishedQuizzes();
       }
       setQuizzes(res.data);
+      
+      if (user?.role === 'STUDENT') {
+        try {
+          const results = await getMyStudentResults();
+          const passedIds = new Set(results.data.map(r => r.quizId));
+          setPassedQuizzes(passedIds);
+        } catch (e) {
+          console.error('Failed to load student results', e);
+        }
+      }
+
       if (id) {
         try {
           const qRes = await getQuizById(id);
@@ -359,12 +371,22 @@ export default function QuizPage() {
                 <span className="course-meta">
                   <FiUser size={13} /> {quiz.teacherName}
                 </span>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => startQuiz(quiz)}
-                >
-                  Commencer
-                </button>
+                {passedQuizzes.has(quiz.id) ? (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    disabled
+                    style={{ opacity: 0.7, cursor: 'not-allowed' }}
+                  >
+                    Déjà passé
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => startQuiz(quiz)}
+                  >
+                    Commencer
+                  </button>
+                )}
               </div>
             </div>
           ))}

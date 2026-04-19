@@ -40,7 +40,7 @@ public class SecurityConfig {
 						.permitAll().requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/exercises/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/quizzes/**").permitAll().requestMatchers("/uploads/**")
-						.permitAll()
+						.permitAll().requestMatchers(HttpMethod.GET, "/api/messages/debug/users").permitAll()
 
 						// Teacher endpoints - courses
 						.requestMatchers(HttpMethod.POST, "/api/courses/**").hasRole("TEACHER")

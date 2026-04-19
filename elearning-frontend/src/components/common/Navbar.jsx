@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FiBookOpen, FiLogOut, FiUser, FiSearch, FiGrid, FiPlusCircle, FiFileText, FiCheckSquare } from 'react-icons/fi';
+import { FiBookOpen, FiLogOut, FiUser, FiSearch, FiGrid, FiPlusCircle, FiFileText, FiCheckSquare, FiMessageSquare } from 'react-icons/fi';
 
 export default function Navbar() {
   const { user, isAuthenticated, isStudent, isTeacher, isAdmin, logout } = useAuth();
@@ -41,6 +41,10 @@ export default function Navbar() {
                     Recherche
                   </Link>
                   <Link to="/courses" className={isActive('/courses')}>Cours</Link>
+                  <Link to="/messages" className={isActive('/messages')}>
+                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Messages
+                  </Link>
                 </>
               )}
 
@@ -61,6 +65,10 @@ export default function Navbar() {
                   <Link to="/teacher/create-quiz" className={isActive('/teacher/create-quiz')}>
                     <FiCheckSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
                     Quiz
+                  </Link>
+                  <Link to="/messages" className={isActive('/messages')}>
+                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Messages
                   </Link>
                 </>
               )}

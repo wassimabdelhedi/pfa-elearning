@@ -210,6 +210,11 @@ public class QuizController {
         int totalQuestions = ((Number) body.get("totalQuestions")).intValue();
         double percentage = totalQuestions > 0 ? (double) score / totalQuestions * 100 : 0;
 
+        if (quizResultRepository.existsByStudentIdAndQuizId(student.getId(), quiz.getId())) {
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Vous avez déjà passé ce quiz. Un seul essai est autorisé."));
+        }
+
         QuizResult result = QuizResult.builder()
                 .quiz(quiz)
                 .student(student)
