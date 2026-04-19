@@ -94,6 +94,14 @@ public class EmailService {
         sendHtmlEmail(student.getEmail(), "Lesson Content Updated: " + lesson.getTitle(), "emails/lesson-updated", context);
     }
 
+    @Async
+    public void sendPasswordResetEmail(String toEmail, String firstName, String resetUrl) {
+        Context context = new Context();
+        context.setVariable("name", firstName);
+        context.setVariable("resetUrl", resetUrl);
+        sendHtmlEmail(toEmail, "Password Reset Request - LearnAgent", "emails/reset-password", context);
+    }
+
     private void sendHtmlEmail(String to, String subject, String templateName, Context context) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();

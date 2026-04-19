@@ -8,6 +8,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 // Student pages
 import Dashboard from './pages/student/Dashboard';
@@ -59,6 +60,9 @@ function App() {
         } />
         <Route path="/forgot-password" element={
           isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <ForgotPasswordPage />
+        } />
+        <Route path="/reset-password" element={
+          isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <ResetPasswordPage />
         } />
 
         {/* Student routes */}
