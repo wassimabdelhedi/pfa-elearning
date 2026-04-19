@@ -33,6 +33,9 @@ import QuizResultsPage from './pages/teacher/QuizResultsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 
+// Common pages
+import MessagesPage from './pages/common/MessagesPage';
+
 function App() {
   const { isAuthenticated, user } = useAuth();
 
@@ -166,6 +169,13 @@ function App() {
         <Route path="/admin/users" element={
           <ProtectedRoute roles={['ADMIN']}>
             <AdminUsers />
+          </ProtectedRoute>
+        } />
+
+        {/* Common Authenticated routes */}
+        <Route path="/messages" element={
+          <ProtectedRoute roles={['STUDENT', 'TEACHER', 'ADMIN']}>
+            <MessagesPage />
           </ProtectedRoute>
         } />
 

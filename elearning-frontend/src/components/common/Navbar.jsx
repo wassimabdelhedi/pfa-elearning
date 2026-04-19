@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
   FiBookOpen, FiLogOut, FiUser, FiSearch, FiGrid,
-  FiPlusCircle, FiFileText, FiCheckSquare, FiSun, FiMoon, FiDroplet
+  FiPlusCircle, FiFileText, FiCheckSquare, FiSun, FiMoon, FiDroplet, FiMessageSquare
 } from 'react-icons/fi';
 
 const themeIcons = {
@@ -58,6 +58,10 @@ export default function Navbar() {
                     Recherche
                   </Link>
                   <Link to="/courses" className={isActive('/courses')}>Cours</Link>
+                  <Link to="/messages" className={isActive('/messages')}>
+                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Messages
+                  </Link>
                 </>
               )}
 
@@ -78,6 +82,10 @@ export default function Navbar() {
                   <Link to="/teacher/create-quiz" className={isActive('/teacher/create-quiz')}>
                     <FiCheckSquare size={15} style={{ marginRight: 4, verticalAlign: 'middle' }} />
                     Quiz
+                  </Link>
+                  <Link to="/messages" className={isActive('/messages')}>
+                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                    Messages
                   </Link>
                 </>
               )}
