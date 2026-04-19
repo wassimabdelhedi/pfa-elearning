@@ -72,6 +72,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void updateLastLoginDate(String email) {
+        User user = getUserByEmail(email);
+        user.setLastLoginDate(java.time.LocalDateTime.now());
+        userRepository.save(user);
+    }
+
     public void toggleUserActive(Long id) {
         User user = getUserById(id);
         user.setActive(!user.isActive());

@@ -10,6 +10,7 @@ import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.FileStorageService;
 import com.pfa.elearning.service.UserService;
+import com.pfa.elearning.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -39,6 +40,7 @@ public class ChapterController {
     private final FileStorageService fileStorageService;
     private final UserService userService;
     private final EnrollmentService enrollmentService;
+    private final EmailService emailService;
 
     // ========== TEACHER: Manage Chapters ==========
 
@@ -139,6 +141,15 @@ public class ChapterController {
         }
 
         Chapter saved = chapterRepository.save(chapter);
+
+        // Notify enrolled students
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(chapter.getCourse().getId());
+        if (enrollments != null) {
+            for (Enrollment enrollment : enrollments) {
+                emailService.sendLessonUpdatedEmail(enrollment.getStudent(), chapter.getCourse(), saved);
+            }
+        }
+
         return ResponseEntity.ok(chapterToMap(saved));
     }
 

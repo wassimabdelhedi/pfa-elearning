@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getQuizResults, getQuizById } from '../../api/quizApi';
-import { FiArrowLeft, FiAward, FiUsers } from 'react-icons/fi';
+import { FiArrowLeft, FiAward, FiUsers, FiTrendingUp, FiClipboard } from 'react-icons/fi';
 
 export default function QuizResultsPage() {
   const { id } = useParams();
@@ -45,18 +45,18 @@ export default function QuizResultsPage() {
         </button>
         <div>
           <h1 style={{ marginBottom: 4 }}>Résultats complets</h1>
-          <p style={{ margin: 0, color: 'var(--primary-300)' }}>📋 {quizName}</p>
+          <p style={{ margin: 0, color: 'var(--primary-300)', display: 'flex', alignItems: 'center', gap: 6 }}><FiClipboard size={15} /> {quizName}</p>
         </div>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: 40, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
         <div className="stat-card animate-in">
-          <div className="stat-icon">👥</div>
+          <div className="stat-icon"><FiUsers size={22} /></div>
           <div className="stat-value">{results.length}</div>
           <div className="stat-label">Participations totales</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">📈</div>
+          <div className="stat-icon"><FiTrendingUp size={22} /></div>
           <div className="stat-value">{averageScore}%</div>
           <div className="stat-label">Moyenne générale</div>
         </div>

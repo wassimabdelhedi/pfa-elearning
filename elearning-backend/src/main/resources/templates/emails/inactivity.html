@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>We Miss You!</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { color: #3b82f6; text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .content { font-size: 16px; color: #333; line-height: 1.6; }
+        .btn { display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; text-align: center; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            We Miss You at LearnAgent!
+        </div>
+        <div class="content">
+            <p>Hello <span th:text="${name}">Student</span>,</p>
+            <p>It's been a while since we last saw you. Your learning journey is waiting for you!</p>
+            <p>Consistency is key to mastering new skills. Jump back in and pick up right where you left off.</p>
+            <div style="text-align: center;">
+                <a href="http://localhost:5173/login" class="btn">Continue Learning</a>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; 2026 LearnAgent. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

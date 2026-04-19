@@ -11,6 +11,8 @@ import com.pfa.elearning.repository.CategoryRepository;
 import com.pfa.elearning.repository.CourseRatingRepository;
 import com.pfa.elearning.repository.CourseRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
+import com.pfa.elearning.repository.UserRepository;
+import com.pfa.elearning.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,8 @@ public class CourseService {
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRatingRepository courseRatingRepository;
     private final WebClient.Builder webClientBuilder;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Value("${app.ai-service.base-url}")
     private String aiServiceBaseUrl;
@@ -57,7 +61,13 @@ public class CourseService {
             course.setCategory(category);
         }
 
-        return courseRepository.save(course);
+        course = courseRepository.save(course);
+
+        if (course.isPublished()) {
+            notifyInterestedStudentsAsync(course);
+        }
+
+        return course;
     }
 
     @Transactional
@@ -105,12 +115,30 @@ public class CourseService {
         }
 
         course.setPublished(!course.isPublished());
-        return courseRepository.save(course);
+        course = courseRepository.save(course);
+
+        if (course.isPublished()) {
+            notifyInterestedStudentsAsync(course);
+        }
+
+        return course;
     }
 
     public Course getCourseById(Long id) {
         return courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course", "id", id));
+    }
+
+    private void notifyInterestedStudentsAsync(Course course) {
+        if (course.getCategory() == null) return;
+        String domain = course.getCategory().getName();
+        
+        List<User> students = userRepository.findByRole(com.pfa.elearning.model.Role.STUDENT);
+        for (User student : students) {
+            if (domain.equalsIgnoreCase(student.getDomaineInteret())) {
+                emailService.sendCourseMatchedInterestEmail(student, course);
+            }
+        }
     }
 
     public List<Course> getPublishedCourses() {

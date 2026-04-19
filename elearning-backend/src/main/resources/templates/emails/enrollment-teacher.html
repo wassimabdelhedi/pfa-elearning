@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Enrollment in Your Course</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { color: #6366f1; text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .content { font-size: 16px; color: #333; line-height: 1.6; }
+        .highlight-box { background-color: #f0f0ff; border-left: 4px solid #6366f1; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            🎓 New Enrollment Alert!
+        </div>
+        <div class="content">
+            <p>Hello <span th:text="${teacherName}">Teacher</span>,</p>
+            <p>Great news! A new student has just enrolled in your course.</p>
+            <div class="highlight-box">
+                <p><strong>Student:</strong> <span th:text="${studentName}">Student Name</span></p>
+                <p><strong>Email:</strong> <span th:text="${studentEmail}">student@email.com</span></p>
+                <p><strong>Course:</strong> <span th:text="${courseName}">Course Name</span></p>
+            </div>
+            <p>Your course is growing! Keep up the great work.</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 LearnAgent. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

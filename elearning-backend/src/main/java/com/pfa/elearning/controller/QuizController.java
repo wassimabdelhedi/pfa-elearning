@@ -14,6 +14,7 @@ import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.SearchService;
 import com.pfa.elearning.service.UserService;
+import com.pfa.elearning.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,7 @@ public class QuizController {
     private final ObjectMapper objectMapper;
     private final EnrollmentRepository enrollmentRepository;
     private final EnrollmentService enrollmentService;
+    private final EmailService emailService;
 
     @Value("${app.ai-service.base-url}")
     private String aiServiceBaseUrl;
@@ -344,6 +346,11 @@ public class QuizController {
         if (quiz.getCourse() != null) {
             enrollmentRepository.findByStudentIdAndCourseId(student.getId(), quiz.getCourse().getId())
                     .ifPresent(enrollment -> enrollmentService.updateEnrollmentStatus(enrollment.getId()));
+        }
+
+        // Send email if perfect score
+        if (percentage >= 100) {
+            emailService.sendPerfectQuizScoreEmail(quiz.getTeacher(), student, quiz);
         }
 
         Map<String, Object> response = new HashMap<>();

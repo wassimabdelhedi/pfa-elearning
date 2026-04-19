@@ -34,6 +34,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.generateToken(authentication);
 
+        userService.updateLastLoginDate(request.getEmail());
         User user = userService.getUserByEmail(request.getEmail());
 
         AuthResponse response = new AuthResponse(

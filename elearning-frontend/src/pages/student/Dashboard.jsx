@@ -7,7 +7,7 @@ import { getPublishedQuizzes, getMyStudentResults } from '../../api/quizApi';
 import { getMyCompletedExercises } from '../../api/exerciseApi';
 import { Link, useNavigate } from 'react-router-dom';
 import CourseCard from '../../components/course/CourseCard';
-import { FiBookOpen, FiTrendingUp, FiAward, FiSearch, FiCheckSquare, FiFile, FiDownload } from 'react-icons/fi';
+import { FiBookOpen, FiTrendingUp, FiAward, FiSearch, FiCheckSquare, FiFile, FiClipboard, FiCheckCircle } from 'react-icons/fi';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -80,29 +80,29 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="page-header">
-        <h1>Bonjour, {user?.fullName?.split(' ')[0]} 👋</h1>
+        <h1>Bonjour, {user?.fullName?.split(' ')[0]}</h1>
         <p>Voici un aperçu de votre progression</p>
       </div>
 
       {/* Stats */}
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <div className="stat-card animate-in" onClick={() => navigate('/enrolled-courses')} style={{ cursor: 'pointer' }}>
-          <div className="stat-icon">📚</div>
+          <div className="stat-icon"><FiBookOpen size={22} /></div>
           <div className="stat-value">{new Set(enrollments.map(e => e.courseId)).size}</div>
           <div className="stat-label">Cours inscrits</div>
         </div>
         <div className="stat-card animate-in" onClick={() => navigate('/completed-courses')} style={{ cursor: 'pointer' }}>
-          <div className="stat-icon">🎓</div>
+          <div className="stat-icon"><FiAward size={22} /></div>
           <div className="stat-value">{completedCount}</div>
           <div className="stat-label">Cours terminés</div>
         </div>
         <div className="stat-card animate-in" onClick={() => navigate('/done-quizzes')} style={{ cursor: 'pointer' }}>
-          <div className="stat-icon">📝</div>
+          <div className="stat-icon"><FiClipboard size={22} /></div>
           <div className="stat-value">{completedQuizzesCount}</div>
           <div className="stat-label">Quiz faits</div>
         </div>
         <div className="stat-card animate-in" onClick={() => navigate('/done-exercises')} style={{ cursor: 'pointer' }}>
-          <div className="stat-icon">✅</div>
+          <div className="stat-icon"><FiCheckCircle size={22} /></div>
           <div className="stat-value">{completedExercisesCount}</div>
           <div className="stat-label">Exercices faits</div>
         </div>

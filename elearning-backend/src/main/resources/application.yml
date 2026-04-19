@@ -38,6 +38,18 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: amin.frikha@enis.tn
+    password: "imcq eolk yxtm ckys"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # JWT Configuration
 app:
   jwt:

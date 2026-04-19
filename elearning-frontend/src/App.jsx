@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/common/Navbar';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -43,7 +44,7 @@ function App() {
   };
 
   return (
-    <>
+    <ThemeProvider>
       <Navbar />
       <Routes>
         {/* Public routes */}
@@ -172,7 +173,7 @@ function App() {
         <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
         <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 

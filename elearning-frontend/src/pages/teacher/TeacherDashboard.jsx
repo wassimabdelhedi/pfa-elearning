@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getMyTeacherCourses, deleteCourse, togglePublishCourse } from '../../api/courseApi';
 import { getMyTeacherExercises, deleteExercise, togglePublishExercise } from '../../api/exerciseApi';
 import { getMyTeacherQuizzes, deleteQuiz, togglePublishQuiz, getMyQuizResults } from '../../api/quizApi';
-import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff, FiLayers } from 'react-icons/fi';
+import { FiBookOpen, FiUsers, FiPlusCircle, FiTrash2, FiFileText, FiCheckSquare, FiAward, FiEye, FiEyeOff, FiLayers, FiClipboard, FiStar, FiX } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function TeacherDashboard() {
@@ -64,7 +64,7 @@ export default function TeacherDashboard() {
     try {
       const res = await togglePublishCourse(courseId);
       setCourses(courses.map(c => c.id === courseId ? res.data : c));
-      showMsg(`✅ Cours ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+      showMsg(`Cours ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -75,7 +75,7 @@ export default function TeacherDashboard() {
     try {
       await deleteExercise(exerciseId);
       setExercises(exercises.filter(e => e.id !== exerciseId));
-      showMsg('✅ Exercice supprimé avec succès');
+      showMsg('Exercice supprimé avec succès');
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la suppression');
     }
@@ -85,7 +85,7 @@ export default function TeacherDashboard() {
     try {
       const res = await togglePublishExercise(exerciseId);
       setExercises(exercises.map(e => e.id === exerciseId ? res.data : e));
-      showMsg(`✅ Exercice ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+      showMsg(`Exercice ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -106,7 +106,7 @@ export default function TeacherDashboard() {
     try {
       const res = await togglePublishQuiz(quizId);
       setQuizzes(quizzes.map(q => q.id === quizId ? res.data : q));
-      showMsg(`✅ Quiz ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
+      showMsg(`Quiz ${res.data.published ? 'publié' : 'retiré des publiés'} avec succès`);
     } catch (err) {
       showMsg(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -124,7 +124,7 @@ export default function TeacherDashboard() {
       setSelectedCourseName(course.title);
       setShowStudentsModal(true);
     } catch (err) {
-      showMsg('❌ Impossible de charger la liste des étudiants');
+      showMsg('Impossible de charger la liste des étudiants');
     }
   };
 
@@ -182,36 +182,40 @@ export default function TeacherDashboard() {
       {msg && (
         <div style={{
           padding: '12px 16px',
-          background: msg.includes('✅') ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-          border: `1px solid ${msg.includes('✅') ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+          background: 'rgba(34,197,94,0.1)',
+          border: '1px solid rgba(34,197,94,0.2)',
           borderRadius: 8,
-          color: msg.includes('✅') ? '#4ade80' : '#f87171',
+          color: '#4ade80',
           textAlign: 'center',
-          marginBottom: 20
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8
         }}>
-          {msg}
+          <FiCheckSquare size={16} />{msg}
         </div>
       )}
 
       {/* Stats */}
       <div className="stats-grid">
         <div className="stat-card animate-in">
-          <div className="stat-icon">📚</div>
+          <div className="stat-icon"><FiBookOpen size={22} /></div>
           <div className="stat-value">{courses.length}</div>
           <div className="stat-label">Cours</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">📝</div>
+          <div className="stat-icon"><FiFileText size={22} /></div>
           <div className="stat-value">{exercises.length}</div>
           <div className="stat-label">Exercices</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">📋</div>
+          <div className="stat-icon"><FiClipboard size={22} /></div>
           <div className="stat-value">{quizzes.length}</div>
           <div className="stat-label">Quiz</div>
         </div>
         <div className="stat-card animate-in">
-          <div className="stat-icon">👥</div>
+          <div className="stat-icon"><FiUsers size={22} /></div>
           <div className="stat-value">{totalEnrollments}</div>
           <div className="stat-label">Inscriptions totales</div>
         </div>
@@ -232,8 +236,8 @@ export default function TeacherDashboard() {
                   <li key={`top-${course.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }} onClick={() => handleCourseClick(course.id)}>
                     <div>
                       <div style={{ fontWeight: 600 }}>{course.title}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                        ⭐ {course.averageRating ? course.averageRating.toFixed(1) : '—'}
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <FiStar size={12} style={{ color: '#fbbf24' }} /> {course.averageRating ? course.averageRating.toFixed(1) : '—'}
                       </div>
                     </div>
                     <span className="badge badge-primary">{course.enrollmentCount} inscrits</span>
@@ -315,7 +319,7 @@ export default function TeacherDashboard() {
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '8px' }}>
                   <span className="course-meta" style={{ marginRight: 'auto' }}>
-                    ⭐ {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
+                    <FiStar size={12} style={{ color: '#fbbf24' }} /> {course.averageRating ? course.averageRating.toFixed(1) : 'N/A'}
                   </span>
                   <button
                     className="btn btn-secondary btn-sm"
@@ -393,14 +397,14 @@ export default function TeacherDashboard() {
                 <h3>{exercise.title}</h3>
                 <p>{exercise.description}</p>
                 {exercise.courseName && (
-                  <p style={{ fontSize: '0.8rem', color: 'var(--accent-400)', marginTop: 8, fontStyle: 'italic' }}>
-                    📚 Cours associé : {exercise.courseName}
+                  <p style={{ fontSize: '0.8rem', color: 'var(--accent-400)', marginTop: 8, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <FiBookOpen size={12} /> Cours associé : {exercise.courseName}
                   </p>
                 )}
               </div>
               <div className="course-card-footer">
                 <span className="course-meta">
-                  {exercise.originalFileName ? `📄 ${exercise.originalFileName}` : 'Pas de fichier'}
+                  <FiFileText size={13} /> {exercise.originalFileName ? exercise.originalFileName : 'Pas de fichier'}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button
@@ -462,13 +466,13 @@ export default function TeacherDashboard() {
               <div className="course-card-body" onClick={() => navigate(`/quiz/${quiz.id}`)}>
                 <h3>{quiz.title}</h3>
                 <p>{quiz.description}</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--accent-400)', marginTop: 8 }}>
-                  📝 {quiz.questionsCount || 0} questions
+                <p style={{ fontSize: '0.8rem', color: 'var(--accent-400)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <FiClipboard size={12} /> {quiz.questionsCount || 0} questions
                 </p>
               </div>
               <div className="course-card-footer">
                 <span className="course-meta">
-                  {quiz.courseName ? `📚 ${quiz.courseName}` : 'Pas de cours associé'}
+                  <FiBookOpen size={13} /> {quiz.courseName ? quiz.courseName : 'Pas de cours associé'}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button
@@ -548,7 +552,7 @@ export default function TeacherDashboard() {
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <td style={{ padding: '14px 20px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                      📋 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{quiz.quizTitle}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FiClipboard size={14} /><span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{quiz.quizTitle}</span></span>
                     </td>
                     <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 600 }}>
                       <span className="badge" style={{ background: 'var(--bg-lighter)' }}>{quiz.attempts}</span>
@@ -597,12 +601,12 @@ export default function TeacherDashboard() {
         }}>
           <div className="card animate-in" style={{ width: '100%', maxWidth: 700, padding: 30, maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ fontSize: '1.4rem', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-              <span>👨‍🎓 Étudiants : {selectedCourseName}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><FiUsers size={18} /> Étudiants : {selectedCourseName}</span>
               <button 
                 onClick={() => setShowStudentsModal(false)}
                 className="btn btn-secondary btn-sm"
               >
-                Fermer
+                <FiX size={14} /> Fermer
               </button>
             </h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: 20 }}>

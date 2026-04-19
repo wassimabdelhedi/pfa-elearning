@@ -4,6 +4,7 @@ import com.pfa.elearning.model.Enrollment;
 import com.pfa.elearning.model.User;
 import com.pfa.elearning.service.EnrollmentService;
 import com.pfa.elearning.service.UserService;
+import com.pfa.elearning.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
     private final UserService userService;
+    private final EmailService emailService;
 
     @PostMapping("/{courseId}")
     public ResponseEntity<Map<String, Object>> enroll(
@@ -29,6 +31,21 @@ public class EnrollmentController {
             Authentication authentication) {
         User student = userService.getUserByEmail(authentication.getName());
         Enrollment enrollment = enrollmentService.enrollStudent(student, courseId);
+
+        // Extract all data eagerly while the Hibernate session is still open
+        com.pfa.elearning.model.Course course = enrollment.getCourse();
+        com.pfa.elearning.model.User teacher = course.getTeacher();
+        String studentEmail   = student.getEmail();
+        String studentFirst   = student.getFirstName();
+        String studentFull    = student.getFullName();
+        String courseName     = course.getTitle();
+        Long   cId            = course.getId();
+        String teacherEmail   = teacher.getEmail();
+        String teacherFirst   = teacher.getFirstName();
+        String teacherFull    = teacher.getFullName();
+
+        emailService.sendEnrollmentNotification(studentEmail, studentFirst, courseName, teacherFull, cId);
+        emailService.sendEnrollmentNotificationToTeacher(teacherEmail, teacherFirst, studentFull, studentEmail, courseName);
 
         Map<String, Double> progressDetails = enrollmentService.calculateDetailedProgress(enrollment);
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfect Score Alert!</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { color: #10b981; text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .content { font-size: 16px; color: #333; line-height: 1.6; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Perfect Score Alert! 🎉
+        </div>
+        <div class="content">
+            <p>Hello <span th:text="${teacherName}">Teacher</span>,</p>
+            <p>Great news! Your student <strong><span th:text="${studentName}">Student</span></strong> just scored a perfect 100% on the quiz: <strong><span th:text="${quizTitle}">Quiz Title</span></strong>.</p>
+            <p>Your excellent teaching is paying off. Keep up the great work!</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 LearnAgent. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

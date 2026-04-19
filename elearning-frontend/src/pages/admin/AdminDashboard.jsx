@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAdminDashboard, getAdminCategories, createCategory, deleteCategory } from '../../api/adminApi';
-import { FiUsers, FiBookOpen, FiTag, FiPlus, FiTrash2, FiAward, FiLayers } from 'react-icons/fi';
+import { FiUsers, FiBookOpen, FiTag, FiPlus, FiTrash2, FiAward, FiLayers, FiClipboard, FiShield } from 'react-icons/fi';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
     <div className="page">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1>🛡️ Administration</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}><FiShield size={26} /> Administration</h1>
           <p>Gérez la plateforme LearnAgent</p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -137,22 +137,22 @@ export default function AdminDashboard() {
       {stats && (
         <div className="stats-grid">
           <div className="stat-card animate-in">
-            <div className="stat-icon">👨‍🎓</div>
+            <div className="stat-icon"><FiUsers size={22} /></div>
             <div className="stat-value">{stats.totalStudents || 0}</div>
             <div className="stat-label">Étudiants</div>
           </div>
           <div className="stat-card animate-in">
-            <div className="stat-icon">👨‍🏫</div>
+            <div className="stat-icon"><FiAward size={22} /></div>
             <div className="stat-value">{stats.totalTeachers || 0}</div>
             <div className="stat-label">Enseignants</div>
           </div>
           <div className="stat-card animate-in">
-            <div className="stat-icon">📚</div>
+            <div className="stat-icon"><FiBookOpen size={22} /></div>
             <div className="stat-value">{stats.totalCourses || 0}</div>
             <div className="stat-label">Cours</div>
           </div>
           <div className="stat-card animate-in">
-            <div className="stat-icon">📝</div>
+            <div className="stat-icon"><FiClipboard size={22} /></div>
             <div className="stat-value">{stats.totalEnrollments || 0}</div>
             <div className="stat-label">Inscriptions</div>
           </div>

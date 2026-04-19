@@ -41,6 +41,13 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    // Tracking for mailing system
+    @Column
+    private LocalDateTime lastLoginDate;
+
+    @Column
+    private LocalDateTime lastInactivityEmailSent;
+
     // STUDENT SPECIFIC FIELDS
     @Column
     private String niveau;

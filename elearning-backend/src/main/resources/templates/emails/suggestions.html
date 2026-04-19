@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Weekly AI Recommendations</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { color: #f59e0b; text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .content { font-size: 16px; color: #333; line-height: 1.6; }
+        .course-list { margin-top: 20px; padding-left: 20px; }
+        .course-item { margin-bottom: 10px; font-weight: bold; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Your Weekly AI Recommendations
+        </div>
+        <div class="content">
+            <p>Hello <span th:text="${name}">Student</span>,</p>
+            <p>Based on your interests and learning goals, our AI has picked out some courses you might love:</p>
+            <ul class="course-list">
+                <li th:each="course : ${suggestions}" class="course-item">
+                    <span th:text="${course.title}">Course Title</span>
+                </li>
+            </ul>
+            <p>Log in today to explore these new opportunities!</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 LearnAgent. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
