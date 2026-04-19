@@ -8,18 +8,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    
-    // Get conversation between two specific users
-    @Query("SELECT m FROM Message m WHERE (m.sender.id = :user1Id AND m.receiver.id = :user2Id) " +
-           "OR (m.sender.id = :user2Id AND m.receiver.id = :user1Id) ORDER BY m.sentAt ASC")
-    List<Message> findConversation(@Param("user1Id") Long user1Id, @Param("user2Id") Long user2Id);
 
-    // Get unread count for a receiver
-    long countByReceiverIdAndIsReadFalse(Long receiverId);
+       // Get conversation between two specific users
+       @Query("SELECT m FROM Message m WHERE (m.sender.id = :user1Id AND m.receiver.id = :user2Id) " +
+                     "OR (m.sender.id = :user2Id AND m.receiver.id = :user1Id) ORDER BY m.sentAt ASC")
+       List<Message> findConversation(@Param("user1Id") Long user1Id, @Param("user2Id") Long user2Id);
 
-    // Find all users who have exchanged messages with this user
-    @Query("SELECT DISTINCT u.id FROM User u " +
-           "JOIN Message m ON (m.sender.id = u.id AND m.receiver.id = :userId) " +
-           "OR (m.receiver.id = u.id AND m.sender.id = :userId)")
-    List<Long> findDistinctContactsForUser(@Param("userId") Long userId);
+       // Get unread count for a receiver
+       long countByReceiverIdAndIsReadFalse(Long receiverId);
+
+       // Find all users who have exchanged messages with this user
+       @Query("SELECT DISTINCT CASE WHEN m.sender.id = :userId THEN m.receiver.id ELSE m.sender.id END " +
+              "FROM Message m WHERE m.sender.id = :userId OR m.receiver.id = :userId")
+       List<Long> findDistinctContactsForUser(@Param("userId") Long userId);
 }

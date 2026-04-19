@@ -9,5 +9,8 @@ export const register = (data) =>
 export const getMe = () =>
   api.get('/auth/me');
 
-export const resetPassword = (email, newPassword) =>
-  api.post('/auth/reset-password', { email, newPassword });
+export const resetPassword = (token, newPassword) =>
+  api.post('/auth/reset-password', { token, newPassword });
+
+export const forgotPassword = (email) =>
+  api.post('/auth/forgot-password', { email });
