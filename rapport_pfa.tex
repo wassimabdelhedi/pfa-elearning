@@ -288,9 +288,9 @@ Ce rapport présente le travail réalisé dans le cadre du Projet de Fin d'Anné
 
 La plateforme intègre trois composantes technologiques principales : un backend développé avec \textbf{Spring Boot} (Java 21) connecté à une base de données \textbf{PostgreSQL}, un frontend réalisé avec \textbf{React.js} et \textbf{Vite}, et un moteur de recommandation basé sur l'intelligence artificielle développé avec \textbf{Python FastAPI} et le modèle de langage \textbf{Sentence-BERT} (\texttt{paraphrase-multilingual-MiniLM-L12-v2}).
 
-Le système permet aux étudiants de s'inscrire à des cours multi-chapitres, de suivre leur progression chapitre par chapitre, de passer des exercices et des quiz, et de recevoir des recommandations personnalisées basées sur leur requête et leur historique d'apprentissage. Les enseignants peuvent créer et gérer des cours structurés en chapitres, avec supports multimédias. Un contrôle d'accès strict restreint l'accès aux quiz et exercices aux seuls étudiants ayant complété l'intégralité des chapitres du cours.
+Le système permet aux étudiants de s'inscrire à des cours multi-chapitres, de suivre leur progression chapitre par chapitre, de passer des exercices et des quiz, et de recevoir des recommandations personnalisées basées sur leur requête et leur historique d'apprentissage. Il intègre également un système de messagerie avancée pour la récupération de compte sécurisée et l'envoi de notifications en temps réel lors des mises à jour pédagogiques. Les enseignants peuvent créer et gérer des cours structurés en chapitres, avec supports multimédias. Un contrôle d'accès strict restreint l'accès aux quiz et exercices aux seuls étudiants ayant complété l'intégralité des chapitres du cours.
 
-Le projet a été conduit selon la méthodologie agile \textbf{Scrum}, structuré en quatre sprints couvrant respectivement l'authentification, la gestion des cours multi-chapitres, les fonctionnalités pédagogiques (quiz et exercices), et le moteur de recommandation IA avec détection des lacunes.
+Le projet a été conduit selon la méthodologie agile \textbf{Scrum}, structuré en cinq sprints couvrant respectivement l'authentification, la gestion des cours multi-chapitres, les fonctionnalités pédagogiques (quiz et exercices), le moteur de recommandation IA avec détection des lacunes, et enfin le système de messagerie et notifications.
 
 \textbf{Mots-clés :} E-Learning, Spring Boot, React.js, Intelligence Artificielle, Sentence-BERT, NLP, Recommandation, Scrum, JWT, REST API, PostgreSQL.
 
@@ -302,7 +302,7 @@ Le projet a été conduit selon la méthodologie agile \textbf{Scrum}, structur�
 
 The platform integrates three main technological components: a backend developed with \textbf{Spring Boot} (Java 21) connected to a \textbf{PostgreSQL} database, a frontend built with \textbf{React.js} and \textbf{Vite}, and an AI-powered recommendation engine developed with \textbf{Python FastAPI} and the \textbf{Sentence-BERT} language model (\texttt{paraphrase-multilingual-MiniLM-L12-v2}).
 
-The project was conducted following the agile \textbf{Scrum} methodology, structured into four sprints covering authentication, multi-chapter course management, educational features (quizzes and exercises with progress tracking), and the AI recommendation engine with weak-topic detection.
+The project was conducted following the agile \textbf{Scrum} methodology, structured into five sprints covering authentication, multi-chapter course management, educational features (quizzes and exercises with progress tracking), the AI recommendation engine with weak-topic detection, and a smart mailing and notification system.
 
 \textbf{Keywords:} E-Learning, Spring Boot, React.js, Artificial Intelligence, Sentence-BERT, NLP, Recommendation, Scrum, JWT, REST API, PostgreSQL.
 
@@ -353,6 +353,7 @@ Les objectifs principaux de notre projet sont :
   \item Créer un moteur de cours multi-chapitres avec suivi de progression strict et contrôle d'accès basé sur la complétion.
   \item Proposer aux étudiants des quiz interactifs avec correction automatique et détection des lacunes par IA.
   \item Intégrer un moteur de recommandation sémantique (Sentence-BERT) pour personnaliser l'expérience d'apprentissage.
+  \item Intégrer un système de notification intelligent (Email, récupération de compte, rappels) pour améliorer l'engagement des apprenants.
   \item Appliquer la méthodologie Scrum pour une gestion de projet agile et efficace.
 \end{itemize}
 
@@ -364,7 +365,7 @@ Ce rapport est organisé en cinq chapitres :
   \item \textbf{Chapitre 2 :} Conception architecturale du système.
   \item \textbf{Chapitre 3 :} Sprints 1 et 2 -- Authentification et gestion des cours multi-chapitres.
   \item \textbf{Chapitre 4 :} Sprint 3 -- Fonctionnalités pédagogiques (Quiz et Exercices).
-  \item \textbf{Chapitre 5 :} Sprint 4 -- Moteur de recommandation IA et détection des lacunes.
+  \item \textbf{Chapitre 5 :} Sprints 4 et 5 -- Moteur de recommandation IA, détection des lacunes et système de messagerie avancée.
 \end{itemize}
 
 \newpage
@@ -479,6 +480,14 @@ Notre solution apporte des réponses concrètes à ces problèmes grâce à une 
   \item Historique des recherches (\texttt{SearchHistory}).
 \end{itemize}
 
+\subsubsection{Module Notification et Messagerie Avancée}
+\begin{itemize}[leftmargin=*]
+  \item Validation des adresses email à l'inscription.
+  \item Récupération sécurisée des mots de passe par email (génération de tokens uniques et liens à durée de vie limitée).
+  \item Envoi de notifications automatiques lors des mises à jour de cours et de leçons pour les étudiants inscrits.
+  \item Relances par email pour les étudiants inactifs (\texttt{EmailScheduler}).
+\end{itemize}
+
 \subsection{Besoins non fonctionnels}
 
 \begin{table}[H]
@@ -588,6 +597,10 @@ US-12 & Étudiant & Voir mon tableau de bord avec progression & Moyenne & S2 \\
 \hline
 US-13 & Enseignant & Voir les résultats de mes quiz par étudiant & Moyenne & S3 \\
 \hline
+US-14 & Utilisateur & Récupérer mon compte via email (mot de passe oublié) & Haute & S5 \\
+\hline
+US-15 & Étudiant & Être notifié par email lors des mises à jour & Moyenne & S5 \\
+\hline
 \end{tabularx}
 \end{table}
 
@@ -656,6 +669,8 @@ Le backend suit une architecture N-Tier avec séparation stricte des responsabil
   \item \textbf{exception/} : Gestion globale des erreurs (\texttt{GlobalExceptionHandler} avec \texttt{@ControllerAdvice}).
 \end{itemize}
 
+Une composante importante de la couche de service est l'\textbf{EmailService} qui s'appuie sur le starter Spring Mail pour gérer les modèles HTML (\texttt{Thymeleaf}) et distribuer les notifications asynchrones.
+
 \subsection{Modèle de données (17 entités JPA)}
 
 \begin{table}[H]
@@ -698,6 +713,8 @@ Le backend suit une architecture N-Tier avec séparation stricte des responsabil
 \texttt{SearchHistory} & Log des recherches effectuées par un étudiant \\
 \hline
 \texttt{DifficultyLevel} & Enum : BEGINNER, INTERMEDIATE, ADVANCED \\
+\hline
+\texttt{Message} & Notification ou email envoyé, avec suivi de statut (envoyé/échoué) \\
 \hline
 \end{tabularx}
 \end{table}
@@ -1335,6 +1352,31 @@ GET & \texttt{/health} & Health check du microservice \\
 \newpage
 
 % =====================================================================
+% SPRINT 5 -- MESSAGERIE ET NOTIFICATIONS
+% =====================================================================
+\section{Sprint 5 -- Système de Messagerie Intelligente}
+
+\begin{scrumbox}[frametitle={Sprint 5 -- Notifications et Récupération de Compte}]
+\textbf{Durée :} 1 semaine \quad \textbf{Responsable :} FRIKHA Amin (Backend) \& BAHLOUL Donia (Frontend)\\[0.3cm]
+\textbf{Objectif :} Mettre en place un système de messagerie avancé, incluant la validation des emails, la récupération sécurisée de mot de passe et l'envoi de notifications lors des mises à jour des cours.
+\end{scrumbox}
+
+\subsection{Architecture du module de messagerie}
+
+Le système repose sur un \texttt{EmailService} côté backend, utilisant le protocole SMTP (via \texttt{spring-boot-starter-mail}) et des templates HTML pour générer des emails dynamiques (mot de passe oublié, alertes d'inactivité, inscriptions). La gestion des notifications s'appuie sur :
+\begin{itemize}
+  \item \textbf{Génération de tokens sécurisés} : Un token unique est généré et stocké en base de données avec une date d'expiration pour la récupération de mot de passe.
+  \item \textbf{Tâches asynchrones et planifiées} : Un \texttt{EmailScheduler} surveille l'activité des utilisateurs et envoie automatiquement des emails de rappel aux étudiants inactifs.
+  \item \textbf{Événements d'application} : Lorsqu'un enseignant modifie un chapitre ou un cours, le service de cours déclenche une notification par email à tous les étudiants inscrits via le \texttt{MessageController} et l'entité \texttt{Message}.
+\end{itemize}
+
+\subsection{Intégration Frontend}
+
+Côté frontend, ce sprint introduit la \texttt{ForgotPasswordPage} et la \texttt{ResetPasswordPage}, offrant des interfaces claires et ergonomiques permettant aux utilisateurs de recevoir un lien de réinitialisation sécurisé sans compromettre l'architecture JWT existante.
+
+\newpage
+
+% =====================================================================
 % CONCLUSION GÉNÉRALE
 % =====================================================================
 \chapter*{Conclusion Générale et Perspectives}
@@ -1345,12 +1387,13 @@ GET & \texttt{/health} & Health check du microservice \\
 
 Au terme de ce Projet de Fin d'Année, nous avons conçu et développé \textbf{LearnAgent}, une plateforme e-learning intelligente et complète répondant à l'ensemble des besoins identifiés lors de l'analyse de l'existant. Le projet constitue une solution moderne et robuste qui intègre harmonieusement les dernières technologies du développement web et de l'intelligence artificielle sémantique.
 
-Les quatre sprints Scrum ont permis de livrer de façon incrémentielle :
+Les cinq sprints Scrum ont permis de livrer de façon incrémentielle :
 \begin{itemize}
   \item Un système d'authentification JWT sécurisé avec gestion des rôles (Sprint 1).
   \item Un moteur de cours multi-chapitres avec progression stricte et contrôle d'accès (Sprint 2).
   \item Des modules interactifs de quiz avec correction automatique et exercices pratiques (Sprint 3).
   \item Un moteur de recommandation sémantique Sentence-BERT et un détecteur de lacunes IA (Sprint 4).
+  \item Un système robuste de messagerie intelligente et de notifications asynchrones (Sprint 5).
 \end{itemize}
 
 \section*{Compétences acquises}
