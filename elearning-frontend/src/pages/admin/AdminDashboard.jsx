@@ -200,13 +200,6 @@ export default function AdminDashboard() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span className="badge" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>{student.enrollmentCount} inscr.</span>
-                      <button 
-                        className="btn btn-secondary btn-sm" 
-                        onClick={() => navigate(`/admin/users/${student.id}`)}
-                        title="Voir détails"
-                      >
-                        <FiEye size={14} />
-                      </button>
                     </div>
                   </li>
                 ))}

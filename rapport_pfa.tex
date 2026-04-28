@@ -1525,7 +1525,7 @@ Le microservice FastAPI expose une interface RESTful structurée autour des fonc
 
 \subsection{Tableau de Bord Analytique et Visualisation de Performance}
 
-Afin d'offrir une vision à 360 degrés de la progression de l'étudiant, le Sprint~4 a été enrichi d'un module d'analytique avancée. Ce dispositif transforme les données brutes de quiz en indicateurs de performance (KPIs) exploitables, visualisés à travers un tableau de bord haute fidélité.
+Afin d'offrir une vision à 360 degrés de la progression de l'étudiant, le Sprint~4 a été enrichi d'un module d'analytique avancée. Ce dispositif transforme les données brutes de quiz en indicateurs de performance (KPIs) exploitables, visualisés à travers un tableau de bord haute fidélité accessible aux \textbf{enseignants} et aux \textbf{administrateurs}.
 
 \begin{scrumbox}
 \textbf{Indicateurs de performance (KPIs) calculés côté backend :}
@@ -1573,7 +1573,7 @@ En complément des graphiques, un processeur logique côté backend analyse les 
 
 \section{Sprint Review -- Sprint 4}
 
-La clôture du Sprint~4 valide l'intégration réussie d'une couche d'intelligence artificielle autonome au sein de la plateforme. Le moteur de recommandation hybride a démontré sa capacité à relier sémantiquement des requêtes multilingues à un catalogue de formations diversifié. Une innovation majeure a été apportée au tuteur pédagogique via l'implémentation d'un système de \textbf{mise en cache intelligente} (Smart Caching) des explications en base de données, réduisant la latence à zéro pour les questions déjà analysées. De plus, une \textbf{chaîne de secours multi-modèles} (Gemini 2.0 Flash, Pro, etc.) garantit une résilience totale face aux limitations de quota. L'isolation du microservice IA et ces optimisations garantissent des performances stables et une expérience utilisateur fluide, validant ainsi la pertinence d'une approche microservices.
+La clôture du Sprint~4 valide l'intégration réussie d'une couche d'intelligence artificielle autonome au sein de la plateforme. Le moteur de recommandation hybride a démontré sa capacité à relier sémantiquement des requêtes multilingues à un catalogue de formations diversifié. Une innovation majeure a été apportée au tuteur pédagogique via l'implémentation d'un système de \textbf{mise en cache intelligente} (Smart Caching) des explications en base de données, réduisant la latence à zéro pour les questions déjà analysées. De plus, une \textbf{chaîne de secours multi-modèles} (Gemini 2.0 Flash, Pro, etc.) garantit une résilience totale face aux limitations de quota. L'isolation du microservice IA et ces optimisations garantissent des performances stables et une expérience utilisateur fluide, validant ainsi la pertinence d'une approche microservices. Par ailleurs, l'extension des outils analytiques aux administrateurs assure une supervision globale et cohérente de la réussite académique au sein de l'établissement.
 
 \newpage
 
@@ -1747,10 +1747,9 @@ POST & /api/quizzes & Créer un quiz & TEACHER \\
 POST & /api/quizzes/\{id\}/submit & Soumettre un quiz & STUDENT \\
 \midrule
 POST & /api/search & Recherche IA (cours) & STUDENT \\
-GET  & /api/search/history & Historique des recherches & STUDENT \\
-GET  & /api/recommendations & Recommandations IA & STUDENT \\
-\midrule
+POST & /api/detect-weak-topics & Détection lacunes & IA / Service \\
 GET  & /api/admin/users & Liste des utilisateurs & ADMIN \\
+GET  & /api/admin/users/\{id\} & Détails analytiques étudiant & ADMIN / TEACHER \\
 GET  & /api/admin/stats & Statistiques globales & ADMIN \\
 \bottomrule
 \end{tabularx}

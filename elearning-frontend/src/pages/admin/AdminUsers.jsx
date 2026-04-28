@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllUsers, toggleUserActive, deleteUser } from '../../api/adminApi';
-import { FiUsers, FiTrash2, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
+import { FiUsers, FiTrash2, FiToggleLeft, FiToggleRight, FiEye } from 'react-icons/fi';
 
 export default function AdminUsers() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
@@ -158,6 +160,13 @@ export default function AdminUsers() {
                   </td>
                   <td style={{ padding: '14px 20px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                        title="Voir le profil"
+                      >
+                        <FiEye size={14} />
+                      </button>
                       <button
                         className="btn btn-secondary btn-sm"
                         onClick={() => handleToggle(user.id)}
