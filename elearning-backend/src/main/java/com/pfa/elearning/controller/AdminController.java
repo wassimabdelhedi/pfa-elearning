@@ -3,6 +3,7 @@ package com.pfa.elearning.controller;
 import com.pfa.elearning.model.Category;
 import com.pfa.elearning.model.Role;
 import com.pfa.elearning.model.User;
+import com.pfa.elearning.model.Enrollment;
 import com.pfa.elearning.repository.CategoryRepository;
 import com.pfa.elearning.repository.CourseRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserService userService;
@@ -29,10 +29,13 @@ public class AdminController {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CategoryRepository categoryRepository;
+    private final com.pfa.elearning.repository.QuizResultRepository quizResultRepository;
+    private final com.pfa.elearning.repository.RecommendationRepository recommendationRepository;
 
     // ========== DASHBOARD ==========
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getDashboard() {
         long totalStudents = userRepository.findByRole(Role.STUDENT).size();
         long totalTeachers = userRepository.findByRole(Role.TEACHER).size();
@@ -66,6 +69,7 @@ public class AdminController {
     // ========== USER MANAGEMENT ==========
 
     @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         List<Map<String, Object>> result = users.stream().map(u -> Map.<String, Object>of(
@@ -79,13 +83,120 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/users/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<Map<String, Object>> getUserDetails(@PathVariable Long id) {
+        User u = userService.getUserById(id);
+        Map<String, Object> details = new java.util.HashMap<>();
+        details.put("id", u.getId());
+        details.put("firstName", u.getFirstName());
+        details.put("lastName", u.getLastName());
+        details.put("fullName", u.getFullName());
+        details.put("email", u.getEmail());
+        details.put("role", u.getRole().name());
+        details.put("active", u.isActive());
+        details.put("createdAt", u.getCreatedAt().toString());
+        details.put("lastLoginDate", u.getLastLoginDate() != null ? u.getLastLoginDate().toString() : null);
+        details.put("niveauEtude", u.getNiveauEtude());
+        details.put("niveauCompetence", u.getNiveauCompetence());
+        details.put("domaineInteret", u.getDomaineInteret());
+        details.put("objectif", u.getObjectif());
+        
+        if (u.getRole() == Role.STUDENT) {
+            List<Enrollment> enrollments = enrollmentRepository.findByStudentId(u.getId());
+            details.put("enrollmentCount", enrollments.size());
+            
+            long completedCount = enrollments.stream().filter(Enrollment::isCompleted).count();
+            long inProgressCount = enrollments.size() - completedCount;
+            double globalProgress = enrollments.isEmpty() ? 0 : enrollments.stream().mapToDouble(Enrollment::getProgressPercentage).average().orElse(0.0);
+
+            details.put("completedCount", completedCount);
+            details.put("inProgressCount", inProgressCount);
+            details.put("globalProgress", Math.round(globalProgress));
+
+            // Courses
+            List<Map<String, Object>> enrolledCourses = enrollments.stream().map(e -> {
+                Map<String, Object> cMap = new java.util.HashMap<>();
+                cMap.put("id", e.getCourse().getId());
+                cMap.put("title", e.getCourse().getTitle());
+                cMap.put("progress", e.getProgressPercentage());
+                cMap.put("completed", e.isCompleted());
+                cMap.put("enrolledAt", e.getEnrolledAt().toString());
+                return cMap;
+            }).collect(Collectors.toList());
+            details.put("enrolledCourses", enrolledCourses);
+
+            // Quiz Results with Class Averages & Line Chart Data
+            List<Map<String, Object>> quizHistory = quizResultRepository.findByStudentId(u.getId()).stream().map(r -> {
+                Map<String, Object> rMap = new java.util.HashMap<>();
+                rMap.put("id", r.getId());
+                rMap.put("quizTitle", r.getQuiz().getTitle());
+                rMap.put("score", r.getScore());
+                rMap.put("total", r.getTotalQuestions());
+                double percentage = r.getTotalQuestions() > 0 ? (double)r.getScore() / r.getTotalQuestions() * 100 : 0;
+                rMap.put("percentage", Math.round(percentage));
+                rMap.put("date", r.getSubmittedAt().toString());
+                rMap.put("dateShort", r.getSubmittedAt().toLocalDate().toString());
+                rMap.put("failed", r.isFailed());
+                rMap.put("weakTopicsRaw", r.getWeakTopics());
+
+                // Class average
+                List<com.pfa.elearning.model.QuizResult> allResultsForQuiz = quizResultRepository.findByQuizId(r.getQuiz().getId());
+                double classAvg = allResultsForQuiz.stream()
+                        .mapToDouble(res -> res.getTotalQuestions() > 0 ? (double)res.getScore() / res.getTotalQuestions() * 100 : 0)
+                        .average().orElse(0.0);
+                rMap.put("classAverage", Math.round(classAvg));
+
+                return rMap;
+            }).collect(Collectors.toList());
+            details.put("quizResults", quizHistory);
+
+            // KPI Calculations
+            if (!quizHistory.isEmpty()) {
+                double avg = quizHistory.stream().mapToDouble(m -> (Long)m.get("percentage")).average().orElse(0.0);
+                long passed = quizHistory.stream().filter(m -> !(Boolean)m.get("failed")).count();
+                double successRate = (double)passed / quizHistory.size() * 100;
+                long lastScore = (Long)quizHistory.get(0).get("percentage");
+                
+                details.put("averageScore", Math.round(avg));
+                details.put("successRate", Math.round(successRate));
+                details.put("lastScore", lastScore);
+                
+                // Evolution (Last vs Previous)
+                double evolution = 0;
+                if (quizHistory.size() >= 2) {
+                    evolution = lastScore - (Long)quizHistory.get(1).get("percentage");
+                }
+                details.put("evolution", evolution);
+
+                // AI Insights
+                List<String> insights = new java.util.ArrayList<>();
+                if (evolution > 5) insights.add("Forte progression constatée sur les derniers quiz.");
+                else if (evolution < -5) insights.add("Attention : baisse de régime sur les derniers résultats.");
+                else insights.add("Performance stable et régulière.");
+                
+                if (avg > 80) insights.add("Excellente maîtrise globale des sujets.");
+                if (successRate < 50) insights.add("Le taux de réussite est faible, un tutorat est recommandé.");
+                
+                details.put("insights", insights);
+            }
+
+        } else if (u.getRole() == Role.TEACHER) {
+            details.put("courseCount", courseRepository.countByTeacherId(u.getId()));
+        }
+        
+        return ResponseEntity.ok(details);
+    }
+
     @PutMapping("/users/{id}/toggle-active")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> toggleUserActive(@PathVariable Long id) {
         userService.toggleUserActive(id);
         return ResponseEntity.ok(Map.of("message", "User status updated"));
     }
 
     @PutMapping("/users/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> updateUserRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String newRole = body.get("role");
         if (newRole == null || newRole.trim().isEmpty()) {
@@ -98,6 +209,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
@@ -106,12 +218,14 @@ public class AdminController {
     // ========== COURSE MANAGEMENT ==========
 
     @DeleteMapping("/courses/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAllCourses() {
         courseRepository.deleteAll();
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/system-reset-seed")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> triggerSystemResetAndSeed() {
         try {
             // 1. Delete all courses and categories
@@ -205,11 +319,13 @@ public class AdminController {
     // ========== CATEGORY MANAGEMENT ==========
 
     @GetMapping("/categories")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok(categoryRepository.findAll());
     }
 
     @PostMapping("/categories")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Category> createCategory(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         String description = body.getOrDefault("description", "");
@@ -227,6 +343,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryRepository.deleteById(id);
         return ResponseEntity.noContent().build();

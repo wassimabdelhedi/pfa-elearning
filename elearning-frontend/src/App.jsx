@@ -33,6 +33,7 @@ import QuizResultsPage from './pages/teacher/QuizResultsPage';
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
+import UserDetails from './pages/admin/UserDetails';
 
 // Common pages
 import MessagesPage from './pages/common/MessagesPage';
@@ -173,6 +174,11 @@ function App() {
         <Route path="/admin/users" element={
           <ProtectedRoute roles={['ADMIN']}>
             <AdminUsers />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/users/:id" element={
+          <ProtectedRoute roles={['ADMIN', 'TEACHER']}>
+            <UserDetails />
           </ProtectedRoute>
         } />
 

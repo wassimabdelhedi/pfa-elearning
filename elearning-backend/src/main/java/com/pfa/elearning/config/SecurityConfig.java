@@ -75,7 +75,9 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/chapters/**").hasRole("TEACHER")
 						.requestMatchers(HttpMethod.DELETE, "/api/chapters/**").hasRole("TEACHER")
 
-						// Admin endpoints
+						// Admin endpoints - shared with teachers for student profiling
+						.requestMatchers(HttpMethod.GET, "/api/admin/users/*").hasAnyRole("ADMIN", "TEACHER")
+						.requestMatchers(HttpMethod.GET, "/api/admin/categories").hasAnyRole("ADMIN", "TEACHER")
 						.requestMatchers("/api/admin/**").hasRole("ADMIN")
 
 						// All other requests require authentication

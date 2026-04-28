@@ -17,6 +17,9 @@ export const updateUserRole = (id, role) =>
 export const deleteUser = (id) =>
   api.delete(`/admin/users/${id}`);
 
+export const getUserDetails = (id) =>
+  api.get(`/admin/users/${id}`);
+
 // Courses & Purge
 export const deleteAllCourses = () =>
   api.delete('/admin/courses/all');

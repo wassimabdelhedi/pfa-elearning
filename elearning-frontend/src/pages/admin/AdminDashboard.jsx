@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAdminDashboard, getAdminCategories, createCategory, deleteCategory } from '../../api/adminApi';
-import { FiUsers, FiBookOpen, FiTag, FiPlus, FiTrash2, FiAward, FiLayers, FiClipboard, FiShield } from 'react-icons/fi';
+import { FiUsers, FiBookOpen, FiTag, FiPlus, FiTrash2, FiAward, FiLayers, FiClipboard, FiShield, FiEye } from 'react-icons/fi';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -176,7 +176,9 @@ export default function AdminDashboard() {
                       <div style={{ fontWeight: 600 }}>{teacher.fullName}</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{teacher.email}</div>
                     </div>
-                    <span className="badge badge-primary">{teacher.courseCount} cours</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="badge badge-primary">{teacher.courseCount} cours</span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -196,7 +198,16 @@ export default function AdminDashboard() {
                       <div style={{ fontWeight: 600 }}>{student.fullName}</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{student.email}</div>
                     </div>
-                    <span className="badge" style={{ background: 'var(--bg-lighter)', color: 'var(--text-secondary)' }}>{student.enrollmentCount} inscr.</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="badge" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>{student.enrollmentCount} inscr.</span>
+                      <button 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={() => navigate(`/admin/users/${student.id}`)}
+                        title="Voir détails"
+                      >
+                        <FiEye size={14} />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

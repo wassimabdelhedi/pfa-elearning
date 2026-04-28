@@ -447,6 +447,7 @@ public class QuizController {
             Map<String, Object> map = new HashMap<>();
             map.put("id", r.getId());
             map.put("studentName", r.getStudent().getFullName());
+            map.put("studentId", r.getStudent().getId());
             map.put("studentEmail", r.getStudent().getEmail());
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());
@@ -479,6 +480,7 @@ public class QuizController {
             map.put("quizId", r.getQuiz().getId());
             map.put("quizTitle", r.getQuiz().getTitle());
             map.put("studentName", r.getStudent().getFullName());
+            map.put("studentId", r.getStudent().getId());
             map.put("studentEmail", r.getStudent().getEmail());
             map.put("score", r.getScore());
             map.put("totalQuestions", r.getTotalQuestions());

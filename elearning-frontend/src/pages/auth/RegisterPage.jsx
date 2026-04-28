@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { register } from '../../api/authApi';
-import { FiBookOpen, FiUser, FiTarget, FiArrowRight, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
+import { FiBookOpen, FiUser, FiTarget, FiArrowRight, FiArrowLeft, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -16,6 +16,7 @@ export default function RegisterPage() {
     objectif: 'Améliorer mes compétences',
     autreObjectif: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { loginUser } = useAuth();
@@ -168,8 +169,37 @@ export default function RegisterPage() {
 
               <div className="form-group">
                 <label>Mot de passe</label>
-                <input name="password" type="password" className="form-input" placeholder="Min. 6 caractères" 
-                  value={form.password} onChange={handleChange} required minLength={6} />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="form-input"
+                    placeholder="Min. 6 caractères"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                    minLength={6}
+                    style={{ width: '100%', paddingRight: '45px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '4px'
+                    }}
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div className="form-group">

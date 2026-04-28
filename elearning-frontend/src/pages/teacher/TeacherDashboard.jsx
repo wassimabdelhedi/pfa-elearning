@@ -140,6 +140,7 @@ export default function TeacherDashboard() {
       const email = r.studentEmail;
       if (!studentMap[email]) {
         studentMap[email] = {
+          id: r.studentId,
           email: r.studentEmail,
           fullName: r.studentName,
           totalScore: 0,
@@ -260,21 +261,30 @@ export default function TeacherDashboard() {
                       <div style={{ fontWeight: 600 }}>{student.fullName}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{student.email}</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{
-                          display: 'inline-block',
-                          padding: '4px 8px',
-                          borderRadius: 8,
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          background: student.averagePercentage >= 70 ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
-                          color: student.averagePercentage >= 70 ? '#4ade80' : '#fbbf24'
-                      }}>
-                        {student.averagePercentage}%
-                      </span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                        {student.quizCount} quiz fait{student.quizCount > 1 ? 's' : ''}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{
+                            display: 'inline-block',
+                            padding: '4px 8px',
+                            borderRadius: 8,
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            background: student.averagePercentage >= 70 ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
+                            color: student.averagePercentage >= 70 ? '#4ade80' : '#fbbf24'
+                        }}>
+                          {student.averagePercentage}%
+                        </span>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                          {student.quizCount} quiz
+                        </div>
                       </div>
+                      <button 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={() => navigate(`/admin/users/${student.id}`)}
+                        title="Voir profil complet"
+                      >
+                        <FiEye size={14} />
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -619,7 +629,8 @@ export default function TeacherDashboard() {
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                     <th style={{ padding: 12, textAlign: 'left', fontSize: '0.85rem' }}>Étudiant</th>
                     <th style={{ padding: 12, textAlign: 'center', fontSize: '0.85rem' }}>Progression</th>
-                    <th style={{ padding: 12, textAlign: 'right', fontSize: '0.85rem' }}>Date d'inscription</th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: '0.85rem' }}>Date d'inscription</th>
+                    <th style={{ padding: 12, textAlign: 'right', fontSize: '0.85rem' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -639,8 +650,17 @@ export default function TeacherDashboard() {
                           </span>
                         </div>
                       </td>
-                      <td style={{ padding: 12, textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      <td style={{ padding: 12, textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         {s.enrolledAt ? new Date(s.enrolledAt).toLocaleDateString('fr-FR') : '-'}
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'right' }}>
+                        <button 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => { setShowStudentsModal(false); navigate(`/admin/users/${s.id}`); }}
+                          title="Voir profil complet"
+                        >
+                          <FiEye size={14} />
+                        </button>
                       </td>
                     </tr>
                   ))}

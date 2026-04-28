@@ -1523,6 +1523,54 @@ Le microservice FastAPI expose une interface RESTful structurée autour des fonc
 \caption{Endpoints REST du microservice IA FastAPI}
 \end{figure}
 
+\subsection{Tableau de Bord Analytique et Visualisation de Performance}
+
+Afin d'offrir une vision à 360 degrés de la progression de l'étudiant, le Sprint~4 a été enrichi d'un module d'analytique avancée. Ce dispositif transforme les données brutes de quiz en indicateurs de performance (KPIs) exploitables, visualisés à travers un tableau de bord haute fidélité.
+
+\begin{scrumbox}
+\textbf{Indicateurs de performance (KPIs) calculés côté backend :}
+\begin{itemize}
+  \item \textbf{Moyenne Globale} : Calculée en temps réel sur l'ensemble des tentatives de quiz.
+  \item \textbf{Taux de Réussite} : Ratio entre quiz validés et tentatives totales.
+  \item \textbf{Évolution de Tendance} : Algorithme comparant le score du dernier quiz à la moyenne glissante des sessions précédentes pour dégager un indice de progression (+/-).
+\end{itemize}
+\end{scrumbox}
+
+\subsubsection{Visualisation de données avec Recharts}
+
+L'interface intègre la bibliothèque \texttt{Recharts} pour le rendu d'une \textbf{courbe de performance adaptative} (Area Chart). Ce graphique est doté d'une intelligence visuelle : la couleur de la courbe s'ajuste dynamiquement (vert pour la progression, rouge pour la régression). Une fonctionnalité majeure est la \textbf{comparaison sémantique avec la classe}, où une ligne de référence superposée permet à l'étudiant de se situer instantanément par rapport à la moyenne globale de ses pairs pour chaque évaluation.
+
+\subsubsection{Moteur d'Insights Pédagogiques (IA)}
+
+En complément des graphiques, un processeur logique côté backend analyse les métriques pour générer des \textbf{insights textuels automatiques}. Ces phrases courtes (ex : "Forte progression constatée", "Performance régulière") offrent un feedback immédiat à l'apprenant, simulant la présence d'un tuteur humain capable de synthétiser son parcours d'apprentissage.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=1.2cm and 1.5cm,
+  data/.style={rectangle, rounded corners=5pt, draw=primaryblue, fill=primaryblue!5,
+    minimum width=3.5cm, minimum height=0.8cm, align=center, font=\footnotesize\bfseries},
+  proc/.style={rectangle, rounded corners=4pt, draw=scrumgreen, fill=scrumgreen!10,
+    minimum width=4cm, minimum height=0.8cm, align=center, font=\footnotesize\sffamily},
+  view/.style={rectangle, rounded corners=4pt, draw=accentorange, fill=accentorange!10,
+    minimum width=4cm, minimum height=0.8cm, align=center, font=\footnotesize\bfseries},
+  arrow/.style={->, thick, primaryblue!60}
+]
+\node[data] (raw) {Quiz Results DB};
+\node[proc, right=of raw] (calc) {Calculateur de KPIs\\(Average, Success Rate, Evo)};
+\node[proc, below=of calc] (ins) {Générateur d'Insights\\(Logique métier Spring)};
+\node[view, right=of calc] (chart) {Line Chart (Recharts)\\+ Comparaison Classe};
+\node[view, right=of ins] (kpi) {Cartes KPI \\+ Alertes Lacunes};
+
+\draw[arrow] (raw)--(calc);
+\draw[arrow] (calc)--(ins);
+\draw[arrow] (calc)--(chart);
+\draw[arrow] (ins)--(kpi);
+\end{tikzpicture}}
+\caption{Architecture du moteur analytique et de visualisation des performances}
+\end{figure}
+
 \section{Sprint Review -- Sprint 4}
 
 La clôture du Sprint~4 valide l'intégration réussie d'une couche d'intelligence artificielle autonome au sein de la plateforme. Le moteur de recommandation hybride a démontré sa capacité à relier sémantiquement des requêtes multilingues à un catalogue de formations diversifié. Une innovation majeure a été apportée au tuteur pédagogique via l'implémentation d'un système de \textbf{mise en cache intelligente} (Smart Caching) des explications en base de données, réduisant la latence à zéro pour les questions déjà analysées. De plus, une \textbf{chaîne de secours multi-modèles} (Gemini 2.0 Flash, Pro, etc.) garantit une résilience totale face aux limitations de quota. L'isolation du microservice IA et ces optimisations garantissent des performances stables et une expérience utilisateur fluide, validant ainsi la pertinence d'une approche microservices.
