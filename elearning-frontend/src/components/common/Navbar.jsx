@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { getUnreadCount } from '../../api/messageApi';
 import {
   FiBookOpen, FiLogOut, FiUser, FiSearch, FiGrid,
   FiPlusCircle, FiFileText, FiCheckSquare, FiSun, FiMoon, FiDroplet, FiMessageSquare
@@ -21,8 +23,27 @@ const themeLabels = {
 export default function Navbar() {
   const { user, isAuthenticated, isStudent, isTeacher, isAdmin, logout } = useAuth();
   const { theme, cycleTheme } = useTheme();
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let interval;
+    if (isAuthenticated) {
+      const fetchCount = async () => {
+        try {
+          const res = await getUnreadCount();
+          setUnreadCount(res.data.unreadCount);
+        } catch (err) {
+          console.error("Failed to fetch unread count", err);
+        }
+      };
+
+      fetchCount();
+      interval = setInterval(fetchCount, 10000); // Check every 10 seconds
+    }
+    return () => clearInterval(interval);
+  }, [isAuthenticated, location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -59,8 +80,13 @@ export default function Navbar() {
                   </Link>
                   <Link to="/courses" className={isActive('/courses')}>Cours</Link>
                   <Link to="/messages" className={isActive('/messages')}>
-                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Messages
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      Messages
+                      {unreadCount > 0 && (
+                        <span className="notification-badge">{unreadCount}</span>
+                      )}
+                    </div>
                   </Link>
                 </>
               )}
@@ -84,8 +110,13 @@ export default function Navbar() {
                     Quiz
                   </Link>
                   <Link to="/messages" className={isActive('/messages')}>
-                    <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                    Messages
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                      <FiMessageSquare size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      Messages
+                      {unreadCount > 0 && (
+                        <span className="notification-badge">{unreadCount}</span>
+                      )}
+                    </div>
                   </Link>
                 </>
               )}

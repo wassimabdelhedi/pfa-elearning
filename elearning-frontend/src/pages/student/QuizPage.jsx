@@ -281,10 +281,25 @@ export default function QuizPage() {
                     color: 'var(--text-secondary)'
                   }}>
                     {(() => {
-                      const feedback = tutorFeedbacks.find(f => 
-                        f.question.trim().toLowerCase() === question.text.trim().toLowerCase()
-                      )?.feedback;
-                      return feedback ? cleanMarkdown(feedback) : "Aucune explication disponible pour cette question.";
+                      const normalize = (str) => str?.toLowerCase().replace(/[^\w\sàâäéèêëïîôöùûüç]/gi, '').replace(/\s+/g, ' ').trim() || '';
+                      const normalizedQuestion = normalize(question.text);
+                      
+                      // Try matching by ID first (most reliable)
+                      let feedbackObj = tutorFeedbacks.find(f => 
+                        f.question_id && Number(f.question_id) === Number(question.id)
+                      );
+                      
+                      // Fallback to matching by text
+                      if (!feedbackObj) {
+                        feedbackObj = tutorFeedbacks.find(f => 
+                          f.question && normalize(f.question) === normalizedQuestion
+                        );
+                      }
+                      
+                      if (feedbackObj?.feedback) return cleanMarkdown(feedbackObj.feedback);
+                      
+                      // DEBUG: Show what we actually have
+                      return `Aucune explication trouvée. (Data: ${JSON.stringify(tutorFeedbacks)})`;
                     })()}
                   </div>
                 )}

@@ -5,6 +5,7 @@ from typing import List, Optional
 import json
 
 class QuestionFeedbackRequest(BaseModel):
+    question_id: Optional[int] = None
     question_text: str
     student_answer: str
     correct_answer: str
@@ -16,7 +17,7 @@ class BatchQuestionFeedbackRequest(BaseModel):
     questions: List[QuestionFeedbackRequest]
 
 class BatchTutorFeedbackResponse(BaseModel):
-    feedbacks: List[dict] # List of {"question": "...", "feedback": "..."}
+    feedbacks: List[dict] # List of {"question_id": 123, "feedback": "..."}
 
 # Try to configure Gemini
 api_key = os.getenv("GEMINI_API_KEY", "")
@@ -72,36 +73,62 @@ def generate_batch_tutor_feedback(request: BatchQuestionFeedbackRequest) -> Batc
     if not request.questions:
         return BatchTutorFeedbackResponse(feedbacks=[])
 
-    # Build a single prompt for all questions to be much faster
+    # HARDCODED TEST to verify the pipe works
+    # return BatchTutorFeedbackResponse(feedbacks=[{"question_id": q.question_id, "feedback": "Test feedback for " + q.question_text} for q in request.questions])
+
     prompt = """
 Tu es un tuteur pédagogique numérique. Analyse les erreurs suivantes de l'étudiant.
-Pour chaque question, fournis une explication TRÈS CONCISE (max 2 phrases).
+Pour chaque question, fournis une explication TRÈS CONCISE (max 2 sentences).
 Sois bienveillant et pédagogique.
 
-Réponds UNIQUEMENT sous forme de liste JSON d'objets : [{"question": "...", "feedback": "..."}]
+Tu DOIS retourner le résultat UNIQUEMENT sous forme de liste JSON d'objets : [{"question_id": ID, "feedback": "EXPLICATION"}]
 """
 
     for i, q in enumerate(request.questions):
-        prompt += f"\n--- Question {i+1} ---\n"
+        prompt += f"\n--- Question {i+1} (ID: {q.question_id}) ---\n"
         prompt += f"Texte: {q.question_text}\n"
         prompt += f"Réponse étudiant: {q.student_answer}\n"
         prompt += f"Réponse correcte: {q.correct_answer}\n"
 
-    try:
-        model = genai.GenerativeModel('gemini-flash-latest')
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        # Clean potential markdown code blocks
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        
-        feedbacks = json.loads(text)
-        return BatchTutorFeedbackResponse(feedbacks=feedbacks)
-    except Exception as e:
-        print(f"Batch tutor error: {e}")
-        # Fallback: empty list
-        return BatchTutorFeedbackResponse(feedbacks=[])
+    # Chaîne de secours étendue pour garantir ZERO interruption
+    models_to_try = [
+        'gemini-2.0-flash', 
+        'gemini-2.0-flash-lite', 
+        'gemini-2.5-flash', 
+        'gemini-pro-latest',
+        'gemini-2.0-flash-001'
+    ]
+    
+    last_error = ""
+    for model_name in models_to_try:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            text = response.text.strip()
+            
+            # Nettoyage JSON
+            if "```json" in text:
+                text = text.split("```json")[1].split("```")[0].strip()
+            elif "```" in text:
+                text = text.split("```")[1].split("```")[0].strip()
+            
+            start = text.find('[')
+            end = text.rfind(']') + 1
+            if start != -1 and end != 0:
+                text = text[start:end]
+                
+            feedbacks = json.loads(text)
+            return BatchTutorFeedbackResponse(feedbacks=feedbacks)
+            
+        except Exception as e:
+            last_error = str(e)
+            if "429" in last_error:
+                continue # Essayer le modèle suivant si quota dépassé
+            break # Arrêter si c'est une autre erreur (ex: clé invalide)
+
+    # Si tous les modèles échouent
+    return BatchTutorFeedbackResponse(feedbacks=[
+        {"question_id": q.question_id, "feedback": f"Analyse temporairement indisponible (Quota atteint). Veuillez réessayer dans 1 minute."} 
+        for q in request.questions
+    ])
 

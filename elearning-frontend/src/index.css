@@ -440,6 +440,32 @@ select.form-input option {
   color: var(--primary-300);
 }
 
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: var(--error);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 100px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--navbar-bg);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
 /* ==================== LOADING ==================== */
 .spinner {
   width: 40px;
@@ -839,3 +865,159 @@ select.form-input option {
 .animate-in:nth-child(4) { animation-delay: 0.2s; }
 .animate-in:nth-child(5) { animation-delay: 0.25s; }
 .animate-in:nth-child(6) { animation-delay: 0.3s; }
+
+/* ==================== REGISTER STEPPER & CARDS ==================== */
+.stepper-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 0;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  position: relative;
+  z-index: 2;
+}
+
+.step-circle.active {
+  background: var(--primary-500);
+  border-color: var(--primary-400);
+  color: white;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.step-line {
+  flex: 1;
+  max-width: 100px;
+  height: 2px;
+  background: var(--border-color);
+  transition: var(--transition);
+  margin: 0 -2px;
+}
+
+.step-line.active {
+  background: var(--primary-500);
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.role-card {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--primary-300);
+  transform: translateY(-3px);
+}
+
+.role-card.active {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.role-icon {
+  font-size: 2rem;
+}
+
+.role-card span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.icon-badge {
+  display: inline-flex;
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 20px;
+  color: var(--primary-400);
+  margin-bottom: 8px;
+}
+
+/* Animations */
+.form-step-content {
+  animation: slideIn 0.4s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.interests-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.interest-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.interest-tag:hover:not(.disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-300);
+  transform: translateY(-1px);
+}
+
+.interest-tag.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--primary-400);
+  color: var(--primary-200);
+}
+
+.interest-tag.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tag-icon {
+  font-size: 1.1rem;
+}
+
+.tag-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+

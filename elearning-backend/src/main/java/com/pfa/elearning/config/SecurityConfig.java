@@ -99,9 +99,10 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowCredentials(true);
-		configuration.addAllowedOriginPattern("*");
-		configuration.addAllowedHeader("*");
-		configuration.addAllowedMethod("*");
+		configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173", "http://localhost:3000"));
+		configuration.setAllowedHeaders(java.util.List.of("*"));
+		configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.setExposedHeaders(java.util.List.of("Authorization"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

@@ -11,3 +11,6 @@ export const getConversationHistory = (contactId) =>
 
 export const searchContacts = (query = '') =>
   api.get(`/messages/contacts/search?query=${encodeURIComponent(query)}`);
+
+export const getUnreadCount = () =>
+  api.get('/messages/unread-count');

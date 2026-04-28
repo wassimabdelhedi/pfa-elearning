@@ -77,38 +77,73 @@ class CourseRecommender:
         # 1. Extraire les mots-clés de la requête
         keywords = self.nlp.extract_keywords(query)
         language = self.nlp.detect_language(query)
-        logger.info(f"Query: '{query}' | Language: {language} | Keywords: {keywords}")
+        
+        # Expansion de la requête pour enrichir l'embedding sémantique
+        # Si l'utilisateur tape "ia", on veut aussi que le modèle cherche "intelligence artificielle"
+        expanded_query = query
+        for kw in keywords:
+            if kw in self.nlp.tech_synonyms:
+                syns = [s for s in self.nlp.tech_synonyms[kw] if s.lower() not in query.lower()]
+                if syns:
+                    expanded_query += " " + " ".join(syns)
+        
+        logger.info(f"Query: '{query}' | Expanded: '{expanded_query}' | Language: {language} | Keywords: {keywords}")
 
-        # 2. Encoder la requête
-        query_embedding = self.model.encode([query])
+        # 2. Encoder la requête (version étendue)
+        query_embedding = self.model.encode([expanded_query])
 
         # 3. Encoder tous les cours
         course_texts = [self._build_course_text(c) for c in courses]
         course_embeddings = self.model.encode(course_texts)
 
-        # 4. Calculer la similarité cosinus
+        # 4. Calculer la similarité cosinus (base sémantique)
         similarities = cosine_similarity(query_embedding, course_embeddings).flatten()
 
-        # 5. Ajustement personnalisé
+        # 5. Raffinement de la précision (Scoring Hybride)
         adjusted_scores = np.copy(similarities)
+        
+        # Détection de l'intention de niveau (débutant, expert, etc.)
+        query_lower = query.lower()
+        target_level = None
+        if any(w in query_lower for w in ["débutant", "beginner", "introduction", "bases", "fondamentaux"]):
+            target_level = "BEGINNER"
+        elif any(w in query_lower for w in ["intermédiaire", "intermediate", "moyen"]):
+            target_level = "INTERMEDIATE"
+        elif any(w in query_lower for w in ["expert", "avancé", "advanced", "maîtrise"]):
+            target_level = "EXPERT"
 
         for i, course in enumerate(courses):
             course_id = course.get("id")
+            course_title = course.get("title", "").lower()
+            course_desc = course.get("description", "").lower()
+            course_cat = course.get("category", "").lower()
+            course_lvl = course.get("level", "BEGINNER")
 
-            # Pénaliser les cours déjà inscrits (l'étudiant les connaît déjà)
+            # A. Pénaliser les cours déjà inscrits (pertinence de découverte)
             if course_id in enrolled_course_ids:
-                adjusted_scores[i] *= 0.3
+                adjusted_scores[i] *= 0.2  # Pénalité plus forte pour favoriser la découverte
 
-            # Bonus pour correspondance de mots-clés dans le titre
-            title_lower = course.get("title", "").lower()
-            keyword_matches = sum(1 for kw in keywords if kw in title_lower)
-            if keyword_matches > 0:
-                adjusted_scores[i] *= (1.0 + 0.2 * keyword_matches)
+            # B. Bonus pour correspondance EXACTE dans le titre (très haute précision)
+            # Si le mot exact cherché est dans le titre, c'est souvent ce que l'utilisateur veut
+            for kw in keywords:
+                if f" {kw} " in f" {course_title} ":
+                    adjusted_scores[i] += 0.15 # Bonus additif pour garantir une remontée
+                elif kw in course_title:
+                    adjusted_scores[i] += 0.05
 
-            # Bonus si la catégorie correspond aux mots-clés
-            category_lower = course.get("category", "").lower()
-            if any(kw in category_lower for kw in keywords):
-                adjusted_scores[i] *= 1.25
+            # C. Bonus pour la catégorie
+            if any(kw in course_cat for kw in keywords):
+                adjusted_scores[i] += 0.1
+
+            # D. Match de niveau (Précision contextuelle)
+            if target_level and course_lvl == target_level:
+                adjusted_scores[i] += 0.1  # Bonus si le niveau correspond à l'intention
+            elif target_level and course_lvl != target_level:
+                adjusted_scores[i] -= 0.05 # Légère pénalité si le niveau ne correspond pas
+
+            # E. Bonus pour les cours "complets" (description longue = souvent plus de contenu)
+            if len(course_desc) > 200:
+                adjusted_scores[i] += 0.02
 
         # 6. Trier par score décroissant
         top_indices = np.argsort(adjusted_scores)[::-1][:top_n]
@@ -117,21 +152,20 @@ class CourseRecommender:
         results = []
         for idx in top_indices:
             score = float(adjusted_scores[idx])
-            if score < 0.03:  # Seuil minimum de pertinence (réduit pour plus de résultats)
+            # Seuil de pertinence : on veut de la précision, donc on ignore les scores trop bas
+            if score < 0.1: 
                 continue
 
             course = courses[idx]
-
-            # Générer une explication
             reason = self._generate_reason(query, course, keywords, score, language)
 
             results.append({
                 "course_id": course["id"],
-                "score": round(score, 4),
+                "score": min(1.0, round(score, 4)), # Cap à 1.0
                 "reason": reason
             })
 
-        logger.info(f"Returning {len(results)} recommendations")
+        logger.info(f"Returning {len(results)} recommendations with improved precision")
         return results
 
     def _generate_reason(

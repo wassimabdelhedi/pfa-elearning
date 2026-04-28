@@ -32,6 +32,9 @@ public class QuizQuestion {
     @Column(length = 100)
     private String topic;
 
+    @Column(columnDefinition = "TEXT")
+    private String aiExplanation; // Cached AI explanation
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
     @JsonIgnore

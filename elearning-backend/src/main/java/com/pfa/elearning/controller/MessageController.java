@@ -58,6 +58,15 @@ public class MessageController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Object>> getUnreadCount(Authentication authentication) {
+        User user = userService.getUserByEmail(authentication.getName());
+        long count = messageService.getUnreadCount(user.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("unreadCount", count);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/debug/users")
     public ResponseEntity<List<Map<String, Object>>> debugUsers() {
         return ResponseEntity.ok(userService.getAllUsers().stream().map(u -> {

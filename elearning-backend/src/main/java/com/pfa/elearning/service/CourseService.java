@@ -162,7 +162,7 @@ public class CourseService {
     }
 
     public List<Course> getPersonalizedCourses(User student) {
-        String level = student.getNiveau();
+        String level = student.getNiveauCompetence();
         String domain = student.getDomaineInteret() != null ? student.getDomaineInteret() : "";
         String goal = student.getObjectif() != null ? student.getObjectif() : "";
 

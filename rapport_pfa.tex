@@ -24,7 +24,7 @@
 \usepackage{float}
 \usepackage{mdframed}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,shadows,backgrounds}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{setspace}
@@ -34,9 +34,9 @@
 % GÉOMÉTRIE
 % =====================================================================
 \geometry{
-  top=2.8cm,
+  top=2.5cm,
   bottom=2.5cm,
-  left=3cm,
+  left=2.5cm,
   right=2.5cm,
   headheight=28pt,
   headsep=12pt,
@@ -51,21 +51,61 @@
 % =====================================================================
 \definecolor{primaryblue}{RGB}{0,82,147}
 \definecolor{secondaryblue}{RGB}{41,128,185}
+\definecolor{layoutblack}{RGB}{0,0,0}
 \definecolor{accentorange}{RGB}{230,126,34}
 \definecolor{lightgray}{RGB}{245,245,245}
 \definecolor{darkgray}{RGB}{60,60,60}
 \definecolor{scrumgreen}{RGB}{39,174,96}
 
 % =====================================================================
+% STYLES TIKZ
+% =====================================================================
+\tikzset{
+  >={Latex[length=2.5mm,width=1.8mm]},
+  base/.style={
+    rectangle, rounded corners=5pt, thick, align=center, font=\small,
+    minimum height=1.3cm, text width=3.8cm,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  frontend/.style={base, draw=secondaryblue, fill=secondaryblue!10},
+  backend/.style={base, draw=primaryblue, fill=primaryblue!10},
+  process/.style={base, draw=scrumgreen, fill=scrumgreen!10},
+  db/.style={base, draw=accentorange, fill=accentorange!10},
+  decision/.style={
+    diamond, aspect=1.5, draw=accentorange, fill=accentorange!10, thick,
+    align=center, inner sep=2pt, text width=2.5cm, font=\small,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  flow/.style={->, thick, draw=darkgray, rounded corners=4pt},
+  line/.style={thick, draw=darkgray, rounded corners=4pt},
+  note/.style={
+    font=\footnotesize, text=primaryblue, fill=white, draw=lightgray, 
+    inner sep=3pt, rounded corners=3pt
+  }
+}
+
+% =====================================================================
+% COMMANDE ACTEUR UML (stick figure)
+% =====================================================================
+\newcommand{\actornode}[3]{%
+  \draw[thick] (#1,{#2+0.38}) circle (0.22cm);
+  \draw[thick] (#1,{#2+0.16}) -- (#1,{#2-0.30});
+  \draw[thick] ({#1-0.30},{#2+0.02}) -- (#1,{#2+0.10}) -- ({#1+0.30},{#2+0.02});
+  \draw[thick] (#1,{#2-0.30}) -- ({#1-0.22},{#2-0.68});
+  \draw[thick] (#1,{#2-0.30}) -- ({#1+0.22},{#2-0.68});
+  \node[below, font=\small\bfseries, align=center] at (#1,{#2-0.72}) {#3};
+}
+
+% =====================================================================
 % STYLES DES TITRES
 % =====================================================================
 \titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries\color{primaryblue}}
+  {\normalfont\huge\bfseries\color{layoutblack}}
   {\chaptername\ \thechapter}{20pt}{\Huge}
 \titlespacing*{\chapter}{0pt}{-10pt}{30pt}
 
 \titleformat{\section}
-  {\normalfont\Large\bfseries\color{secondaryblue}}
+  {\normalfont\Large\bfseries\color{layoutblack}}
   {\thesection}{1em}{}
 
 \titleformat{\subsection}
@@ -73,7 +113,7 @@
   {\thesubsection}{1em}{}
 
 \titleformat{\subsubsection}
-  {\normalfont\normalsize\bfseries\color{accentorange}}
+  {\normalfont\normalsize\bfseries\color{layoutblack}}
   {\thesubsubsection}{1em}{}
 
 % =====================================================================
@@ -82,40 +122,45 @@
 \pagestyle{fancy}
 \fancyhf{}
 
-\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+% Pour les chapitres numérotés : afficher seulement le titre, sans "Chapitre N."
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
 
+% En-tête gauche : nom du projet
 \fancyhead[L]{%
-  \small\color{primaryblue}\textbf{PFA -- Plateforme E-Learning LearnAgent}%
+  \small\color{layoutblack}\textbf{LearnAgent}%
 }
 
+% En-tête droite : titre du chapitre courant
 \fancyhead[R]{%
-  \small\color{darkgray}\nouppercase{%
-    \parbox[b]{0.48\textwidth}{\raggedleft\leftmark}%
-  }%
+  \small\color{darkgray}\itshape\nouppercase{\leftmark}%
 }
 
-\fancyfoot[L]{\small\color{darkgray}ENIS / 2024--2025}
-\fancyfoot[C]{\thepage}
-
+% Ligne de séparation en-tête
 \renewcommand{\headrulewidth}{0.4pt}
+
+% Pied de page
+\fancyfoot[L]{\small\color{darkgray}ENIS -- Génie Informatique / 2025--2026}
+\fancyfoot[C]{\small\thepage}
+\fancyfoot[R]{}
 \renewcommand{\footrulewidth}{0.4pt}
 
+% Style plain (première page de chaque chapitre)
 \fancypagestyle{plain}{
   \fancyhf{}
   \fancyhead[L]{%
-    \small\color{primaryblue}\textbf{PFA -- Plateforme E-Learning LearnAgent}%
+    \small\color{layoutblack}\textbf{LearnAgent}%
   }
   \fancyhead[R]{%
-    \small\color{darkgray}\nouppercase{%
-      \parbox[b]{0.48\textwidth}{\raggedleft\leftmark}%
-    }%
+    \small\color{darkgray}\itshape\nouppercase{\leftmark}%
   }
-  \fancyfoot[L]{\small\color{darkgray}ENIS / 2024--2025}
-  \fancyfoot[C]{\thepage}
+  \fancyfoot[L]{\small\color{darkgray}ENIS -- Génie Informatique / 2025--2026}
+  \fancyfoot[C]{\small\thepage}
+  \fancyfoot[R]{}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
+
 
 % =====================================================================
 % LISTINGS
@@ -160,9 +205,9 @@
 % =====================================================================
 \hypersetup{
   colorlinks=true,
-  linkcolor=primaryblue,
-  urlcolor=secondaryblue,
-  citecolor=accentorange,
+  linkcolor=layoutblack,
+  urlcolor=layoutblack,
+  citecolor=layoutblack,
   pdfauthor={BAHLOUL Donia, FRIKHA Amin, ABDELHEDI Wassim},
   pdftitle={Rapport PFA -- LearnAgent Plateforme E-Learning},
   pdfsubject={Projet de Fin d'Année ENIS}
@@ -177,60 +222,88 @@
 % PAGE DE GARDE
 % =====================================================================
 \begin{titlepage}
-  \thispagestyle{empty}
-  \centering
-  \vspace*{0.5cm}
+\thispagestyle{empty}
 
-  {\color{primaryblue}\rule{\linewidth}{2pt}}
-  \vspace{0.4cm}
+\noindent
+\begin{minipage}[c]{0.38\textwidth}
+    \centering
+    \footnotesize
+    \textbf{République Tunisienne}\\
+    Ministère de l'Enseignement Supérieur\\
+    et de la Recherche Scientifique\\
+    \textbf{Université de Sfax}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.20\textwidth}
+    \centering
+    \IfFileExists{enis.pdf}{
+        \includegraphics[width=3cm]{enis.pdf}
+    }{
+        \fbox{\parbox[c][2cm][c]{2.5cm}{\centering\footnotesize Logo ENIS}}
+    }
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.38\textwidth}
+    \centering
+    \footnotesize
+    \textbf{École Nationale d'Ingénieurs de Sfax}\\
+    Département de Génie Informatique\\
+    et de Mathématiques Appliquées
+\end{minipage}
 
-  {\Large\bfseries\color{darkgray} République Tunisienne}\\[0.2cm]
-  {\large\color{darkgray} Ministère de l'Enseignement Supérieur et de la Recherche Scientifique}\\[0.5cm]
-  {\Large\bfseries\color{primaryblue} École Nationale d'Ingénieurs de Sfax}\\[0.2cm]
-  {\large\color{darkgray} ENIS}\\[0.2cm]
-  {\large\color{darkgray} Département Génie Informatique}
+\vspace{0.8cm}
+\noindent\rule{\textwidth}{1pt}
+\vfill
 
-  \vspace{0.6cm}
-  {\color{primaryblue}\rule{\linewidth}{0.5pt}}
-  \vspace{1cm}
+\begin{center}
+    {\Large \scshape Rapport de Projet de Fin d'Année}
 
-  {\huge\bfseries\color{primaryblue} RAPPORT DE PROJET DE FIN D'ANNÉE}\\[0.5cm]
-  {\Large\bfseries\color{secondaryblue} PFA -- 2024/2025}
+    \vspace{2cm}
+    \rule{0.85\textwidth}{1pt}
+    \vspace{0.6cm}
 
-  \vspace{1cm}
-  {\color{accentorange}\rule{0.7\linewidth}{1.5pt}}
-  \vspace{0.5cm}
+    {\LARGE \bfseries Conception et Développement}\\[0.35cm]
+    {\LARGE \bfseries d'une Plateforme E-Learning Intelligente}\\[0.35cm]
+    {\Huge \textit{LearnAgent}}
 
-  {\LARGE\bfseries\color{darkgray}
-    Conception et Développement\\[0.3cm]
-    d'une Plateforme E-Learning\\[0.3cm]
-    Intelligente avec Moteur de\\[0.3cm]
-    Recommandation par IA\\[0.3cm]
-    \textit{\large LearnAgent}
-  }
+    \vspace{0.4cm}
+    {\normalsize \textit{Recommandation par IA, suivi de progression et détection des lacunes pédagogiques}}
 
-  \vspace{0.5cm}
-  {\color{accentorange}\rule{0.7\linewidth}{1.5pt}}
-  \vspace{1.2cm}
+    \vspace{0.5cm}
+    \rule{0.85\textwidth}{1pt}
+\end{center}
+\vfill
 
-  \begin{tabular}{ll}
-    \textbf{\color{primaryblue}Réalisé par :} & \\[0.3cm]
-    \quad $\bullet$ & \textbf{BAHLOUL Donia} \\[0.2cm]
-    \quad $\bullet$ & \textbf{FRIKHA Amin} \\[0.2cm]
-    \quad $\bullet$ & \textbf{ABDELHEDI Wassim} \\
-  \end{tabular}
+\begin{center}
+    {\large \textit{Réalisé par :}}\\[0.6cm]
+    \begin{tabular}{>{\centering\arraybackslash}p{4.5cm}
+                    >{\centering\arraybackslash}p{4.5cm}
+                    >{\centering\arraybackslash}p{4.5cm}}
+        \textbf{\large Wassim Abdelhedi} &
+        \textbf{\large Donia Bahloul} &
+        \textbf{\large Amin Frikha} \\
+    \end{tabular}
+\end{center}
 
-  \vspace{1cm}
+\vfill
 
-  \begin{tabular}{ll}
-    \textbf{\color{primaryblue}Encadrante :} & \textbf{Mme. Massmoudi Sahla} \\[0.3cm]
-    \textbf{\color{primaryblue}Établissement :} & ENIS \\[0.3cm]
-    \textbf{\color{primaryblue}Spécialité :} & Génie Informatique \\[0.3cm]
-    \textbf{\color{primaryblue}Année universitaire :} & 2024 -- 2025 \\
-  \end{tabular}
+\begin{center}
+{\large \textit{Soutenu publiquement le 02/05/2026 devant le jury composé de :}}\\[0.8cm]
+\begin{tabular}{>{\raggedright\arraybackslash}p{6.5cm}
+                >{\raggedleft\arraybackslash}p{4.5cm}}
+{\Large \textbf{Mme. Sahla Masmoudi}} & {\Large Encadrante} \\[0.4cm]
+{\Large \textbf{***************}}     & {\Large Co-encadrant} \\[0.4cm]
+{\Large \textbf{***************}}     & {\Large Examinateur} \\
+\end{tabular}
+\end{center}
 
-  \vfill
-  {\color{primaryblue}\rule{\linewidth}{2pt}}
+\vfill
+
+\begin{center}
+    \rule{4cm}{0.5pt}\\[0.3cm]
+    \textbf{Année Universitaire 2025--2026}
+\end{center}
+
 \end{titlepage}
 
 \pagenumbering{roman}
@@ -239,14 +312,13 @@
 % DÉDICACES
 % =====================================================================
 \chapter*{Dédicaces}
-\addcontentsline{toc}{chapter}{Dédicaces}
 \markboth{Dédicaces}{}
 
 \vspace{2cm}
 \begin{center}
 \textit{\large À nos familles et proches,}\\[0.5cm]
 \textit{qui nous ont soutenus tout au long de ce parcours académique.}\\[0.8cm]
-\textit{À notre encadrante Mme. Massmoudi Sahla,}\\[0.5cm]
+\textit{À notre encadrante Mme. Masmoudi Sahla,}\\[0.5cm]
 \textit{pour sa disponibilité, ses conseils et son accompagnement précieux.}\\[0.8cm]
 \textit{À tous ceux qui croient en la puissance de l'éducation numérique.}
 \end{center}
@@ -262,12 +334,11 @@
 % REMERCIEMENTS
 % =====================================================================
 \chapter*{Remerciements}
-\addcontentsline{toc}{chapter}{Remerciements}
 \markboth{Remerciements}{}
 
 Nous tenons à exprimer notre profonde gratitude à toutes les personnes qui ont contribué à la réalisation de ce projet de fin d'année.
 
-Nous adressons tout d'abord nos sincères remerciements à notre encadrante, \textbf{Mme. Massmoudi Sahla}, pour son soutien indéfectible, ses conseils avisés et sa disponibilité tout au long de ce travail. Sa rigueur académique et son expertise technique nous ont été d'une valeur inestimable.
+Nous adressons tout d'abord nos sincères remerciements à notre encadrante, \textbf{Mme. Masmoudi Sahla}, pour son soutien indéfectible, ses conseils avisés et sa disponibilité tout au long de ce travail. Sa rigueur académique et son expertise technique nous ont été d'une valeur inestimable.
 
 Nous remercions également l'ensemble du corps enseignant du département informatique de l'ENIS pour la qualité de la formation dispensée, qui nous a fourni les bases solides nécessaires à l'accomplissement de ce projet.
 
@@ -281,18 +352,17 @@ Enfin, nous remercions tous nos camarades de promotion pour l'entraide et l'espr
 % RÉSUMÉ
 % =====================================================================
 \chapter*{Résumé}
-\addcontentsline{toc}{chapter}{Résumé}
 \markboth{Résumé}{}
 
 Ce rapport présente le travail réalisé dans le cadre du Projet de Fin d'Année (PFA) à l'École Nationale d'Ingénieurs de Sfax (ENIS), portant sur la conception et le développement d'une plateforme e-learning intelligente baptisée \textbf{LearnAgent}.
 
-La plateforme intègre trois composantes technologiques principales : un backend développé avec \textbf{Spring Boot} (Java 21) connecté à une base de données \textbf{PostgreSQL}, un frontend réalisé avec \textbf{React.js} et \textbf{Vite}, et un moteur de recommandation basé sur l'intelligence artificielle développé avec \textbf{Python FastAPI} et le modèle de langage \textbf{Sentence-BERT} (\texttt{paraphrase-multilingual-MiniLM-L12-v2}).
+La plateforme intègre trois composantes technologiques principales : un backend développé avec \textbf{Spring Boot~\cite{spring}} (Java 21) connecté à une base de données \textbf{PostgreSQL~\cite{postgresql}}, un frontend réalisé avec \textbf{React.js~\cite{react}} et \textbf{Vite~\cite{vite}}, et un moteur de recommandation basé sur l'intelligence artificielle développé avec \textbf{Python FastAPI~\cite{fastapi}} et le modèle de langage \textbf{Sentence-BERT~\cite{sbert}} (\texttt{paraphrase-multilingual-MiniLM-L12-v2}).
 
 Le système permet aux étudiants de s'inscrire à des cours multi-chapitres, de suivre leur progression chapitre par chapitre, de passer des exercices et des quiz, et de recevoir des recommandations personnalisées basées sur leur requête et leur historique d'apprentissage. Il intègre également un système de messagerie avancée pour la récupération de compte sécurisée et l'envoi de notifications en temps réel lors des mises à jour pédagogiques. Les enseignants peuvent créer et gérer des cours structurés en chapitres, avec supports multimédias. Un contrôle d'accès strict restreint l'accès aux quiz et exercices aux seuls étudiants ayant complété l'intégralité des chapitres du cours.
 
-Le projet a été conduit selon la méthodologie agile \textbf{Scrum}, structuré en cinq sprints couvrant respectivement l'authentification, la gestion des cours multi-chapitres, les fonctionnalités pédagogiques (quiz et exercices), le moteur de recommandation IA avec détection des lacunes, et enfin le système de messagerie et notifications.
+Le projet a été conduit selon la méthodologie agile \textbf{Scrum}~\cite{scrum}, structuré en cinq sprints couvrant respectivement l'authentification, la gestion des cours multi-chapitres, les fonctionnalités pédagogiques (quiz et exercices), le moteur de recommandation IA avec détection des lacunes, et enfin le système de messagerie et notifications.
 
-\textbf{Mots-clés :} E-Learning, Spring Boot, React.js, Intelligence Artificielle, Sentence-BERT, NLP, Recommandation, Scrum, JWT, REST API, PostgreSQL.
+\textbf{Mots-clés :} E-Learning, Spring Boot, React.js, Intelligence Artificielle, Sentence-BERT, NLP, Recommandation, Scrum, JWT~\cite{jwt}, REST API, PostgreSQL.
 
 \vspace{1cm}
 
@@ -317,12 +387,12 @@ The project was conducted following the agile \textbf{Scrum} methodology, struct
 % =====================================================================
 % LISTE DES FIGURES & TABLEAUX
 % =====================================================================
+\begingroup
+\let\clearpage\relax
 \listoffigures
-\addcontentsline{toc}{chapter}{Liste des figures}
-\newpage
-
+\vspace{1cm}
 \listoftables
-\addcontentsline{toc}{chapter}{Liste des tableaux}
+\endgroup
 
 \newpage
 \pagenumbering{arabic}
@@ -334,39 +404,11 @@ The project was conducted following the agile \textbf{Scrum} methodology, struct
 \addcontentsline{toc}{chapter}{Introduction Générale}
 \markboth{Introduction Générale}{}
 
-\section*{Contexte général}
+L'ère numérique a profondément transformé le secteur de l'éducation. L'apprentissage en ligne (e-learning) est devenu une réalité incontournable, offrant aux apprenants une flexibilité et une accessibilité sans précédent. Face à la diversité croissante des contenus disponibles, il devient cependant difficult pour un étudiant de trouver les ressources les mieux adaptées à ses besoins spécifiques, à son niveau et à ses objectifs d'apprentissage. Cette situation met en évidence la nécessité de développer des plateformes intelligentes, capables non seulement de centraliser les ressources pédagogiques, mais aussi de guider chaque apprenant de manière personnalisée.
 
-L'ère numérique a profondément transformé le secteur de l'éducation. L'apprentissage en ligne (e-learning) est devenu une réalité incontournable, offrant aux apprenants une flexibilité et une accessibilité sans précédent. Face à la diversité croissante des contenus disponibles, il devient cependant difficile pour un étudiant de trouver les ressources les plus adaptées à ses besoins spécifiques, son niveau et ses objectifs d'apprentissage.
+C'est dans ce contexte que s'inscrit notre Projet de Fin d'Année, qui consiste à concevoir et à développer \textbf{LearnAgent}, une plateforme e-learning intelligente. Notre objectif est d'offrir une expérience d'apprentissage structurée, progressive et personnalisée, grâce notamment à un moteur de recommandation intelligent basé sur l'intelligence artificielle. Pour répondre à ces ambitions, nous avons conçu une architecture logicielle robuste suivant les meilleures pratiques du génie logiciel, intégrant un système d'authentification sécurisé par tokens JWT, un moteur de cours multi-chapitres avec suivi de progression strict, des quiz interactifs avec détection automatique des lacunes par IA, ainsi qu'un système de notification intelligent pour améliorer l'engagement des apprenants. L'ensemble du projet a été conduit selon la méthodologie agile Scrum afin d'assurer une livraison itérative et incrémentielle de valeur.
 
-C'est dans ce contexte que s'inscrit notre Projet de Fin d'Année : développer \textbf{LearnAgent}, une plateforme e-learning intelligente capable non seulement de centraliser les ressources pédagogiques et de structurer l'apprentissage en chapitres progressifs, mais aussi de guider chaque apprenant vers les contenus les plus pertinents grâce à un moteur de recommandation sémantique basé sur Sentence-BERT.
-
-\section*{Problématique}
-
-La problématique principale que nous avons identifiée est la suivante : comment concevoir et développer une plateforme e-learning complète et moderne qui offre une expérience d'apprentissage personnalisée, structurée et progressive, tout en intégrant des fonctionnalités avancées de recommandation intelligente et de détection automatique des lacunes ?
-
-\section*{Objectifs du projet}
-
-Les objectifs principaux de notre projet sont :
-\begin{itemize}
-  \item Concevoir une architecture logicielle robuste (microservices) suivant les meilleures pratiques du génie logiciel.
-  \item Développer un système d'authentification sécurisé basé sur les tokens JWT avec gestion des rôles (ADMIN, TEACHER, STUDENT).
-  \item Créer un moteur de cours multi-chapitres avec suivi de progression strict et contrôle d'accès basé sur la complétion.
-  \item Proposer aux étudiants des quiz interactifs avec correction automatique et détection des lacunes par IA.
-  \item Intégrer un moteur de recommandation sémantique (Sentence-BERT) pour personnaliser l'expérience d'apprentissage.
-  \item Intégrer un système de notification intelligent (Email, récupération de compte, rappels) pour améliorer l'engagement des apprenants.
-  \item Appliquer la méthodologie Scrum pour une gestion de projet agile et efficace.
-\end{itemize}
-
-\section*{Structure du rapport}
-
-Ce rapport est organisé en cinq chapitres :
-\begin{itemize}
-  \item \textbf{Chapitre 1 :} Étude préalable et spécification des besoins.
-  \item \textbf{Chapitre 2 :} Conception architecturale du système.
-  \item \textbf{Chapitre 3 :} Sprints 1 et 2 -- Authentification et gestion des cours multi-chapitres.
-  \item \textbf{Chapitre 4 :} Sprint 3 -- Fonctionnalités pédagogiques (Quiz et Exercices).
-  \item \textbf{Chapitre 5 :} Sprints 4 et 5 -- Moteur de recommandation IA, détection des lacunes et système de messagerie avancée.
-\end{itemize}
+Le présent rapport rend compte de l'ensemble des travaux réalisés et est structuré en cinq chapitres complémentaires. Le premier chapitre propose une étude préalable incluant l'analyse de l'existant, la présentation de la méthodologie Scrum adoptée et la spécification des besoins fonctionnels et non fonctionnels. Le deuxième chapitre est consacré à la conception architecturale globale du système. Le troisième chapitre couvre les deux premiers sprints portant sur l'authentification et la gestion des cours multi-chapitres. Le quatrième chapitre présente le troisième sprint relatif aux fonctionnalités pédagogiques (quiz et exercices). Enfin, le cinquième chapitre expose les sprints quatre et cinq dédiés au moteur de recommandation IA, à la détection des lacunes et au système de messagerie avancée.
 
 \newpage
 
@@ -375,39 +417,40 @@ Ce rapport est organisé en cinq chapitres :
 % =====================================================================
 \chapter{Étude Préalable et Spécification des Besoins}
 
+% ------- Introduction du chapitre -------
+Ce premier chapitre pose les fondements du projet \textbf{LearnAgent}. Nous commençons par présenter le contexte et les motivations qui ont conduit à l'émergence de cette idée, puis nous analysons les solutions existantes afin d'en dégager les limites. Nous exposons ensuite la méthodologie de gestion de projet adoptée, avant de détailler la spécification complète des besoins fonctionnels et non fonctionnels du système, en identifiant les différents acteurs impliqués.
+
+% =====================================================================
 \section{Présentation du projet}
 
 \subsection{Contexte et motivation}
 
-La démocratisation d'Internet et la montée en puissance des technologies mobiles ont créé un terrain fertile pour le développement de solutions éducatives numériques. Les plateformes e-learning comme Coursera, Udemy ou Moodle ont démontré l'immense potentiel de ce marché. Toutefois, la plupart de ces plateformes manquent de personnalisation réelle, ne structurent pas l'apprentissage de manière progressive et ne guident pas l'étudiant après un échec.
+La démocratisation d'Internet et la montée en puissance des technologies mobiles ont créé un terrain fertile pour le développement de solutions éducatives numériques. Les plateformes e-learning de référence telles que Coursera, Udemy ou Moodle ont déjà démontré l'immense potentiel de ce marché et l'appétit des apprenants pour des contenus accessibles en ligne. Cette dynamique mondiale constitue le terreau idéal pour proposer une solution nouvelle, pensée pour répondre aux exigences d'une pédagogie moderne, intelligente et personnalisée.
 
-Notre projet \textbf{LearnAgent} vise à combler ces manques en proposant une solution complète : gestion de cours multi-chapitres avec progression stricte, quiz interactifs avec détection automatique des lacunes via IA, et moteur de recommandation sémantique multilingue basé sur Sentence-BERT.
+Notre projet \textbf{LearnAgent} s'inscrit dans cette tendance en proposant une plateforme e-learning innovante qui va au-delà de la simple mise à disposition de contenus. Elle offre une gestion de cours multi-chapitres avec progression stricte, des quiz interactifs couplés à un moteur de détection automatique des lacunes par intelligence artificielle, et un moteur de recommandation intelligent exploitant des techniques d'intelligence artificielle pour orienter chaque étudiant vers les ressources les plus pertinentes en fonction de son profil et de ses besoins.
 
 \subsection{Périmètre du projet}
 
-La plateforme LearnAgent s'adresse à trois types d'utilisateurs :
-\begin{itemize}
-  \item \textbf{Administrateurs} : gestion globale de la plateforme, des utilisateurs et des catégories.
-  \item \textbf{Enseignants (TEACHER)} : création et gestion de cours structurés en chapitres (avec supports PDF, vidéo, PPTX), d'exercices et de quiz QCM.
-  \item \textbf{Étudiants (STUDENT)} : inscription aux cours, progression chapitre par chapitre, accès aux quiz et exercices uniquement après complétion de tous les chapitres, et accès aux recommandations personnalisées.
-\end{itemize}
+La plateforme LearnAgent s'adresse à trois types d'utilisateurs distincts, chacun disposant d'un espace et de fonctionnalités dédiés. Les \textbf{Administrateurs} assurent la gestion globale de la plateforme, des utilisateurs et des catégories de cours. Les \textbf{Enseignants} créent et gèrent des cours structurés en chapitres (avec supports PDF, vidéo, PPTX) ainsi que des exercices et des quiz QCM. Les \textbf{Étudiants}, quant à eux, s'inscrivent aux cours, progressent chapitre par chapitre selon un ordre strict, accèdent aux quiz et exercices uniquement après avoir complété l'ensemble des chapitres, et bénéficient de recommandations personnalisées basées sur l'IA.
 
+% =====================================================================
 \section{Étude de l'existant}
 
 \subsection{Analyse des plateformes existantes}
 
-Avant de commencer le développement, nous avons analysé plusieurs plateformes e-learning existantes afin d'identifier leurs forces et leurs limites.
+Avant d'entamer le développement, nous avons procédé à une analyse comparative de plusieurs plateformes e-learning existantes afin d'identifier leurs points forts et leurs limites, comme le résume le tableau~\ref{tab:comparaison} ci-dessous.
 
 \begin{table}[H]
 \centering
 \caption{Comparaison des plateformes e-learning existantes}
+\label{tab:comparaison}
 \begin{tabularx}{\textwidth}{|l|X|X|X|}
 \hline
 \textbf{Critère} & \textbf{Moodle} & \textbf{Udemy} & \textbf{LearnAgent} \\
 \hline
 Open Source & Oui & Non & Oui \\
 \hline
-Recommandation IA & Non & Partielle & Oui (Sentence-BERT) \\
+Recommandation IA & Non & Partielle & Oui (IA sémantique) \\
 \hline
 Détection des lacunes & Non & Non & Oui (IA) \\
 \hline
@@ -426,20 +469,201 @@ Architecture microservices & Non & Oui & Oui \\
 
 \subsection{Critique de l'existant}
 
-Les analyses réalisées révèlent plusieurs lacunes dans les solutions existantes :
+L'analyse comparative menée révèle plusieurs lacunes récurrentes dans les solutions existantes : une architecture monolithique difficile à maintenir et à faire évoluer, un manque de personnalisation basée sur l'IA sémantique, une absence de détection automatique des lacunes suite à un échec à un quiz, des interfaces utilisateurs vieillissantes et peu réactives, ainsi qu'une absence de progression structurée et obligatoire chapitre par chapitre. Notre solution \textbf{LearnAgent} apporte des réponses concrètes à ces lacunes grâce à une architecture microservices moderne, un moteur d'intelligence artificielle pour la recommandation personnalisée et la détection automatique des points faibles, ainsi qu'un mécanisme de progression stricte garantissant un parcours d'apprentissage pleinement structuré.
+
+% =====================================================================
+\section{Méthodologie adoptée : Scrum}
+
+\subsection{Présentation de Scrum}
+
+Pour la gestion de ce projet, nous avons adopté la méthodologie agile \textbf{Scrum}. Cette méthode itérative et incrémentielle est particulièrement adaptée aux projets de développement logiciel où les exigences peuvent évoluer au cours du temps. Elle permet de livrer des fonctionnalités de manière régulière et d'intégrer les retours au fil des itérations, appelées \textit{sprints}.
+
+\begin{infobox}
+\textbf{Scrum repose sur trois piliers fondamentaux :}
 \begin{itemize}
-  \item Architecture monolithique difficile à maintenir et à faire évoluer.
-  \item Manque de personnalisation basée sur l'IA sémantique.
-  \item Absence de détection automatique des lacunes suite à un échec à un quiz.
-  \item Interfaces utilisateurs vieillissantes et peu réactives.
-  \item Absence de progression structurée et obligatoire chapitre par chapitre.
+  \item \textbf{Transparence} : Toute l'équipe dispose d'une vision claire et partagée de l'avancement du projet.
+  \item \textbf{Inspection} : Des points réguliers (cérémonies) permettent d'évaluer la progression et la qualité du travail produit.
+  \item \textbf{Adaptation} : L'équipe s'ajuste en continu en fonction des retours obtenus lors des inspections.
 \end{itemize}
+\end{infobox}
 
-Notre solution apporte des réponses concrètes à ces problèmes grâce à une architecture microservices, un moteur IA Sentence-BERT, un suivi de progression strict basé sur les entités \texttt{ChapterProgress} et \texttt{ExerciseCompletion}, et une détection des lacunes par similarité sémantique.
+\subsection{Rôles Scrum dans notre équipe}
 
+La répartition des rôles au sein de notre équipe a été définie de façon à tirer le meilleur parti des compétences de chacun, comme le présente le tableau~\ref{tab:scrum_roles} suivant.
+
+\begin{table}[H]
+\centering
+\caption{Répartition des rôles Scrum}
+\label{tab:scrum_roles}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Rôle} & \textbf{Membre} & \textbf{Responsabilités principales} \\
+\hline
+Product Owner & Mme. Masmoudi Sahla & Définition de la vision produit, validation des livrables, priorisation du backlog \\
+\hline
+Scrum Master & FRIKHA Amin & Animation des cérémonies Scrum, levée des obstacles, coordination d'équipe \\
+\hline
+Dev Team & BAHLOUL Donia & Frontend React.js, conception UI/UX, interfaces utilisateurs \\
+\hline
+Dev Team & ABDELHEDI Wassim & Backend Spring Boot, moteur IA Python, intégration système \\
+\hline
+Dev Team & FRIKHA Amin & Backend Spring Boot, sécurité JWT, API REST \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Cérémonies Scrum}
+
+Tout au long du projet, les cérémonies Scrum suivantes ont été rigoureusement appliquées. Le \textbf{Sprint Planning} est organisé au début de chaque sprint (d'une durée de deux semaines) pour planifier et répartir les tâches à réaliser. Le \textbf{Daily Scrum} est une réunion quotidienne de quinze minutes permettant de synchroniser l'équipe et d'identifier rapidement les obstacles. La \textbf{Sprint Review} est conduite en fin de sprint pour démontrer les fonctionnalités réalisées au Product Owner et recueillir ses retours. Enfin, la \textbf{Sprint Retrospective} permet à l'équipe d'analyser les points positifs et les axes d'amélioration pour le sprint suivant.
+
+\subsection{Product Backlog}
+
+Le Product Backlog regroupe l'ensemble des User Stories identifiées et priorisées par le Product Owner. Chaque story décrit une fonctionnalité du point de vue de l'utilisateur final, avec une priorité et un sprint de réalisation associé, comme l'illustre la figure~\ref{fig:backlog} ci-dessous.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  sprintnode/.style={draw=primaryblue, fill=primaryblue!10, rounded corners=8pt, text width=3.2cm, minimum height=1.3cm, align=center, font=\bfseries\normalsize},
+  highprio/.style={draw=accentorange!80, fill=accentorange!15, rounded corners=5pt, text width=2.8cm, align=center, font=\footnotesize, inner sep=6pt, thick},
+  medprio/.style={draw=scrumgreen!80, fill=scrumgreen!15, rounded corners=5pt, text width=2.8cm, align=center, font=\footnotesize, inner sep=6pt, thick},
+  arr/.style={-{Stealth[scale=1.2]}, ultra thick, primaryblue}
+]
+
+% Sprint Headers
+\node[sprintnode] (s1) at (0, 0) {Sprint 1\\[1mm]Authentification};
+\node[sprintnode] (s2) at (4.0, 0) {Sprint 2\\[1mm]Cours \& Prog.};
+\node[sprintnode] (s3) at (8.0, 0) {Sprint 3\\[1mm]Évaluation};
+\node[sprintnode] (s4) at (12.0, 0) {Sprint 4\\[1mm]Moteur IA};
+\node[sprintnode] (s5) at (16.0, 0) {Sprint 5\\[1mm]Mails \& Notifs};
+
+% Sprint 1 US
+\node[highprio] (us1) at (0, -2.2) {\textbf{US-01}\\Créer compte};
+\node[highprio] (us2) at (0, -3.8) {\textbf{US-02}\\Connexion JWT};
+\node[highprio] (us3) at (0, -5.4) {\textbf{US-03}\\Gestion Admin};
+
+% Sprint 2 US
+\node[highprio] (us4) at (4.0, -2.2) {\textbf{US-04}\\Création de cours};
+\node[highprio] (us5) at (4.0, -3.8) {\textbf{US-05}\\Suivi séquentiel};
+\node[medprio] (us12) at (4.0, -5.4) {\textbf{US-12}\\Tableau de bord};
+
+% Sprint 3 US
+\node[medprio] (us6) at (8.0, -2.2) {\textbf{US-06}\\QCM \& Évaluation};
+\node[medprio] (us7) at (8.0, -3.8) {\textbf{US-07}\\Condition d'accès};
+\node[medprio] (us8) at (8.0, -5.4) {\textbf{US-08}\\Créer Exercice};
+\node[medprio] (us13) at (8.0, -7.0) {\textbf{US-13}\\Résultats dét.};
+
+% Sprint 4 US
+\node[highprio] (us9) at (12.0, -2.2) {\textbf{US-09}\\Recherche sémant.};
+\node[highprio] (us10) at (12.0, -3.8) {\textbf{US-10}\\Recommandation};
+\node[highprio] (us11) at (12.0, -5.4) {\textbf{US-11}\\Détection lacunes};
+
+% Sprint 5 US
+\node[highprio] (us14) at (16.0, -2.2) {\textbf{US-14}\\Reset mdp};
+\node[medprio] (us15) at (16.0, -3.8) {\textbf{US-15}\\Notifs email};
+
+% Flow Arrows
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4) -- (s5);
+
+% Legend Box
+\draw[draw=gray!50, rounded corners, fill=gray!5, thick] (4.0, -9.0) rectangle (12.0, -7.8);
+\node[font=\bfseries] at (5.5, -8.4) {Priorité :};
+\node[highprio, minimum height=0.6cm, text width=1.5cm, inner sep=2pt] at (7.8, -8.4) {Haute};
+\node[medprio, minimum height=0.6cm, text width=1.5cm, inner sep=2pt] at (10.2, -8.4) {Moyenne};
+
+\end{tikzpicture}
+}%
+\vspace{0.5cm}
+\caption{Diagramme Roadmap du Product Backlog priorisé par Sprint}
+\label{fig:backlog}
+\end{figure}
+
+% =====================================================================
 \section{Spécification des besoins}
 
+\subsection{Identification des acteurs}
+
+Un acteur représente toute entité externe au système qui interagit avec lui, qu'il s'agisse d'une personne, d'un groupe ou d'un système tiers. Dans le cadre de la plateforme \textbf{LearnAgent}, trois acteurs principaux ont été identifiés.
+
+\textbf{L'Étudiant (STUDENT)} est l'acteur central de la plateforme. Il s'inscrit sur la plateforme, s'abonne à des cours et progresse chapitre par chapitre selon un parcours strictement ordonné. Il accède aux quiz et exercices uniquement après avoir complété l'ensemble des chapitres d'un cours. Il bénéficie également du moteur de recommandation IA pour découvrir des cours adaptés à ses besoins, et reçoit des notifications lors des mises à jour de son parcours d'apprentissage.
+
+\textbf{L'Enseignant (TEACHER)} est responsable de la création et de la gestion des contenus pédagogiques. Il crée des cours structurés en chapitres ordonnés, associés à des supports multimédias variés (PDF, vidéo, PPTX). Il conçoit également des quiz QCM et des exercices pratiques, et suit les résultats et la progression de ses étudiants.
+
+\textbf{L'Administrateur (ADMIN)} dispose d'un accès complet à l'ensemble de la plateforme. Il gère les comptes utilisateurs (activation, désactivation, attribution des rôles), supervise les catégories de cours et assure la bonne configuration globale du système.
+
+\subsection{Diagramme de cas d'utilisation global}
+
+Le diagramme de cas d'utilisation global, présenté à la figure~\ref{fig:usecase_global}, offre une vue synthétique des interactions entre les différents acteurs et le système LearnAgent.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.75, every node/.style={transform shape},
+  usecase/.style={draw=primaryblue, ellipse, align=center, font=\normalsize,
+    minimum width=4.2cm, minimum height=1.1cm},
+  sysbox/.style={draw=primaryblue, very thick, rounded corners=12pt, fill=primaryblue!3}
+]
+%--- Frontière du système ---
+\draw[sysbox] (2.5,-12.0) rectangle (15.5,2.4);
+\node[font=\bfseries\Large\color{primaryblue}] at (9.0,1.8)
+  {Plateforme LearnAgent};
+
+%--- ACTEURS ---
+\actornode{0.5}{-5.8}{Étudiant}
+\actornode{17.5}{-2.2}{Enseignant}
+\actornode{17.5}{-9.0}{Administrateur}
+
+%--- USE CASES ÉTUDIANT (colonne gauche) ---
+\node[usecase, fill=secondaryblue!14] (uc1) at (6.5, 0.3)   {S'inscrire /\\Se connecter};
+\node[usecase, fill=secondaryblue!14] (uc2) at (6.5,-2.2)   {Parcourir les cours};
+\node[usecase, fill=secondaryblue!14] (uc3) at (6.5,-4.4)   {Progresser chapitre\\par chapitre};
+\node[usecase, fill=secondaryblue!14] (uc4) at (6.5,-6.6)   {Passer quiz /\\exercice};
+\node[usecase, fill=secondaryblue!14] (uc5) at (6.5,-8.8)   {Recommandations IA};
+\node[usecase, fill=secondaryblue!14] (uc6) at (6.5,-11.0)  {Consulter lacunes};
+
+%--- USE CASES ENSEIGNANT (colonne droite haute) ---
+\node[usecase, fill=scrumgreen!16]   (uc7) at (11.5, 0.3)  {Créer un cours};
+\node[usecase, fill=scrumgreen!16]   (uc8) at (11.5,-2.2)  {Créer quiz /\\exercice};
+\node[usecase, fill=scrumgreen!16]   (uc9) at (11.5,-4.4)  {Consulter résultats};
+
+%--- USE CASES ADMIN (colonne droite basse) ---
+\node[usecase, fill=accentorange!20] (uc10) at (11.5,-6.6)  {Gérer utilisateurs};
+\node[usecase, fill=accentorange!20] (uc11) at (11.5,-8.8)  {Gérer catégories};
+\node[usecase, fill=accentorange!20] (uc12) at (11.5,-11.0) {Configurer plateforme};
+
+%--- SÉPARATEUR ENSEIGNANT / ADMIN ---
+\draw[dashed, color=gray!50, thick] (8.5,-5.5) -- (14.5,-5.5);
+
+%--- CONNEXIONS ÉTUDIANT ---
+\draw (1.1,-5.8) -- (uc1.west);
+\draw (1.1,-5.8) -- (uc2.west);
+\draw (1.1,-5.8) -- (uc3.west);
+\draw (1.1,-5.8) -- (uc4.west);
+\draw (1.1,-5.8) -- (uc5.west);
+\draw (1.1,-5.8) -- (uc6.west);
+
+%--- CONNEXIONS ENSEIGNANT ---
+\draw (16.9,-2.2) -- (uc1.east);
+\draw (16.9,-2.2) -- (uc7.east);
+\draw (16.9,-2.2) -- (uc8.east);
+\draw (16.9,-2.2) -- (uc9.east);
+
+%--- CONNEXIONS ADMIN ---
+\draw (16.9,-9.0) -- (uc1.east);
+\draw (16.9,-9.0) -- (uc10.east);
+\draw (16.9,-9.0) -- (uc11.east);
+\draw (16.9,-9.0) -- (uc12.east);
+
+\end{tikzpicture}
+\caption{Diagramme de cas d'utilisation global -- Plateforme LearnAgent}
+\label{fig:usecase_global}
+\end{figure}
+
 \subsection{Besoins fonctionnels}
+
+Les besoins fonctionnels ont été regroupés en quatre modules correspondant aux grandes fonctionnalités de la plateforme.
 
 \subsubsection{Module Authentification}
 \begin{itemize}[leftmargin=*]
@@ -472,12 +696,12 @@ Notre solution apporte des réponses concrètes à ces problèmes grâce à une 
 
 \subsubsection{Module Recommandation IA}
 \begin{itemize}[leftmargin=*]
-  \item Analyse sémantique des cours via Sentence-BERT (modèle multilingue FR/EN).
-  \item Génération de recommandations personnalisées basées sur la requête de l'étudiant.
-  \item Recherche intelligente de cours avec extraction de mots-clés NLP.
-  \item Détection des lacunes (\texttt{detect-weak-topics}) : analyse des réponses incorrectes d'un quiz et mappage aux chapitres du cours par similarité cosinus.
-  \item Extraction automatique de texte des supports de cours (PDF, DOCX, PPTX).
-  \item Historique des recherches (\texttt{SearchHistory}).
+  \item Analyse sémantique du contenu des cours à l'aide d'un modèle de traitement du langage naturel (NLP) multilingue.
+  \item Génération de recommandations personnalisées en fonction de la requête et du profil d'apprentissage de l'étudiant.
+  \item Recherche intelligente de cours avec extraction automatique de mots-clés pertinents.
+  \item Détection des lacunes : identification automatique des chapitres à réviser suite à un échec, par analyse des réponses incorrectes soumises.
+  \item Extraction automatique de texte des supports de cours (PDF, DOCX, PPTX) pour l'indexation sémantique.
+  \item Historique et traçabilité des recherches effectuées par chaque étudiant.
 \end{itemize}
 
 \subsubsection{Module Notification et Messagerie Avancée}
@@ -490,9 +714,12 @@ Notre solution apporte des réponses concrètes à ces problèmes grâce à une 
 
 \subsection{Besoins non fonctionnels}
 
+En complément des besoins fonctionnels, le tableau~\ref{tab:non_fonctionnels} synthétise les exigences non fonctionnelles auxquelles la plateforme doit répondre.
+
 \begin{table}[H]
 \centering
 \caption{Besoins non fonctionnels du système}
+\label{tab:non_fonctionnels}
 \begin{tabularx}{\textwidth}{|l|X|}
 \hline
 \textbf{Critère} & \textbf{Exigence} \\
@@ -503,7 +730,7 @@ Sécurité & Authentification JWT (JJWT 0.12.5), chiffrement des mots de passe (
 \hline
 Scalabilité & Architecture microservices permettant l'indépendance du service IA \\
 \hline
-Disponibilité & Base de données hébergée sur Supabase (PostgreSQL cloud) \\
+Disponibilité & Base de données hébergée sur Supabase~\cite{supabase} (PostgreSQL cloud) \\
 \hline
 Utilisabilité & Interface responsive Dark Mode (desktop et mobile) \\
 \hline
@@ -514,95 +741,11 @@ Upload fichiers & Support jusqu'à 500 MB par fichier (PDF, MP4, PPTX) \\
 \end{tabularx}
 \end{table}
 
-\section{Méthodologie adoptée : Scrum}
+% ------- Conclusion du chapitre -------
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
 
-\subsection{Présentation de Scrum}
-
-Pour la gestion de ce projet, nous avons adopté la méthodologie agile \textbf{Scrum}. Cette méthode itérative et incrémentielle est particulièrement adaptée aux projets de développement logiciel où les exigences peuvent évoluer au cours du temps.
-
-\begin{infobox}
-\textbf{Scrum repose sur trois piliers fondamentaux :}
-\begin{itemize}
-  \item \textbf{Transparence} : Toute l'équipe a une vision claire de l'avancement.
-  \item \textbf{Inspection} : Des points réguliers permettent d'évaluer la progression.
-  \item \textbf{Adaptation} : L'équipe s'ajuste en fonction des retours obtenus.
-\end{itemize}
-\end{infobox}
-
-\subsection{Rôles Scrum dans notre équipe}
-
-\begin{table}[H]
-\centering
-\caption{Répartition des rôles Scrum}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Rôle} & \textbf{Membre} & \textbf{Responsabilités principales} \\
-\hline
-Product Owner & BAHLOUL Donia & Gestion du backlog, priorisation, UI/UX \\
-\hline
-Scrum Master & FRIKHA Amin & Animation des cérémonies, Backend API REST \\
-\hline
-Dev Team & ABDELHEDI Wassim & Backend, Moteur IA Python, intégration \\
-\hline
-Dev Team & BAHLOUL Donia & Frontend React, interfaces utilisateurs \\
-\hline
-Dev Team & FRIKHA Amin & Backend Spring Boot, sécurité JWT \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Cérémonies Scrum}
-
-Les cérémonies Scrum suivantes ont été appliquées tout au long du projet :
-
-\begin{itemize}
-  \item \textbf{Sprint Planning} : Planification des tâches au début de chaque sprint (durée : 2 semaines).
-  \item \textbf{Daily Scrum} : Réunion quotidienne de 15 minutes pour synchroniser l'équipe.
-  \item \textbf{Sprint Review} : Démonstration du travail accompli en fin de sprint.
-  \item \textbf{Sprint Retrospective} : Analyse des points positifs et axes d'amélioration.
-\end{itemize}
-
-\subsection{Product Backlog}
-
-\begin{table}[H]
-\centering
-\caption{Product Backlog -- User Stories prioritaires}
-\begin{tabularx}{\textwidth}{|c|l|X|c|c|}
-\hline
-\textbf{ID} & \textbf{En tant que} & \textbf{Je veux} & \textbf{Priorité} & \textbf{Sprint} \\
-\hline
-US-01 & Étudiant & M'inscrire sur la plateforme & Haute & S1 \\
-\hline
-US-02 & Utilisateur & Me connecter via JWT & Haute & S1 \\
-\hline
-US-03 & Admin & Gérer les utilisateurs et catégories & Haute & S1 \\
-\hline
-US-04 & Enseignant & Créer un cours multi-chapitres & Haute & S2 \\
-\hline
-US-05 & Étudiant & M'inscrire et progresser chapitre par chapitre & Haute & S2 \\
-\hline
-US-06 & Enseignant & Créer un quiz QCM & Moyenne & S3 \\
-\hline
-US-07 & Étudiant & Passer un quiz après 100\% de progression & Moyenne & S3 \\
-\hline
-US-08 & Enseignant & Créer un exercice avec fichier & Moyenne & S3 \\
-\hline
-US-09 & Étudiant & Rechercher des cours avec IA & Haute & S4 \\
-\hline
-US-10 & Étudiant & Recevoir des recommandations Sentence-BERT & Haute & S4 \\
-\hline
-US-11 & Étudiant & Voir mes lacunes après un échec à un quiz & Haute & S4 \\
-\hline
-US-12 & Étudiant & Voir mon tableau de bord avec progression & Moyenne & S2 \\
-\hline
-US-13 & Enseignant & Voir les résultats de mes quiz par étudiant & Moyenne & S3 \\
-\hline
-US-14 & Utilisateur & Récupérer mon compte via email (mot de passe oublié) & Haute & S5 \\
-\hline
-US-15 & Étudiant & Être notifié par email lors des mises à jour & Moyenne & S5 \\
-\hline
-\end{tabularx}
-\end{table}
+Ce premier chapitre a permis de poser les bases du projet \textbf{LearnAgent} en définissant clairement son contexte, ses motivations et son périmètre d'application. L'analyse de l'existant a mis en évidence les lacunes des solutions actuelles et a justifié les choix technologiques et fonctionnels de notre plateforme. La méthodologie Scrum, décrite dans ce chapitre, nous a fourni un cadre de travail agile et structuré, tandis que la spécification des besoins a permis d'identifier avec précision les fonctionnalités à développer et les acteurs impliqués. Ces éléments constituent le socle sur lequel repose la conception architecturale présentée dans le chapitre suivant.
 
 \newpage
 
@@ -611,52 +754,118 @@ US-15 & Étudiant & Être notifié par email lors des mises à jour & Moyenne & 
 % =====================================================================
 \chapter{Conception Architecturale du Système}
 
+% ------- Introduction du chapitre -------
+Ce deuxième chapitre est dédié à la conception architecturale du système \textbf{LearnAgent}. Après avoir défini les besoins dans le chapitre précédent, nous présentons ici les décisions de conception qui ont guidé le développement de la plateforme. Nous détaillons successivement l'architecture globale orientée microservices, l'architecture en couches du backend Spring Boot, la structure du frontend React.js et enfin l'organisation du moteur de recommandation IA basé sur Python FastAPI.
+
+% =====================================================================
 \section{Architecture globale}
 
 \subsection{Vue d'ensemble}
 
-L'architecture de LearnAgent suit une approche \textbf{orientée microservices} avec une séparation claire entre le frontend, le backend principal et le service de recommandation IA. Le système est composé de trois composantes indépendantes communicant via HTTP/REST :
+L'architecture de LearnAgent suit une approche \textbf{orientée microservices} avec une séparation claire entre le frontend, le backend principal et le service de recommandation IA. Le système est composé de trois composantes indépendantes communicant via HTTP/REST, comme le montre la figure~\ref{fig:archi_globale} :
 
 \begin{enumerate}
-  \item \textbf{elearning-frontend} : Application SPA (Single Page Application) développée avec React.js 19 + Vite.
-  \item \textbf{elearning-backend} : API RESTful développée avec Spring Boot 3.2.5 (Java 21) sur le port \textbf{8081}.
-  \item \textbf{ai-recommendation-engine} : Microservice Python FastAPI dédié à l'IA sur le port \textbf{8000}.
+  \item \textbf{elearning-frontend} : Application SPA (Single Page Application) développée avec React.js 19 + Vite, s'exécutant sur le port \textbf{5173}.
+  \item \textbf{elearning-backend} : API RESTful développée avec Spring Boot 3.2~\cite{spring}.5 (Java 21) sur le port \textbf{8081}, exposant l'ensemble des endpoints métier.
+  \item \textbf{ai-recommendation-engine} : Microservice Python FastAPI dédié à l'IA sur le port \textbf{8000}, responsable des recommandations et de la détection des lacunes.
 \end{enumerate}
 
 \subsection{Diagramme d'architecture}
 
+La figure~\ref{fig:archi_globale} ci-dessous illustre l'architecture globale du système, en mettant en évidence les flux de communication entre les trois composantes principales et la base de données PostgreSQL hébergée sur Supabase.
+
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  box/.style={rectangle, draw, rounded corners, minimum width=3.2cm, minimum height=1.2cm, align=center, font=\small},
-  arrow/.style={->, thick}
+  box/.style={rectangle, draw, rounded corners=6pt,
+    minimum width=3.2cm, minimum height=1.3cm, align=center, font=\small\bfseries},
+  arrow/.style={->, thick, >=Stealth}
 ]
-\node[box, fill=secondaryblue!20, draw=secondaryblue] (frontend) at (0,0)
-  {React.js\\Frontend\\(Port 5173)};
-\node[box, fill=primaryblue!20, draw=primaryblue] (backend) at (5.5,0)
-  {Spring Boot\\Backend\\(Port 8081)};
-\node[box, fill=scrumgreen!20, draw=scrumgreen] (ai) at (5.5,-3.5)
-  {Python FastAPI\\AI Engine\\(Port 8000)};
-\node[box, fill=accentorange!20, draw=accentorange] (db) at (10,0)
-  {PostgreSQL\\(Supabase Cloud)};
+%--- Noeuds ---
+\node[box, fill=secondaryblue!22, draw=secondaryblue] (frontend) at (0,0)
+  {React.js\\Frontend\\\footnotesize(Port 5173)};
+\node[box, fill=primaryblue!22, draw=primaryblue] (backend) at (5.5,0)
+  {Spring Boot\\Backend\\\footnotesize(Port 8081)};
+\node[box, fill=scrumgreen!22, draw=scrumgreen] (ai) at (5.5,-3.8)
+  {Python FastAPI\\AI Engine\\\footnotesize(Port 8000)};
+\node[box, fill=accentorange!22, draw=accentorange] (db) at (10.5,0)
+  {PostgreSQL\\Supabase Cloud};
 
-\draw[arrow, secondaryblue] (frontend) -- node[above]{\tiny REST + JWT} (backend);
-\draw[arrow, primaryblue] (backend) -- node[above]{\tiny JPA/Hibernate} (db);
-\draw[arrow, scrumgreen] (backend) -- node[right]{\tiny WebClient HTTP} (ai);
-\draw[arrow, scrumgreen] (ai) -- (backend);
+%--- Flèches ---
+\draw[arrow, color=secondaryblue] (frontend) --
+  node[above, font=\tiny\bfseries]{REST + JWT} (backend);
+\draw[arrow, color=primaryblue] (backend) --
+  node[above, font=\tiny\bfseries]{JPA / Hibernate} (db);
+\draw[arrow, color=scrumgreen, bend left=12] (backend) to
+  node[right, font=\tiny\bfseries]{HTTP Request} (ai);
+\draw[arrow, color=scrumgreen, bend left=12] (ai) to
+  node[left, font=\tiny\bfseries]{JSON Response} (backend);
 
-\node[above=1.2cm of frontend, font=\footnotesize\bfseries, color=secondaryblue] {Présentation};
-\node[above=1.2cm of backend, font=\footnotesize\bfseries, color=primaryblue] {Logique Métier};
-\node[below=1.0cm of ai, font=\footnotesize\bfseries, color=scrumgreen] {Service IA (Sentence-BERT)};
+%--- Libellés de couche ---
+\node[above=1.3cm of frontend, font=\footnotesize\bfseries, color=secondaryblue]
+  {Présentation};
+\node[above=1.3cm of backend, font=\footnotesize\bfseries, color=primaryblue]
+  {Logique Métier};
+\node[below=0.7cm of ai, font=\footnotesize\bfseries, color=scrumgreen]
+  {Service IA};
 \end{tikzpicture}
 \caption{Architecture globale du système LearnAgent}
+\label{fig:archi_globale}
 \end{figure}
 
+\subsection{Diagramme de cas d'utilisation -- Authentification}
+
+La figure~\ref{fig:usecase_auth} ci-dessous présente le diagramme de cas d'utilisation relatif au module d'authentification, détaillant les interactions entre les utilisateurs et le système pour les opérations de connexion, d'inscription et de récupération de compte.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  usecase/.style={draw=primaryblue, ellipse, align=center, font=\small,
+    minimum width=4.0cm, minimum height=0.95cm},
+  sysbox/.style={draw=primaryblue, very thick, rounded corners=8pt, fill=primaryblue!4},
+  extsys/.style={draw=accentorange, very thick, ellipse, align=center,
+    font=\small, minimum width=3.8cm, minimum height=0.95cm,
+    fill=accentorange!10}
+]
+%--- Cadre du système principal (sans le noeud email) ---
+\draw[sysbox] (2.0,-7.2) rectangle (10.5,1.5);
+\node[font=\bfseries\color{primaryblue}] at (6.25,0.9)
+  {Module Authentification};
+
+%--- Acteur ---
+\actornode{0}{-3.0}{Utilisateur}
+
+%--- Cas d'utilisation ---
+\node[usecase, fill=primaryblue!10] (login)    at (6.2, 0.2)   {Se connecter (JWT)};
+\node[usecase, fill=primaryblue!10] (register) at (6.2,-1.8)   {S'inscrire};
+\node[usecase, fill=primaryblue!10] (logout)   at (6.2,-3.8)   {Se déconnecter};
+\node[usecase, fill=primaryblue!10] (reset)    at (6.2,-6.0)   {Réinitialiser\\le mot de passe};
+
+%--- Système externe (hors du cadre) ---
+\node[extsys] (email) at (13.5,-6.0) {Service email\\(externe)};
+
+%--- Connexions acteur ---
+\draw (0.55,-3.0) -- (login);
+\draw (0.55,-3.0) -- (register);
+\draw (0.55,-3.0) -- (logout);
+\draw (0.55,-3.0) -- (reset);
+
+%--- Relation d'extension ---
+\draw[dashed, ->, >=Stealth, color=accentorange, thick] (reset) --
+  node[above, font=\small\bfseries, color=accentorange]
+  {$\langle\langle$extend$\rangle\rangle$} (email);
+
+\end{tikzpicture}
+\caption{Diagramme de cas d'utilisation -- Module Authentification}
+\label{fig:usecase_auth}
+\end{figure}
+
+% =====================================================================
 \section{Architecture du Backend (Spring Boot)}
 
 \subsection{Structure en couches N-Tier}
 
-Le backend suit une architecture N-Tier avec séparation stricte des responsabilités :
+Le backend suit une architecture N-Tier avec séparation stricte des responsabilités, comme le montre la figure~\ref{fig:ntier}. Chaque couche a un rôle bien défini et ne communique qu'avec les couches adjacentes :
 
 \begin{itemize}
   \item \textbf{controller/} : Exposition des endpoints REST, validation des entrées, délégation aux services.
@@ -669,85 +878,90 @@ Le backend suit une architecture N-Tier avec séparation stricte des responsabil
   \item \textbf{exception/} : Gestion globale des erreurs (\texttt{GlobalExceptionHandler} avec \texttt{@ControllerAdvice}).
 \end{itemize}
 
-Une composante importante de la couche de service est l'\textbf{EmailService} qui s'appuie sur le starter Spring Mail pour gérer les modèles HTML (\texttt{Thymeleaf}) et distribuer les notifications asynchrones.
+Une composante importante de la couche service est l'\textbf{EmailService}, qui s'appuie sur le starter Spring Mail pour gérer les modèles HTML (\texttt{Thymeleaf}) et distribuer les notifications asynchrones.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  layer/.style={rectangle, rounded corners=6pt,
+    minimum width=13cm, minimum height=1.05cm,
+    align=center, font=\small\bfseries},
+  arrow/.style={->, thick, >=Stealth, color=primaryblue}
+]
+\node[layer, draw=secondaryblue, fill=secondaryblue!28] (ctrl) at (0, 0)
+  {Couche Contrôleur\quad$|$\quad Endpoints REST\quad$|$\quad Filtre Sécurité (JWT)};
+\node[layer, draw=primaryblue, fill=primaryblue!18] (svc) at (0,-1.6)
+  {Couche Service\quad$|$\quad Logique Métier\quad$|$\quad DTOs (Request / Response)};
+\node[layer, draw=scrumgreen, fill=scrumgreen!18] (repo) at (0,-3.2)
+  {Couche Repository\quad$|$\quad Spring Data JPA\quad$|$\quad Hibernate ORM};
+\node[layer, draw=accentorange, fill=accentorange!22] (db) at (0,-4.8)
+  {Base de données PostgreSQL\quad$|$\quad Supabase Cloud};
+
+\draw[arrow] (ctrl) -- (svc);
+\draw[arrow] (svc)  -- (repo);
+\draw[arrow] (repo) -- (db);
+\end{tikzpicture}
+\caption{Architecture N-Tier du backend Spring Boot}
+\label{fig:ntier}
+\end{figure}
 
 \subsection{Modèle de données (17 entités JPA)}
 
-\begin{table}[H]
-\centering
-\caption{Entités JPA du modèle de données}
-\begin{tabularx}{\textwidth}{|l|X|}
-\hline
-\textbf{Entité} & \textbf{Description} \\
-\hline
-\texttt{User} & Profil utilisateur : identifiants, rôle (ADMIN/TEACHER/STUDENT), statut actif \\
-\hline
-\texttt{Role} & Enum : STUDENT, TEACHER, ADMIN \\
-\hline
-\texttt{Course} & Cours avec titre, description, niveau, catégorie, mots-clés extraits par IA \\
-\hline
-\texttt{Chapter} & Chapitre d'un cours avec position, contenu et \texttt{SupportType} \\
-\hline
-\texttt{ChapterProgress} & Suivi de complétion d'un chapitre par un étudiant (porte d'accès stricte) \\
-\hline
-\texttt{SupportType} & Enum : VIDEO, PDF, PPTX, IMAGE \\
-\hline
-\texttt{Category} & Catégorie de classification des cours \\
-\hline
-\texttt{Enrollment} & Inscription étudiant/cours avec pourcentage de progression \\
-\hline
-\texttt{Exercise} & Exercice pratique avec fichier téléchargeable \\
-\hline
-\texttt{ExerciseCompletion} & Enregistrement de la complétion d'un exercice par un étudiant \\
-\hline
-\texttt{Quiz} & Quiz QCM associé à un cours (accès conditionnel à 100\% de progression) \\
-\hline
-\texttt{QuizQuestion} & Question avec 4 options et la bonne réponse \\
-\hline
-\texttt{QuizResult} & Score obtenu, réponses soumises, date de passage \\
-\hline
-\texttt{CourseRating} & Note (étoiles + commentaire) attribuée à un cours \\
-\hline
-\texttt{Recommendation} & Recommandation IA stockée en base (course\_id, score, raison) \\
-\hline
-\texttt{SearchHistory} & Log des recherches effectuées par un étudiant \\
-\hline
-\texttt{DifficultyLevel} & Enum : BEGINNER, INTERMEDIATE, ADVANCED \\
-\hline
-\texttt{Message} & Notification ou email envoyé, avec suivi de statut (envoyé/échoué) \\
-\hline
-\end{tabularx}
-\end{table}
+Le modèle de données de la plateforme est constitué de 17 entités JPA, regroupées en cinq domaines fonctionnels majeurs pour une meilleure clarté :
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Utilisateurs \& Sécurité :} \texttt{User} (profil et statut actif) et \texttt{Role} (niveaux d'accès : ADMIN, TEACHER, STUDENT).
+  \item \textbf{Catalogue de Cours :} \texttt{Course} (informations principales et mots-clés sémantiques), \texttt{Chapter} (leçons ordonnées), \texttt{Category} (classification globale) et \texttt{SupportType} (formats supportés : PDF, vidéo...).
+  \item \textbf{Suivi de l'Apprentissage :} \texttt{Enrollment} (gestion des inscriptions) et \texttt{ChapterProgress} (suivi strict de l'avancement servant de condition d'accès).
+  \item \textbf{Évaluations :} \texttt{Quiz}, \texttt{QuizQuestion} et \texttt{QuizResult} pour les QCM conditionnels, ainsi que \texttt{Exercise} et \texttt{ExerciseCompletion} pour les devoirs pratiques.
+  \item \textbf{Moteur IA \& Interactions :} \texttt{Recommendation} (historique des affinités IA), \texttt{SearchHistory} (traces de recherche), \texttt{CourseRating} (avis) et \texttt{Message} (log des notifications emails).
+\end{itemize}
 
 \subsection{Sécurité -- Architecture JWT}
 
-La sécurité du système repose sur l'utilisation de \textbf{JSON Web Tokens (JWT)} via la bibliothèque JJWT 0.12.5. Le flux d'authentification se déroule comme suit :
+La sécurité de la plateforme est assurée par un système d'authentification robuste basé sur les \textbf{JSON Web Token~\cite{jwt}s (JWT)}. Cette approche sans état (stateless) permet de vérifier l'identité des utilisateurs à chaque requête HTTP de manière performante, sans nécessiter de stockage de session côté serveur. 
 
-\begin{enumerate}
-  \item L'utilisateur envoie ses identifiants (email + mot de passe) au endpoint \texttt{POST /api/auth/login}.
-  \item Le backend vérifie les identifiants via \texttt{CustomUserDetailsService} et BCrypt.
-  \item En cas de succès, \texttt{JwtTokenProvider} génère un token signé valable 24h.
-  \item Le token est retourné dans \texttt{AuthResponse} (token + userId + rôle + nom complet).
-  \item Pour chaque requête suivante, le client inclut le token dans le header \texttt{Authorization: Bearer <token>}.
-  \item \texttt{JwtAuthenticationFilter} intercepte et valide le token à chaque requête.
-  \item \texttt{SecurityConfig} définit les règles d'accès par rôle sur chaque endpoint.
-\end{enumerate}
+Concrètement, lors de la connexion, un token crypté et limité dans le temps est délivré au client. Ce token est ensuite transmis automatiquement dans l'en-tête de chaque requête vers le backend. Le serveur intercepte ce token, vérifie son intégrité, et autorise l'accès aux différentes fonctionnalités selon les privilèges associés au rôle de l'utilisateur (Étudiant, Enseignant ou Administrateur).
 
+% =====================================================================
 \section{Architecture du Frontend (React.js)}
 
 \subsection{Structure de l'application}
 
-Le frontend est développé avec React.js 19 et Vite, suivant une architecture modulaire :
+Le frontend est développé avec React.js 19 et Vite, suivant une architecture modulaire orientée composants. La figure~\ref{fig:frontend_archi} donne un aperçu de l'organisation des répertoires principaux :
 
 \begin{itemize}
-  \item \textbf{/api} : Couche d'abstraction Axios (\texttt{axiosConfig.js} avec intercepteurs JWT).
-  \item \textbf{/components/common} : \texttt{Navbar.jsx} (navigation par rôle), \texttt{ProtectedRoute.jsx} (guard RBAC).
-  \item \textbf{/components/course} : \texttt{CourseCard.jsx} (carte de cours réutilisable).
+  \item \textbf{/api} : Couche d'abstraction Axios (\texttt{axiosConfig.js} avec intercepteurs JWT automatiques).
+  \item \textbf{/components/common} : \texttt{Navbar.jsx} (navigation adaptative par rôle), \texttt{ProtectedRoute.jsx} (guard RBAC).
+  \item \textbf{/components/course} : \texttt{CourseCard.jsx} (composant de carte de cours réutilisable).
   \item \textbf{/context} : \texttt{AuthContext.jsx} -- état global d'authentification (JWT + localStorage).
   \item \textbf{/pages/auth} : \texttt{LoginPage.jsx}, \texttt{RegisterPage.jsx}.
   \item \textbf{/pages/student} : \texttt{Dashboard.jsx}, \texttt{CoursesPage.jsx}, \texttt{CourseViewPage.jsx} (chapitres progressifs), \texttt{QuizPage.jsx}, \texttt{ExercisesPage.jsx}, \texttt{SearchPage.jsx}.
   \item \textbf{/pages/teacher} : \texttt{TeacherDashboard.jsx}, \texttt{CreateCourse.jsx}, \texttt{CreateQuiz.jsx}, \texttt{CreateExercise.jsx}.
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  comp/.style={rectangle, draw=secondaryblue, rounded corners=3pt, fill=secondaryblue!10, minimum width=2.8cm, minimum height=0.75cm, align=center, font=\footnotesize},
+  core/.style={rectangle, draw=primaryblue, rounded corners=3pt, fill=primaryblue!15, minimum width=3.2cm, minimum height=0.75cm, align=center, font=\footnotesize\bfseries},
+  arr/.style={->, thick, >=Stealth, color=primaryblue}
+]
+\node[core] (ctx)  at (0,0)    {AuthContext\\(JWT State)};
+\node[comp] (api)  at (-4,-1.8) {/api\\Axios + Intercepteurs};
+\node[comp] (nav)  at (0,-1.8)  {Navbar\\ProtectedRoute};
+\node[comp] (pages) at (4,-1.8) {Pages\\(Student/Teacher/Admin)};
+\node[comp] (comp) at (0,-3.5) {Composants\\réutilisables};
+
+\draw[arr] (ctx) -- (api);
+\draw[arr] (ctx) -- (nav);
+\draw[arr] (ctx) -- (pages);
+\draw[arr] (pages) -- (comp);
+\draw[arr, dashed] (api) -- (pages);
+\end{tikzpicture}
+\caption{Architecture modulaire du frontend React.js}
+\label{fig:frontend_archi}
+\end{figure}
 
 \subsection{Design System}
 
@@ -760,11 +974,12 @@ L'interface utilise un \textbf{Dark Mode} avec les tokens de design suivants :
   \item \textbf{Responsive} : Breakpoint 768px, grilles CSS adaptatives.
 \end{itemize}
 
+% =====================================================================
 \section{Architecture du Moteur IA (Python FastAPI)}
 
 \subsection{Structure du service}
 
-Le moteur de recommandation est un microservice Python indépendant (\texttt{ai-recommendation-engine/}) :
+Le moteur de recommandation est un microservice Python indépendant (\texttt{ai-recommendation-engine/}), dont l'architecture est présentée à la figure~\ref{fig:ai_archi}. Il est composé des modules suivants :
 
 \begin{itemize}
   \item \textbf{main.py} : Point d'entrée FastAPI avec configuration CORS et enregistrement des routes.
@@ -772,609 +987,592 @@ Le moteur de recommandation est un microservice Python indépendant (\texttt{ai-
   \item \textbf{models/nlp\_processor.py} : \texttt{NLPProcessor} -- extraction de mots-clés, détection de langue (FR/EN).
   \item \textbf{services/text\_extractor.py} : Extraction de texte PDF (PyPDF2), DOCX (python-docx), PPTX (python-pptx).
   \item \textbf{services/weak\_topic\_detector.py} : Détection des lacunes par similarité sémantique entre questions ratées et chapitres.
-  \item \textbf{routes/recommendation\_routes.py} : 5 endpoints REST exposés au backend Spring Boot.
+  \item \textbf{routes/recommendation\_routes.py} : 6 endpoints REST exposés au backend Spring Boot.
   \item \textbf{schemas/recommendation\_schema.py} : Modèles Pydantic pour la validation des requêtes/réponses.
 \end{itemize}
-
-\newpage
-
-% =====================================================================
-% CHAPITRE 3 -- SPRINT 1 & SPRINT 2
-% =====================================================================
-\chapter{Sprints 1 et 2 -- Authentification et Gestion des Cours}
-
-\section{Sprint 1 -- Authentification et Gestion des Utilisateurs}
-
-\begin{scrumbox}[frametitle={Sprint 1 -- Authentification et Gestion des Utilisateurs}]
-\textbf{Durée :} 2 semaines \quad \textbf{Responsable :} FRIKHA Amin (Backend) \& BAHLOUL Donia (Frontend)\\[0.3cm]
-\textbf{Objectif :} Mettre en place le système d'authentification JWT sécurisé et la gestion des utilisateurs par rôle.
-\end{scrumbox}
-
-\subsection{Sprint Backlog -- Sprint 1}
-
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog -- Sprint 1}
-\begin{tabularx}{\textwidth}{|c|X|l|c|}
-\hline
-\textbf{ID} & \textbf{Tâche} & \textbf{Assigné à} & \textbf{Effort (h)} \\
-\hline
-T-01 & Configuration Spring Boot 3.2.5 + Spring Security & FRIKHA Amin & 4 \\
-\hline
-T-02 & Implémentation JwtTokenProvider (JJWT 0.12.5) & FRIKHA Amin & 6 \\
-\hline
-T-03 & Implémentation JwtAuthenticationFilter & FRIKHA Amin & 4 \\
-\hline
-T-04 & Entité User + Role (enum) + UserRepository & ABDELHEDI Wassim & 3 \\
-\hline
-T-05 & Service inscription (RegisterRequest + BCrypt) & ABDELHEDI Wassim & 5 \\
-\hline
-T-06 & Service connexion (LoginRequest/AuthResponse) & ABDELHEDI Wassim & 5 \\
-\hline
-T-07 & AuthController (/api/auth/register, /login, /me) & FRIKHA Amin & 4 \\
-\hline
-T-08 & AdminController -- Gestion utilisateurs \& stats & ABDELHEDI Wassim & 6 \\
-\hline
-T-09 & CategoryController + CategoryRepository & FRIKHA Amin & 3 \\
-\hline
-T-10 & Page LoginPage (React) & BAHLOUL Donia & 5 \\
-\hline
-T-11 & Page RegisterPage (React) & BAHLOUL Donia & 5 \\
-\hline
-T-12 & AuthContext + ProtectedRoute (RBAC) & BAHLOUL Donia & 6 \\
-\hline
-T-13 & Configuration Axios (axiosConfig.js + intercepteurs) & BAHLOUL Donia & 3 \\
-\hline
-\end{tabularx}
-\end{table}
-
-\subsection{Réalisations techniques -- Sprint 1}
-
-\subsubsection{Backend : JwtTokenProvider}
-
-La classe \texttt{JwtTokenProvider} est au cœur du système de sécurité. Elle utilise la bibliothèque JJWT 0.12.5 pour générer et valider les tokens avec une clé secrète de 256 bits :
-
-\begin{lstlisting}[language=Java, caption=Extrait de JwtTokenProvider.java]
-@Component
-public class JwtTokenProvider {
-
-    @Value("${app.jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${app.jwt.expiration-ms}")
-    private long jwtExpirationMs;
-
-    public String generateToken(Authentication authentication) {
-        UserDetails userDetails =
-            (UserDetails) authentication.getPrincipal();
-        return Jwts.builder()
-            .subject(userDetails.getUsername())
-            .issuedAt(new Date())
-            .expiration(new Date(
-                new Date().getTime() + jwtExpirationMs))
-            .signWith(getSigningKey())
-            .compact();
-    }
-
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(
-            Decoders.BASE64.decode(jwtSecret));
-    }
-
-    public boolean validateToken(String token) {
-        Jwts.parser()
-            .verifyWith(getSigningKey())
-            .build()
-            .parseSignedClaims(token);
-        return true;
-    }
-}
-\end{lstlisting}
-
-\subsubsection{Frontend : AuthContext et axiosConfig}
-
-Le contexte d'authentification centralise l'état JWT dans React :
-
-\begin{lstlisting}[language=JavaScript, caption=Extrait de AuthContext.jsx]
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(
-    localStorage.getItem('token') || null
-  );
-
-  const login = async (credentials) => {
-    const response = await authApi.login(credentials);
-    const { token, userId, fullName, role } = response.data;
-    setToken(token);
-    setUser({ userId, fullName, role });
-    localStorage.setItem('token', token);
-  };
-
-  const logout = () => {
-    setUser(null); setToken(null);
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-\end{lstlisting}
-
-L'intercepteur Axios attache automatiquement le token à toutes les requêtes et gère les déconnexions sur réception d'un code 401.
-
-\subsection{Sprint Review -- Sprint 1}
-
-Fonctionnalités livrées et validées :
-\begin{itemize}[label=$\checkmark$]
-  \item Système d'inscription avec validation et chiffrement BCrypt.
-  \item Authentification par token JWT (validité 24h, clé 256 bits).
-  \item Gestion des rôles ADMIN, TEACHER, STUDENT avec protection des routes Spring Security.
-  \item Interface de connexion et d'inscription responsive (Dark Mode).
-  \item Protection des routes frontend via \texttt{ProtectedRoute}.
-  \item Panel administrateur : gestion des utilisateurs et des catégories.
-\end{itemize}
-
-\newpage
-
-\section{Sprint 2 -- Gestion des Cours Multi-Chapitres}
-
-\begin{scrumbox}[frametitle={Sprint 2 -- Cours Multi-Chapitres et Progression}]
-\textbf{Durée :} 2 semaines \quad \textbf{Responsable :} ABDELHEDI Wassim (Backend) \& BAHLOUL Donia (Frontend)\\[0.3cm]
-\textbf{Objectif :} Développer le moteur de cours multi-chapitres avec suivi de progression strict et contrôle d'accès.
-\end{scrumbox}
-
-\subsection{Sprint Backlog -- Sprint 2}
-
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog -- Sprint 2}
-\begin{tabularx}{\textwidth}{|c|X|l|c|}
-\hline
-\textbf{ID} & \textbf{Tâche} & \textbf{Assigné à} & \textbf{Effort (h)} \\
-\hline
-T-14 & Entités Course, Chapter, SupportType, ChapterProgress & ABDELHEDI Wassim & 6 \\
-\hline
-T-15 & CourseService (CRUD + upload fichier + indexation IA) & ABDELHEDI Wassim & 10 \\
-\hline
-T-16 & CourseController (REST endpoints) & FRIKHA Amin & 6 \\
-\hline
-T-17 & FileStorageService (upload 500MB, PDF/MP4/PPTX) & FRIKHA Amin & 8 \\
-\hline
-T-18 & Logique suivi progression (ChapterProgress, \%) & ABDELHEDI Wassim & 8 \\
-\hline
-T-19 & Système d'inscription (Enrollment + progression) & ABDELHEDI Wassim & 5 \\
-\hline
-T-20 & Système de notation des cours (CourseRating) & FRIKHA Amin & 4 \\
-\hline
-T-21 & Page CoursesPage (liste + filtres) & BAHLOUL Donia & 6 \\
-\hline
-T-22 & Page CourseViewPage (chapitres séquentiels) & BAHLOUL Donia & 9 \\
-\hline
-T-23 & Page CreateCourse (enseignant + ajout chapitres) & BAHLOUL Donia & 7 \\
-\hline
-T-24 & Dashboard étudiant (progression, cours en cours) & BAHLOUL Donia & 5 \\
-\hline
-T-25 & TeacherDashboard (statistiques cours) & BAHLOUL Donia & 5 \\
-\hline
-\end{tabularx}
-\end{table}
-
-\subsection{Réalisations techniques -- Sprint 2}
-
-\subsubsection{Architecture multi-chapitres}
-
-L'innovation principale de ce sprint est l'architecture de cours structurés en chapitres. Chaque \texttt{Course} possède une liste ordonnée de \texttt{Chapter} (par \texttt{position}). Chaque chapitre possède un \texttt{SupportType} (VIDEO, PDF, PPTX, IMAGE) déterminant le rendu côté frontend.
-
-L'entité \texttt{ChapterProgress} lie un \texttt{User} à un \texttt{Chapter} avec un drapeau \texttt{isCompleted}. La logique de progression dans \texttt{EnrollmentService} calcule le pourcentage de complétion du cours en divisant le nombre de chapitres complétés par le total.
-
-\subsubsection{Contrôle d'accès basé sur la progression}
-
-Un garde de sécurité vérifie que l'étudiant a complété 100\% des chapitres avant d'autoriser l'accès aux quiz et exercices d'un cours :
-
-\begin{lstlisting}[language=Java, caption=Extrait de la logique d'accès aux quiz]
-public boolean hasCompletedAllChapters(Long userId, Long courseId) {
-    List<Chapter> chapters = chapterRepository
-        .findByCourseIdOrderByPosition(courseId);
-    if (chapters.isEmpty()) return true;
-
-    long completed = chapterProgressRepository
-        .countByUserIdAndChapterCourseIdAndIsCompletedTrue(
-            userId, courseId);
-
-    return completed >= chapters.size();
-}
-\end{lstlisting}
-
-\subsection{Sprint Review -- Sprint 2}
-
-\begin{itemize}[label=$\checkmark$]
-  \item CRUD complet pour les cours avec structure multi-chapitres.
-  \item Upload et stockage des fichiers (jusqu'à 500 MB) via \texttt{FileStorageService}.
-  \item Suivi de progression strict chapitre par chapitre (\texttt{ChapterProgress}).
-  \item Calcul automatique du pourcentage de progression dans \texttt{Enrollment}.
-  \item Accès conditionnel aux quiz/exercices (100\% de complétion requis).
-  \item Interface \texttt{CourseViewPage} avec progression visuelle et déverrouillage séquentiel des chapitres.
-  \item Tableaux de bord étudiant et enseignant.
-\end{itemize}
-
-\newpage
-
-% =====================================================================
-% CHAPITRE 4 -- SPRINT 3
-% =====================================================================
-\chapter{Sprint 3 -- Fonctionnalités Pédagogiques}
-
-\begin{scrumbox}[frametitle={Sprint 3 -- Quiz et Exercices}]
-\textbf{Durée :} 2 semaines \quad \textbf{Responsable :} FRIKHA Amin (Quiz) \& ABDELHEDI Wassim (Exercices)\\[0.3cm]
-\textbf{Objectif :} Développer les modules de quiz interactifs avec correction automatique et les exercices pratiques avec suivi de complétion.
-\end{scrumbox}
-
-\section{Sprint Backlog -- Sprint 3}
-
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog -- Sprint 3}
-\begin{tabularx}{\textwidth}{|c|X|l|c|}
-\hline
-\textbf{ID} & \textbf{Tâche} & \textbf{Assigné à} & \textbf{Effort (h)} \\
-\hline
-T-26 & Entités Quiz, QuizQuestion, QuizResult & FRIKHA Amin & 5 \\
-\hline
-T-27 & QuizRepository + QuizResultRepository & FRIKHA Amin & 3 \\
-\hline
-T-28 & Logique de soumission et correction automatique & FRIKHA Amin & 6 \\
-\hline
-T-29 & QuizController (CRUD + submit + my-results) & FRIKHA Amin & 6 \\
-\hline
-T-30 & Entités Exercise + ExerciseCompletion & ABDELHEDI Wassim & 4 \\
-\hline
-T-31 & ExerciseService + ExerciseController & ABDELHEDI Wassim & 7 \\
-\hline
-T-32 & Suivi de complétion des exercices & ABDELHEDI Wassim & 4 \\
-\hline
-T-33 & Page QuizPage (React -- quiz interactif) & BAHLOUL Donia & 8 \\
-\hline
-T-34 & Page ExercisesPage (React) & BAHLOUL Donia & 5 \\
-\hline
-T-35 & Page CreateQuiz (enseignant + ajout questions) & BAHLOUL Donia & 7 \\
-\hline
-T-36 & Page CreateExercise (enseignant + upload fichier) & BAHLOUL Donia & 5 \\
-\hline
-T-37 & Dashboard enseignant -- résultats étudiants & ABDELHEDI Wassim & 5 \\
-\hline
-\end{tabularx}
-\end{table}
-
-\section{Module Quiz}
-
-\subsection{Architecture du module Quiz}
-
-Le module Quiz est composé de trois entités liées :
-\begin{itemize}
-  \item \textbf{Quiz} : Titre, description, niveau de difficulté, statut publié. Associé à un \texttt{Course}.
-  \item \textbf{QuizQuestion} : Énoncé, quatre options de réponse (A, B, C, D), index de la bonne réponse (\texttt{correctAnswer}).
-  \item \textbf{QuizResult} : Score (entier), total des questions, date de soumission (\texttt{submittedAt}), référence à l'étudiant et au quiz.
-\end{itemize}
-
-L'accès à un quiz est strictement conditionné à la complétion de 100\% des chapitres du cours associé, vérifiée par \texttt{QuizController} avant de retourner les questions.
-
-\subsection{Endpoint de soumission}
-
-\begin{lstlisting}[language=Java, caption=Extrait de QuizController.java -- soumission]
-@PostMapping("/{id}/submit")
-@PreAuthorize("hasRole('STUDENT')")
-public ResponseEntity<?> submitQuiz(
-        @PathVariable Long id,
-        @RequestBody Map<String, Object> body,
-        Authentication auth) {
-
-    // Vérifier la complétion des chapitres
-    if (!enrollmentService.hasCompletedAllChapters(
-            getCurrentUserId(auth), quiz.getCourse().getId())) {
-        return ResponseEntity.status(403)
-            .body("Complétez tous les chapitres d'abord.");
-    }
-
-    int score = (int) body.get("score");
-    int totalQuestions = (int) body.get("totalQuestions");
-
-    QuizResult result = new QuizResult();
-    result.setScore(score);
-    result.setTotalQuestions(totalQuestions);
-    result.setSubmittedAt(LocalDateTime.now());
-    result.setStudent(currentUser);
-    result.setQuiz(quiz);
-
-    quizResultRepository.save(result);
-
-    return ResponseEntity.ok(Map.of(
-        "score", score,
-        "totalQuestions", totalQuestions,
-        "percentage", (score * 100.0) / totalQuestions
-    ));
-}
-\end{lstlisting}
-
-\section{Module Exercices}
-
-\subsection{Architecture du module Exercice}
-
-Chaque exercice (\texttt{Exercise}) contient un titre, une description, un niveau de difficulté, un fichier téléchargeable (stocké via \texttt{FileStorageService}) et un statut publié. L'entité \texttt{ExerciseCompletion} enregistre qu'un étudiant a complété un exercice spécifique, avec la date de complétion.
-
-\section{Sprint Review -- Sprint 3}
-
-\begin{itemize}[label=$\checkmark$]
-  \item Création et gestion complète des quiz QCM par les enseignants.
-  \item Soumission des quiz par les étudiants avec calcul du score en pourcentage.
-  \item Vérification stricte de l'accès (complétion 100\% des chapitres requise).
-  \item Historique des résultats et tableau de résultats par enseignant.
-  \item Création et gestion des exercices pratiques avec fichiers téléchargeables.
-  \item Suivi de complétion des exercices (\texttt{ExerciseCompletion}).
-  \item Interface React interactive (\texttt{QuizPage}) avec progression question par question.
-\end{itemize}
-
-\newpage
-
-% =====================================================================
-% CHAPITRE 5 -- SPRINT 4 -- IA
-% =====================================================================
-\chapter{Sprint 4 -- Moteur de Recommandation IA}
-
-\begin{scrumbox}[frametitle={Sprint 4 -- Intelligence Artificielle et Recommandation Sémantique}]
-\textbf{Durée :} 2 semaines \quad \textbf{Responsable :} ABDELHEDI Wassim (AI Engine) \& FRIKHA Amin (Intégration)\\[0.3cm]
-\textbf{Objectif :} Développer et intégrer le moteur de recommandation sémantique basé sur Sentence-BERT et la détection automatique des lacunes.
-\end{scrumbox}
-
-\section{Architecture du Service IA}
-
-\subsection{Choix technologique : Sentence-BERT}
-
-Le service de recommandation utilise le modèle \textbf{\texttt{paraphrase-multilingual-MiniLM-L12-v2}} de la bibliothèque \textit{Sentence-Transformers}, téléchargé depuis HuggingFace~:
-
-\begin{itemize}
-  \item \textbf{Type} : Sentence-BERT (architecture Transformer BERT fine-tunée).
-  \item \textbf{Dimension des embeddings} : 384 dimensions.
-  \item \textbf{Langues supportées} : 50+ langues (Français \checkmark, Anglais \checkmark, Arabe \checkmark).
-  \item \textbf{Taille du modèle} : \textasciitilde{}500 MB (téléchargé et mis en cache au premier lancement).
-  \item \textbf{Avantage clé} : Recherche cross-lingue -- une requête en français retourne des résultats pertinents même pour des cours en anglais.
-\end{itemize}
-
-\subsection{Sprint Backlog -- Sprint 4}
-
-\begin{table}[H]
-\centering
-\caption{Sprint Backlog -- Sprint 4}
-\begin{tabularx}{\textwidth}{|c|X|l|c|}
-\hline
-\textbf{ID} & \textbf{Tâche} & \textbf{Assigné à} & \textbf{Effort (h)} \\
-\hline
-T-38 & Setup FastAPI + configuration CORS + uvicorn & ABDELHEDI Wassim & 3 \\
-\hline
-T-39 & TextExtractor (PyPDF2, python-docx, python-pptx) & ABDELHEDI Wassim & 7 \\
-\hline
-T-40 & NLPProcessor (extraction mots-clés, détection langue) & ABDELHEDI Wassim & 8 \\
-\hline
-T-41 & CourseRecommender (Sentence-BERT + cosinus) & ABDELHEDI Wassim & 12 \\
-\hline
-T-42 & WeakTopicDetector (lacunes quiz + chapitres) & ABDELHEDI Wassim & 10 \\
-\hline
-T-43 & Endpoints REST FastAPI + schémas Pydantic & FRIKHA Amin & 5 \\
-\hline
-T-44 & RecommendationService (Spring Boot -- WebClient) & FRIKHA Amin & 6 \\
-\hline
-T-45 & RecommendationController + SearchController & FRIKHA Amin & 5 \\
-\hline
-T-46 & SearchService + SaveSearchHistory & FRIKHA Amin & 5 \\
-\hline
-T-47 & Page SearchPage (React) & BAHLOUL Donia & 7 \\
-\hline
-T-48 & Intégration recommandations dans Dashboard & BAHLOUL Donia & 5 \\
-\hline
-\end{tabularx}
-\end{table}
-
-\section{Pipeline de Recommandation Sémantique}
-
-\subsection{Flux complet de recommandation}
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-  step/.style={rectangle, draw=primaryblue, fill=primaryblue!10,
-    rounded corners, minimum width=4cm, minimum height=0.9cm,
-    align=center, font=\small},
-  arrow/.style={->, thick, primaryblue}
+  mod/.style={rectangle, draw=scrumgreen, rounded corners=4pt, fill=scrumgreen!10, minimum width=3.8cm, minimum height=0.85cm, align=center, font=\small},
+  arr/.style={->, thick, >=Stealth, color=scrumgreen}
 ]
-\node[step] (q) at (0,0) {Requête étudiant\\{\footnotesize "Python pour IA"}};
-\node[step] (kw) at (0,-1.6) {1. Extraction mots-clés\\{\footnotesize NLPProcessor}};
-\node[step] (enc) at (0,-3.2) {2. Encodage Sentence-BERT\\{\footnotesize vecteur 384 dim}};
-\node[step] (cours) at (0,-4.8) {3. Encodage de tous les cours\\{\footnotesize batch encoding}};
-\node[step] (cos) at (0,-6.4) {4. Similarité Cosinus\\{\footnotesize sklearn.cosine\_similarity}};
-\node[step] (adj) at (0,-8.0) {5. Ajustement des scores\\{\footnotesize pénalité inscrits, bonus titre/catégorie}};
-\node[step] (top) at (0,-9.6) {6. Top 10 + raison générée\\{\footnotesize résultats retournés à Spring Boot}};
+\node[mod, fill=scrumgreen!25] (main) at (0,0)      {main.py\\(FastAPI)};
+\node[mod] (routes)   at (-4.5,-1.8)  {recommendation\_routes.py\\(5 endpoints REST)};
+\node[mod] (reco)     at (0,-1.8)     {recommender.py\\(Sentence-BERT)};
+\node[mod] (nlp)      at (4.5,-1.8)   {nlp\_processor.py\\(Extraction mots-clés)};
+\node[mod] (extract)  at (-2.5,-3.5)  {text\_extractor.py\\(PDF/DOCX/PPTX)};
+\node[mod] (weak)     at (2.5,-3.5)   {weak\_topic\_detector.py\\(Lacunes IA)};
 
-\draw[arrow] (q) -- (kw);
-\draw[arrow] (kw) -- (enc);
-\draw[arrow] (enc) -- (cours);
-\draw[arrow] (cours) -- (cos);
-\draw[arrow] (cos) -- (adj);
-\draw[arrow] (adj) -- (top);
+\draw[arr] (main) -- (routes);
+\draw[arr] (main) -- (reco);
+\draw[arr] (main) -- (nlp);
+\draw[arr] (reco) -- (extract);
+\draw[arr] (reco) -- (weak);
 \end{tikzpicture}
-\caption{Pipeline de recommandation sémantique LearnAgent}
+\caption{Architecture du microservice Python FastAPI (moteur IA)}
+\label{fig:ai_archi}
 \end{figure}
 
-\subsection{Implémentation CourseRecommender}
+% ------- Conclusion du chapitre -------
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
 
-La classe \texttt{CourseRecommender} encapsule le modèle Sentence-BERT et l'algorithme d'ajustement des scores :
+Ce deuxième chapitre a présenté l'architecture complète du système \textbf{LearnAgent}, articulée autour de trois composantes principales : un frontend React.js, un backend Spring Boot et un microservice IA Python FastAPI. Les choix architecturaux, notamment l'approche microservices, la séparation en couches N-Tier et l'utilisation de JWT pour la sécurité, ont été motivés par des impératifs de performance, de scalabilité et de maintenabilité. Les diagrammes présentés tout au long de ce chapitre offrent une vision claire et structurée du système, posant ainsi les bases pour les chapitres suivants qui détailleront la réalisation sprint par sprint.
 
-\begin{lstlisting}[language=Python, caption=Extrait de recommender.py -- méthode recommend()]
-def recommend(self, query, courses, enrolled_course_ids=None,
-              top_n=10):
-    if not courses:
-        return []
+\newpage
 
-    # 1. Extraire les mots-cles de la requete
-    keywords = self.nlp.extract_keywords(query)
-    language = self.nlp.detect_language(query)
+% =====================================================================
+% CHAPITRE 3
+% =====================================================================
+\chapter{Mise en œuvre incrémentale : Sprints 1 et 2}
 
-    # 2. Encoder la requete avec Sentence-BERT
-    query_embedding = self.model.encode([query])
+\section*{Introduction du chapitre}
+Ce chapitre détaille la réalisation technique des deux premiers cycles de développement de la plateforme \textbf{LearnAgent}. En nous appuyant sur la méthodologie agile Scrum \cite{scrum}, nous avons structuré notre travail en itérations courtes pour livrer rapidement une valeur fonctionnelle. Le premier sprint a été dédié à la mise en place des fondations sécuritaires de la plateforme, tandis que le second sprint s'est concentré sur la conception du noyau pédagogique, incluant la gestion des cours et le suivi strict de la progression des apprenants.
 
-    # 3. Encoder tous les cours (titre + description + contenu)
-    course_texts = [self._build_course_text(c) for c in courses]
-    course_embeddings = self.model.encode(course_texts)
+\section{Sprint 1 -- Authentification et gestion des utilisateurs}
 
-    # 4. Similarite cosinus
-    similarities = cosine_similarity(
-        query_embedding, course_embeddings).flatten()
+Le premier sprint, réalisé sur deux semaines, a permis d'ériger le socle de sécurité de la plateforme. Les travaux ont porté sur l’authentification par jeton JWT \cite{jwt}, la gestion des utilisateurs structurée par rôles (Administrateur, Enseignant, Étudiant) et l’implémentation des interfaces de connexion et d’inscription. Le backend a été assuré principalement par \textbf{FRIKHA Amin}, tandis que le frontend a été pris en charge par \textbf{BAHLOUL Donia}.
 
-    # 5. Ajustement personnalise
-    adjusted_scores = np.copy(similarities)
-    for i, course in enumerate(courses):
-        course_id = course.get("id")
-        # Penaliser les cours deja inscrits
-        if course_id in (enrolled_course_ids or []):
-            adjusted_scores[i] *= 0.3
-        # Bonus correspondance titre
-        title_lower = course.get("title", "").lower()
-        kw_matches = sum(1 for kw in keywords if kw in title_lower)
-        if kw_matches > 0:
-            adjusted_scores[i] *= (1.0 + 0.2 * kw_matches)
-        # Bonus correspondance categorie
-        cat_lower = course.get("category", "").lower()
-        if any(kw in cat_lower for kw in keywords):
-            adjusted_scores[i] *= 1.25
+\subsection{Planification du sprint}
 
-    # 6. Trier et retourner le Top N
-    top_indices = np.argsort(adjusted_scores)[::-1][:top_n]
-    results = []
-    for idx in top_indices:
-        score = float(adjusted_scores[idx])
-        if score < 0.03:   # Seuil minimum de pertinence
-            continue
-        results.append({
-            "course_id": courses[idx]["id"],
-            "score": round(score, 4),
-            "reason": self._generate_reason(
-                query, courses[idx], keywords, score, language)
-        })
-    return results
-\end{lstlisting}
+Le backlog du sprint 1 a été organisé en trois volets complémentaires : la sécurité backend, la gestion métier des utilisateurs et l’interface d’authentification. La partie backend a couvert la configuration avancée de Spring Security \cite{spring_security}, la génération et la validation des jetons JWT, ainsi que l'exposition des points d’accès d’authentification (\texttt{/api/auth/login}, \texttt{/api/auth/register}). En parallèle, la modélisation des entités utilisateurs, l’inscription sécurisée avec hachage des mots de passe, et les fonctions d’administration ont été développées. Côté client, le frontend a intégré les pages d’authentification, le contexte React \cite{react} pour la persistance de session, la protection des routes par rôle, et la configuration d’Axios avec des intercepteurs globaux.
 
-\section{Détection des Lacunes (Weak Topic Detector)}
-
-\subsection{Objectif et principe}
-
-Suite à un échec à un quiz (score $<$ 60\%), le backend Spring Boot appelle l'endpoint \texttt{POST /api/detect-weak-topics} avec les questions du quiz, les réponses de l'étudiant et les chapitres du cours. Le service analyse les questions ratées et les mappe sémantiquement aux chapitres correspondants.
-
-\subsection{Algorithme de détection}
-
-\begin{enumerate}
-  \item Encoder les textes des chapitres du cours avec Sentence-BERT.
-  \item Pour chaque question ratée : encoder le texte de la question.
-  \item Calculer la similarité cosinus entre la question et chaque chapitre.
-  \item Assigner la question au chapitre le plus similaire (seuil $>$ 0.3).
-  \item Calculer le taux d'erreur par chapitre/topic.
-  \item Classifier la sévérité : \textit{critical} ($>$ 70\% d'erreurs), \textit{medium} ($\geq$ 40\%), \textit{low} ($<$ 40\%).
-  \item Retourner un résumé lisible indiquant les chapitres à réviser en priorité.
-\end{enumerate}
-
-\begin{lstlisting}[language=Python, caption=Extrait de weak\_topic\_detector.py]
-def detect_weak_topics(questions, chapters=None, recommender=None):
-    # Encoder les chapitres si disponibles
-    if chapters and recommender:
-        chapter_texts = [f"{c.get('title','')} {c.get('content','')}"
-                         for c in chapters]
-        chapter_embeddings = recommender.model.encode(chapter_texts)
-
-    # Analyser chaque question
-    for q in questions:
-        is_correct = (q.get("student_answer") == q.get("correct_answer"))
-        topic = q.get("topic")
-
-        # Mapper au chapitre le plus similaire si topic absent
-        if not topic and chapter_embeddings is not None:
-            q_emb = recommender.model.encode([q.get("text", "")])
-            sims = cosine_similarity(q_emb, chapter_embeddings).flatten()
-            best_idx = np.argmax(sims)
-            if sims[best_idx] > 0.3:
-                topic = chapters[best_idx].get("title", "Unknown")
-            else:
-                topic = "Concepts Generaux"
-
-        # Accumuler les stats par topic
-        topic_stats[topic]["total"] += 1
-        if not is_correct:
-            topic_stats[topic]["incorrect"] += 1
-\end{lstlisting}
-
-\section{Endpoints REST du Service IA}
-
+\vspace{0.5cm}
 \begin{table}[H]
 \centering
-\caption{Endpoints REST du moteur IA (port 8000)}
-\begin{tabularx}{\textwidth}{|l|l|X|}
-\hline
-\textbf{Méthode} & \textbf{Endpoint} & \textbf{Description} \\
-\hline
-POST & \texttt{/api/recommend} & Recommandation Sentence-BERT (top 10 cours) \\
-\hline
-POST & \texttt{/api/index-course} & Indexation d'un cours + extraction de mots-clés \\
-\hline
-POST & \texttt{/api/extract-text} & Extraction texte d'un fichier PDF/DOCX/PPTX \\
-\hline
-POST & \texttt{/api/extract-keywords} & Extraction NLP de mots-clés d'un texte \\
-\hline
-POST & \texttt{/api/detect-weak-topics} & Détection des lacunes après échec quiz \\
-\hline
-GET & \texttt{/health} & Health check du microservice \\
-\hline
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 1 (Authentification \& Sécurité)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 1.1 & \textbf{En tant que} visiteur, \textbf{je souhaite} pouvoir créer un compte avec une adresse email valide \textbf{afin d'} accéder à la plateforme. & Haute & 5 pts \\
+US 1.2 & \textbf{En tant qu'} utilisateur, \textbf{je souhaite} m'authentifier de manière sécurisée \textbf{afin d'} obtenir un jeton d'accès (JWT). & Haute & 8 pts \\
+US 1.3 & \textbf{En tant qu'} administrateur, \textbf{je souhaite} disposer d'un espace de gestion \textbf{afin d'} attribuer et révoquer les rôles. & Moyenne & 5 pts \\
+US 1.4 & \textbf{En tant que} système, \textbf{je dois} sécuriser les routes (API et Frontend) selon les privilèges associés au rôle \textbf{afin de} garantir la confidentialité. & Haute & 8 pts \\
+\bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Sprint Review -- Sprint 4}
+\subsection{Réalisations techniques}
 
-\begin{itemize}[label=$\checkmark$]
-  \item Moteur de recommandation sémantique Sentence-BERT fonctionnel (FR/EN).
-  \item Détection automatique des lacunes après un échec à un quiz.
-  \item Extraction de texte depuis PDF, DOCX et PPTX en mémoire.
-  \item Indexation des cours avec extraction automatique de mots-clés NLP.
-  \item Intégration Spring Boot $\leftrightarrow$ Service IA via \texttt{WebClient} (non-bloquant).
-  \item Historique des recherches (\texttt{SearchHistory}) persisté en base.
-  \item \texttt{SearchPage} React avec résultats classés par pertinence sémantique.
-  \item Recommandations affichées dans le tableau de bord étudiant.
-\end{itemize}
+L’architecture de sécurité mise en œuvre repose sur une chaîne d'approbation complète liant l’interface React, le contrôleur d’authentification, les services métier et la couche de persistance. Lors de la validation des identifiants, un jeton JWT est généré et transmis de manière sécurisée au client. Côté frontend, la session est centralisée au sein d'un contexte global (\texttt{AuthContext}), facilitant la gestion du profil utilisateur et l’application systématique d'un contrôle d’accès basé sur les rôles (RBAC).
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.8cm and 1cm]
+
+% --- Noeuds ---
+\node[frontend] (ui) {Interface Client\\(Login / Register)};
+\node[frontend, right=1.5cm of ui] (axios) {Client HTTP\\(Axios + Interceptor)};
+\node[backend, right=1.5cm of axios] (controller) {AuthController\\\texttt{/api/auth/login}};
+
+\node[backend, below=1.8cm of controller, text width=4.5cm] (service) {AuthService\\(Logique métier \& Validation)};
+
+\node[db, below=1.8cm of service] (db) {PostgreSQL\\(User \& Role)};
+\node[process, left=1cm of db] (bcrypt) {BCryptEncoder\\(Hachage MDP)};
+\node[process, right=1cm of db] (jwt) {JwtProvider\\(Génération Token)};
+
+% --- Flèches ---
+\draw[flow] (ui) -- node[above]{\footnotesize Identifiants} (axios);
+\draw[flow] (axios) -- node[above]{\footnotesize POST Request} (controller);
+\draw[flow] (controller) -- (service);
+
+\draw[flow, <->] (service.south) -- (db.north);
+\draw[flow, ->] (service.south west) -- ++(0,-0.5) -| (bcrypt.north);
+\draw[flow, ->] (service.south east) -- ++(0,-0.5) -| (jwt.north);
+
+% Flèche retour token
+\draw[flow, dashed, draw=scrumgreen] 
+    (jwt.east) -- ++(0.5,0) 
+    |- ([yshift=1.5cm]controller.north) 
+    -| (axios.north) node[pos=0.25, above, note, text=scrumgreen]{Retour du jeton JWT sécurisé};
+
+\end{tikzpicture}
+}
+\caption{Architecture détaillée du mécanisme d’authentification}
+\end{figure}
+
+Le contrôle des sessions s'effectue dynamiquement côté client. Les requêtes interceptées qui retournent une erreur 401 (Non autorisé) déclenchent automatiquement une invalidation de la session et une redirection vers la page de connexion.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[frontend] (pages) {Composants React\\(Vues protégées)};
+\node[frontend, right=1.5cm of pages] (context) {AuthContext\\(État de session global)};
+\node[process, right=1.5cm of context] (storage) {Local Storage\\(Persistance du JWT)};
+
+\node[backend, above=1.5cm of context] (routes) {ProtectedRoute\\(Contrôle RBAC)};
+\node[backend, below=1.5cm of storage] (api) {Appels API\\(Header Authorization)};
+
+\draw[flow] (pages) -- (context);
+\draw[flow] (context) -- (storage);
+\draw[flow] (context) -- (routes);
+\draw[flow] (storage) -- (api);
+
+\draw[flow, dashed, draw=accentorange] 
+    (api.west) -| node[pos=0.25, below, note, text=accentorange, draw=accentorange!30, yshift=-0.2cm]{Interception erreur 401} (context.south);
+
+\end{tikzpicture}
+}
+\caption{Gestion des sessions et contrôle d’accès (Frontend)}
+\end{figure}
+
+\subsection{Bilan du sprint}
+
+Les résultats de ce premier sprint garantissent la fiabilité et la sécurité de l'accès à LearnAgent. Le mécanisme d'inscription intégrant le chiffrement robuste des mots de passe (BCrypt) et l'authentification sans état (stateless) via JWT assurent une scalabilité optimale. Cette base permet une gestion granulaire des droits (\texttt{ADMIN}, \texttt{TEACHER}, \texttt{STUDENT}) garantissant la protection des ressources critiques aussi bien au niveau de l'API Spring Boot que des routes React. 
+
+\newpage
+
+\section{Sprint 2 -- Gestion des cours multi-chapitres}
+
+Le deuxième sprint s'est focalisé sur le cœur pédagogique de LearnAgent. Il a permis d'implémenter la gestion hiérarchique des cours, le suivi rigoureux de la progression des apprenants et le contrôle d’accès conditionnel aux différents modules d'apprentissage. La logique métier backend a été conçue par \textbf{ABDELHEDI Wassim}, tandis que l'intégration et l'interface utilisateur ont été assurées par \textbf{BAHLOUL Donia}.
+
+\subsection{Planification du sprint}
+
+La modélisation du sprint 2 s’est articulée autour de trois axes majeurs : la conception de l'arborescence des cours et chapitres, le stockage des supports pédagogiques, et le moteur de calcul de progression. Les tâches ont couvert la création des entités relationnelles, le développement des API de gestion de fichiers (upload de vidéos MP4, PDF, etc.), le calcul dynamique de l'avancement, et les interfaces permettant aux enseignants de construire leurs cours.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 2 (Moteur de Cours)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 2.1 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} créer et structurer un cours en plusieurs chapitres ordonnés \textbf{afin d'} offrir un apprentissage progressif. & Haute & 8 pts \\
+US 2.2 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} enrichir mes chapitres en y attachant divers supports (vidéos, PDF) \textbf{afin d'} améliorer l'engagement. & Haute & 5 pts \\
+US 2.3 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} m'inscrire à un cours et visualiser mon avancement en temps réel \textbf{afin de} suivre mon apprentissage. & Haute & 5 pts \\
+US 2.4 & \textbf{En tant qu'} étudiant, \textbf{je dois} valider le chapitre en cours avant de débloquer le suivant \textbf{afin de} respecter le cheminement imposé. & Moyenne & 3 pts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Réalisations techniques}
+
+Le modèle de données repose sur une relation hiérarchique stricte : un cours (\texttt{Course}) agrège une séquence ordonnée de chapitres (\texttt{Chapter}). Chaque chapitre héberge un type de média (\texttt{SupportType}) influençant son rendu frontend. Le mécanisme de progression (\texttt{ChapterProgress}) assure la liaison entre l'inscription de l'étudiant (\texttt{Enrollment}) et les chapitres, déclenchant des calculs automatiques du pourcentage global d'avancement.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1cm]
+
+\node[backend] (course) {Course\\(Métadonnées)};
+\node[process, right=1.5cm of course] (chap1) {Chapter 1\\(Ordre = 1)};
+\node[process, right=1cm of chap1] (chap2) {Chapter 2\\(Ordre = 2)};
+\node[process, right=1cm of chap2] (chapn) {Chapter N\\(Ordre = N)};
+
+\node[db, above=1cm of chap1] (support1) {SupportType\\(VIDEO / PDF)};
+\node[db, above=1cm of chap2] (support2) {SupportType\\(PPTX / IMAGE)};
+
+\node[backend, below=2.2cm of chap2, text width=4.5cm] (progress) {ChapterProgress\\(État d'achèvement par étudiant)};
+\node[backend, left=1.5cm of progress] (enroll) {Enrollment\\(Inscription \& Taux de complétion)};
+
+\draw[flow] (course) -- (chap1);
+\draw[flow] (chap1) -- (chap2);
+\draw[flow, dashed] (chap2) -- (chapn);
+
+\draw[flow] (chap1) -- (support1);
+\draw[flow] (chap2) -- (support2);
+
+\draw[flow] (chap1.south) -- (progress.north west);
+\draw[flow] (chap2.south) -- (progress.north);
+\draw[flow] (chapn.south) -- (progress.north east);
+\draw[flow] (progress) -- (enroll);
+
+\end{tikzpicture}
+}
+\caption{Architecture relationnelle des cours multi-chapitres et suivi de progression}
+\end{figure}
+
+Le moteur de progression conditionne l'accès aux activités pratiques (Quiz, Exercices). Le système de vérification (\texttt{EnrollmentService}) garantit qu'un étudiant ne peut accéder à l'évaluation finale qu'après avoir marqué la totalité des chapitres comme terminés, garantissant ainsi l'intégrité du parcours pédagogique.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.7\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.2cm and 1.5cm]
+
+\node[frontend] (student) {Étudiant authentifié};
+\node[process, below=of student] (request) {Requête d'accès\\(Quiz / Exercice)};
+\node[backend, below=of request, text width=4cm] (check) {Service de Vérification\\(Progression globale = 100\%)};
+\node[decision] (decision) [below=1cm of check] {Cours validé ?};
+
+\node[process, left=1.2cm of decision, fill=scrumgreen!20, draw=scrumgreen] (allow) {Accès Autorisé};
+\node[process, right=1.2cm of decision, fill=accentorange!20, draw=accentorange] (deny) {Accès Refusé\\(Message d'alerte)};
+
+\draw[flow] (student) -- (request);
+\draw[flow] (request) -- (check);
+\draw[flow] (check) -- (decision);
+\draw[flow] (decision) -- node[above, note]{Oui} (allow);
+\draw[flow] (decision) -- node[above, note]{Non} (deny);
+
+\end{tikzpicture}
+}
+\caption{Algorithme de contrôle d’accès basé sur la progression de l'étudiant}
+\end{figure}
+
+\subsection{Bilan du sprint}
+
+La finalisation du sprint 2 dote LearnAgent d'un noyau pédagogique puissant et résilient. L'architecture supporte dorénavant la gestion de cours modulaires et la diffusion de ressources multimédias lourdes de façon fluide. Le tracking des chapitres s'est avéré extrêmement précis, générant des jauges de progression fiables sur les tableaux de bord étudiants. De plus, la règle d'affaire imposant l'achèvement à 100\% avant toute évaluation a été strictement implémentée et testée avec succès, consolidant la crédibilité académique de la plateforme.
+
+\section*{Conclusion du chapitre}
+Ces deux premières itérations ont permis d'asseoir l'infrastructure fondamentale de LearnAgent. L'intégration de la sécurité JWT couplée à un moteur de structuration de cours performant forme une base logicielle mature. Ce socle technique stable nous permet d'aborder sereinement le développement des fonctionnalités pédagogiques évaluatives détaillées dans le chapitre suivant.
 
 \newpage
 
 % =====================================================================
-% SPRINT 5 -- MESSAGERIE ET NOTIFICATIONS
+% CHAPITRE 4
 % =====================================================================
-\section{Sprint 5 -- Système de Messagerie Intelligente}
+\chapter{Sprint 3 -- Fonctionnalités pédagogiques avancées}
 
-\begin{scrumbox}[frametitle={Sprint 5 -- Notifications et Récupération de Compte}]
-\textbf{Durée :} 1 semaine \quad \textbf{Responsable :} FRIKHA Amin (Backend) \& BAHLOUL Donia (Frontend)\\[0.3cm]
-\textbf{Objectif :} Mettre en place un système de messagerie avancé, incluant la validation des emails, la récupération sécurisée de mot de passe et l'envoi de notifications lors des mises à jour des cours.
-\end{scrumbox}
+\section*{Introduction du chapitre}
+Faisant suite au développement de l'architecture de base, ce chapitre se penche sur l'élaboration du troisième sprint, centré sur les mécanismes d'évaluation formelle des acquis. En introduisant des modules interactifs de quiz et de soumission d'exercices, le système s'enrichit d'outils d'évaluation automatique indispensables pour mesurer les performances de l'apprenant et offrir aux enseignants un suivi analytique complet de leurs classes.
+
+\section{Planification du sprint}
+
+Le backlog du sprint 3 a ciblé la conception des évaluations asynchrones. Il englobe la création des structures de données complexes pour les quiz, les logiques de correction automatisée, et la gestion des livrables pratiques. La charge de développement a été répartie stratégiquement : \textbf{FRIKHA Amin} a piloté l'ingénierie des quiz et du scoring, \textbf{ABDELHEDI Wassim} s'est chargé du module d'exercices pratiques, et \textbf{BAHLOUL Donia} a assuré la création d'interfaces ergonomiques et réactives pour une expérience d'évaluation fluide.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 3 (Quiz \& Évaluation)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 3.1 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} concevoir des quiz (QCM) \textbf{afin d'} évaluer la compréhension des apprenants. & Haute & 8 pts \\
+US 3.2 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} passer un quiz interactif en fin de parcours \textbf{afin de} valider mes acquis. & Haute & 5 pts \\
+US 3.3 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} publier des exercices pratiques avec pièces jointes \textbf{afin de} diversifier l'évaluation. & Moyenne & 5 pts \\
+US 3.4 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} soumettre un exercice et marquer mon travail comme complété \textbf{afin de} mettre à jour mon dossier. & Moyenne & 3 pts \\
+US 3.5 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} accéder à un tableau de bord analytique \textbf{afin de} suivre la réussite de mes étudiants. & Basse & 5 pts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Module d'Évaluation : Quiz}
+
+\subsection{Architecture du module}
+
+L'implémentation du module de quiz repose sur un graphe d'entités interconnectées. L'entité centrale \texttt{Quiz} qualifie l'épreuve (niveau de difficulté, métadonnées). Elle est liée à une collection d'items \texttt{QuizQuestion} définissant l'énoncé, les distracteurs (options) et la clé de correction. L'entité \texttt{QuizResult} historise l'ensemble des tentatives de l'apprenant, constituant la source de données primaire pour les statistiques et le futur système de recommandation par IA.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.85\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[backend] (course) {Entité Course};
+\node[process, right=2cm of course] (quiz) {Quiz\\(Métadonnées, Difficulté)};
+\node[process, above=1.5cm of quiz, text width=4cm] (rule) {Précondition d'accès\\(Progression = 100\%)};
+
+\node[db, right=2cm of quiz, text width=4cm] (questions) {QuizQuestion\\(Énoncé, Choix, Réponse exacte)};
+\node[backend, below=1.5cm of quiz] (result) {QuizResult\\(Score, Date, Tentative)};
+
+\draw[flow] (course) -- (quiz);
+\draw[flow] (rule) -- (quiz); 
+\draw[flow] (quiz) -- (questions);
+\draw[flow] (quiz) -- (result);
+
+\end{tikzpicture}
+}
+\caption{Modèle architectural du module d'évaluation par Quiz}
+\end{figure}
+
+\subsection{Soumission et correction algorithmique}
+
+Le flux de traitement d'un quiz garantit la fiabilité et l'instantanéité des retours. À la soumission, un pipeline transactionnel valide d'abord l'éligibilité de l'étudiant, confronte les réponses soumises aux clés de correction, agrège les points, calcule le pourcentage de réussite, et persiste l'entité \texttt{QuizResult} en base de données.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+
+\node[frontend] (access) {Initiation du Quiz};
+\node[backend, right=1cm of access] (verify) {Contrôle\\d'éligibilité};
+\node[decision] (ok) [right=1cm of verify] {Validé ?};
+
+\node[process, below=1.5cm of ok] (submit) {Soumission du formulaire de réponses};
+\node[process, left=1cm of submit] (score) {Moteur de correction\\(Calcul du score \%)};
+\node[db, right=1cm of submit] (save) {Persistance\\(QuizResult DB)};
+
+\draw[flow] (access) -- (verify);
+\draw[flow] (verify) -- (ok);
+\draw[flow] (ok) -- node[right, note, yshift=-0.2cm]{Oui} (submit);
+\draw[flow] (submit) -- (score);
+\draw[flow] (submit) -- (save);
+
+\end{tikzpicture}
+}
+\caption{Pipeline transactionnel de correction automatique d'un Quiz}
+\end{figure}
+
+\section{Module d'Activités Pratiques : Exercices}
+
+\subsection{Architecture du module}
+
+En complément de l'évaluation théorique, le module des exercices adresse les compétences pratiques. L'entité \texttt{Exercise} encapsulate un sujet détaillé, un niveau de complexité et un support didactique téléchargeable. Le traçage de la réalisation s'effectue via l'entité de jonction \texttt{ExerciseCompletion}, alimentant directement les tableaux de bord de supervision des enseignants.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[backend] (exercise) {Exercise\\(Titre, Sujet, Difficulté)};
+\node[db, right=1.5cm of exercise] (file) {File Storage\\(Sujet PDF/ZIP)};
+\node[backend, below=1.5cm of exercise] (completion) {ExerciseCompletion\\(Étudiant, Horodatage)};
+\node[frontend, right=1.5cm of completion] (dashboard) {Tableau de bord Enseignant\\(Analytique)};
+
+\draw[flow] (exercise) -- (file);
+\draw[flow] (exercise) -- (completion);
+\draw[flow] (completion) -- (dashboard);
+
+\end{tikzpicture}
+}
+\caption{Logique de liaison et de suivi du module Exercice}
+\end{figure}
+
+\section{Bilan du sprint}
+
+L'achèvement du sprint 3 marque un tournant qualitatif pour la plateforme LearnAgent. La mise en production du moteur d'évaluation QCM s'est accompagnée du développement d'un algorithme de correction instantané à la fois performant et robuste face aux cas de figure anormaux. La restriction d'accès aux évaluations a été couplée au moteur de progression (Sprint 2) pour consolider l'expérience d'apprentissage séquentiel. Par ailleurs, la gestion fluide des supports d'exercices et des états de complétion permet aujourd'hui de restituer aux enseignants un profil analytique riche et exploitable, valorisant ainsi considérablement l'écosystème pédagogique.
+
+\section*{Conclusion du chapitre}
+La finalisation des fonctionnalités pédagogiques de ce troisième sprint vient clore la phase de développement des fonctionnalités métiers fondamentales. La boucle d'apprentissage est désormais complète : structuration de cours, diffusion de contenus, suivi de progression, et évaluation des connaissances. Sur cette base logicielle exhaustive et éprouvée, le chapitre suivant s'attachera à l'intégration d'une couche d'intelligence artificielle (moteur Sentence-BERT), visant à propulser LearnAgent vers un modèle d'apprentissage adaptatif de nouvelle génération.
+
+\newpage
+
+% =====================================================================
+% CHAPITRE 5 -- SPRINTS 4 ET 5
+% =====================================================================
+
+\chapter{Sprints 4 et 5 -- Intelligence Artificielle et Messagerie Avancée}
+
+% ─────────────────────────────────────────────
+\section*{Introduction}
+% ─────────────────────────────────────────────
+
+Ce chapitre couvre les deux derniers sprints du projet. Le Sprint~4 intègre un moteur de recommandation sémantique basé sur Sentence-BERT, une détection automatique des lacunes et un tuteur pédagogique Gemini, déployés sous forme d'un microservice Python FastAPI indépendant. Le Sprint~5 met en place un système de messagerie assurant la récupération sécurisée des comptes et l'envoi de notifications automatiques aux apprenants.
+
+
+% ─────────────────────────────────────────────
+\section{Sprint 4 -- Intelligence Artificielle et Recommandation Sémantique}
+% ─────────────────────────────────────────────
+
+Ce quatrième sprint, d'une durée de deux semaines, a été mené conjointement par ABDELHEDI Wassim pour le développement du moteur IA et FRIKHA Amin pour son intégration au backend. Son objectif principal consistait à concevoir un moteur de recommandation hybride exploitant le modèle Sentence-BERT, enrichi de mécanismes automatiques de détection des lacunes et d'un tuteur pédagogique interactif.
+
+\subsection{Architecture du Service IA et Choix technologique : Sentence-BERT}
+
+Le service de recommandation repose sur le modèle \texttt{paraphrase-multilingual-MiniLM-L12-v2} issu de la bibliothèque \textit{Sentence-Transformers}~\cite{sbert}. Il s'agit d'une architecture Transformer BERT fine-tunée pour la similarité sémantique, capable de produire des vecteurs de 384 dimensions couvrant plus de 50 langues. Son avantage majeur réside dans la recherche cross-lingue : une requête soumise en français peut retrouver des cours rédigés en anglais et vice-versa. Contrairement à une recherche classique par mots-clés, qui ne retourne que des correspondances exactes, Sentence-BERT évalue la proximité sémantique globale des énoncés, rendant la découverte de ressources beaucoup plus naturelle et pertinente pour l'apprenant.
+
+\subsection{Sprint Backlog -- Sprint 4}
+
+Les onze tâches planifiées pour ce sprint ont été réparties selon trois domaines de responsabilité. ABDELHEDI Wassim a pris en charge l'ensemble du développement du microservice IA : configuration de l'environnement FastAPI, module d'extraction textuelle multi-format, processeur NLP bilingue, moteur de recommandation hybride, détecteur de lacunes sémantique et service tuteur Gemini. FRIKHA Amin a assuré la couche d'intégration Spring Boot, comprenant les endpoints REST, le service de recherche WebClient asynchrone et la persistance de l'historique. BAHLOUL Donia a développé l'interface React avec la page de recherche multi-entités et l'affichage des recommandations dans le tableau de bord étudiant.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.88\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.5cm and 1.4cm,
+  member/.style={rectangle, rounded corners=4pt, draw=primaryblue, fill=primaryblue!12,
+    font=\bfseries\small, minimum width=4cm, minimum height=0.72cm, align=center},
+  task/.style={rectangle, rounded corners=3pt, draw=primaryblue!45, fill=white,
+    font=\footnotesize, minimum width=4cm, minimum height=0.6cm, align=center,
+    text width=3.8cm},
+  arr/.style={->, thick, primaryblue!55}
+]
+\node[member] (w) {ABDELHEDI Wassim};
+\node[task, below=of w] (t38) {Config. microservice FastAPI};
+\node[task, below=of t38] (t39) {Extraction texte multi-format};
+\node[task, below=of t39] (t40) {Processeur NLP bilingue};
+\node[task, below=of t40] (t41) {Moteur recommandation Sentence-BERT};
+\node[task, below=of t41] (t42) {Détecteur de lacunes};
+\node[task, below=of t42] (t43) {Service tuteur Gemini};
+\node[member, right=1.6cm of w] (a) {FRIKHA Amin};
+\node[task, below=of a] (t44) {Endpoints REST + Pydantic};
+\node[task, below=of t44] (t45) {SearchService WebClient};
+\node[task, below=of t45] (t46) {Historique des recherches};
+\node[member, right=1.6cm of a] (d) {BAHLOUL Donia};
+\node[task, below=of d] (t47) {Page de recherche React};
+\node[task, below=of t47] (t48) {Recommandations tableau de bord};
+\draw[arr] (w)--(t38); \draw[arr] (t38)--(t39); \draw[arr] (t39)--(t40);
+\draw[arr] (t40)--(t41); \draw[arr] (t41)--(t42); \draw[arr] (t42)--(t43);
+\draw[arr] (a)--(t44); \draw[arr] (t44)--(t45); \draw[arr] (t45)--(t46);
+\draw[arr] (d)--(t47); \draw[arr] (t47)--(t48);
+\end{tikzpicture}}
+\caption{Répartition des tâches -- Sprint Backlog Sprint~4}
+\end{figure}
+
+\section{Pipeline de Recommandation Hybride}
+
+\subsection{Flux complet de recommandation}
+
+Le pipeline de recommandation combine une analyse sémantique profonde à des ajustements contextuels pour affiner les résultats. Comme illustré dans le schéma ci-dessous, la requête de l'utilisateur traverse six étapes successives, de l'extraction des mots-clés jusqu'à la sélection finale des cours les plus pertinents.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.25cm,
+  box/.style={
+    rectangle, rounded corners=5pt,
+    draw=primaryblue, fill=primaryblue!8,
+    minimum width=9cm, minimum height=0.9cm,
+    align=center, font=\small\sffamily
+  },
+  arrow/.style={->, thick, primaryblue!70, shorten >=2pt, shorten <=2pt}
+]
+\node[box] (q)   {\textbf{Requête utilisateur}};
+\node[box, below=of q]   (kw)  {\textbf{Étape 1 — Extraction NLP}\\\footnotesize Analyse lexicale et identification des mots-clés};
+\node[box, below=of kw]  (exp) {\textbf{Étape 2 — Expansion sémantique}\\\footnotesize Enrichissement par synonymes techniques bidirectionnels};
+\node[box, below=of exp] (enc) {\textbf{Étape 3 — Encodage vectoriel}\\\footnotesize Génération d'embeddings de 384 dimensions via Sentence-BERT};
+\node[box, below=of enc] (cos) {\textbf{Étape 4 — Similarité cosinus}\\\footnotesize Comparaison vectorielle avec le catalogue de cours indexé};
+\node[box, below=of cos] (adj) {\textbf{Étape 5 — Scoring hybride}\\\footnotesize Pondérations : titre, catégorie, niveau et pénalité inscription};
+\node[box, below=of adj] (top) {\textbf{Étape 6 — Agrégation et restitution}\\\footnotesize Top 10 cours + raison générée renvoyés au backend};
+\draw[arrow] (q)--(kw); \draw[arrow] (kw)--(exp); \draw[arrow] (exp)--(enc);
+\draw[arrow] (enc)--(cos); \draw[arrow] (cos)--(adj); \draw[arrow] (adj)--(top);
+\end{tikzpicture}
+\caption{Schéma explicatif du flux complet de recommandation hybride LearnAgent}
+\end{figure}
+
+\subsection{Algorithme de Scoring Hybride}
+
+Le score global attribué à chaque cours résulte de la combinaison de sa similarité cosinus avec la requête enrichie et de plusieurs pondérations contextuelles. Des bonifications sont accordées lorsque la requête correspond au titre, à la catégorie ou au niveau de difficulté ciblé par l'apprenant. À l'inverse, une pénalité multiplicative est appliquée si l'étudiant est déjà inscrit à ce cours afin de favoriser la découverte de nouveaux contenus. Seuls les cours dépassant un seuil minimal de pertinence sont conservés, et les scores sont plafonnés à une valeur maximale unitaire.
+
+\subsection{Expansion de Requête et NLP Bilingue}
+
+Le module d'analyse linguistique enrichit automatiquement les requêtes courtes grâce à un dictionnaire de synonymes techniques bidirectionnels. Ainsi, un sigle ou un terme générique est étendu à ses variantes et acronymes associés pour maximiser les correspondances pertinentes. Ce traitement inclut également une détection heuristique de la langue de saisie, un filtrage des mots vides bilingue et une extraction de l'intention de l'utilisateur, permettant au moteur d'ajuster dynamiquement le score de pertinence selon le niveau de difficulté recherché.
+
+\subsection{Intégration Backend (SearchService)}
+
+Le service de recherche du backend Spring Boot orchestre l'intégralité du flux transactionnel. Il agrège le catalogue des cours publiés et les données d'inscription de l'utilisateur, puis initie un appel asynchrone non-bloquant vers le microservice IA. Un mécanisme de secours automatique (fallback) bascule vers une recherche textuelle classique en base de données en cas d'inaccessibilité du moteur IA, garantissant ainsi la continuité du service. L'ensemble des requêtes est tracé dans un historique persistant, et les recommandations produites alimentent de manière proactive l'interface personnalisée de l'étudiant.
+
+\section{Détection des Lacunes (Weak Topic Detector)}
+
+\subsection{Algorithme de détection}
+
+L'algorithme de détection des lacunes effectue une analyse sémantique ciblée des erreurs commises lors d'une évaluation. Après un échec à un quiz, le système encode le contenu textuel de chaque chapitre du cours ainsi que l'énoncé de chaque question incorrecte. Une comparaison par similarité cosinus associe chaque erreur au chapitre traitant le sujet correspondant, sous réserve que le score de proximité dépasse un seuil minimal. Le taux d'erreur est ensuite calculé par chapitre et classé selon trois niveaux de sévérité — critique, moyen et faible — aboutissant à la génération d'un rapport d'orientation indiquant à l'étudiant les sections précises à réviser en priorité.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.15cm and 1.8cm,
+  step/.style={rectangle, rounded corners=4pt, draw=scrumgreen, fill=scrumgreen!10,
+    minimum width=7.5cm, minimum height=0.85cm, align=center, font=\small\sffamily},
+  level/.style={rectangle, rounded corners=3pt, draw=accentorange, fill=accentorange!10,
+    minimum width=3cm, minimum height=0.75cm, align=center, font=\footnotesize\sffamily},
+  arrow/.style={->, thick, scrumgreen!70},
+  oarr/.style={->, thick, accentorange!70}
+]
+\node[step] (q1) {Échec au quiz — questions ratées identifiées};
+\node[step, below=of q1] (q2) {Encodage Sentence-BERT des chapitres et des questions};
+\node[step, below=of q2] (q3) {Comparaison cosinus : question → chapitre le plus proche};
+\node[step, below=of q3] (q4) {Calcul du taux d'erreur par chapitre};
+\node[step, below=of q4] (q5) {Classification et génération du rapport de lacunes};
+\node[level, right=1.6cm of q3] (lc) {Critique $>$ 70\%};
+\node[level, above=0.5cm of lc] (ll) {Faible $<$ 40\%};
+\node[level, below=0.5cm of lc] (lm) {Moyen 40--70\%};
+\draw[arrow] (q1)--(q2); \draw[arrow] (q2)--(q3);
+\draw[arrow] (q3)--(q4); \draw[arrow] (q4)--(q5);
+\draw[oarr] (q5.east) -- ++(0.7,0) |- (ll);
+\draw[oarr] (q5.east) -- ++(0.7,0) |- (lc);
+\draw[oarr] (q5.east) -- ++(0.7,0) |- (lm);
+\end{tikzpicture}
+\caption{Schéma du processus de détection automatique des lacunes pédagogiques}
+\end{figure}
+
+\section{Tuteur Pédagogique IA (Gemini)}
+
+Afin de proposer un retour formatif personnalisé, un tuteur intelligent basé sur l'API Google Gemini complète le dispositif de détection des lacunes. Lorsqu'une erreur est identifiée, le service transmet la question, la réponse de l'étudiant et la correction attendue au modèle de langage. Ce dernier génère une explication concise et constructive, guidant l'apprenant vers la compréhension du concept sans se limiter à lui livrer la réponse exacte. Pour optimiser les performances, l'ensemble des questions incorrectes d'un quiz est traité en une seule requête groupée (batch), réduisant drastiquement le temps d'attente global.
+
+\section{Endpoints REST du Service IA}
+
+Le microservice FastAPI expose une interface RESTful structurée autour des fonctionnalités clés de la couche IA. Le schéma suivant présente les principaux points d'accès et leur rôle respectif au sein de la plateforme.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.65cm and 0.5cm,
+  ep/.style={rectangle, rounded corners=4pt, draw=primaryblue, fill=primaryblue!10,
+    minimum width=5.5cm, minimum height=0.72cm, align=center, font=\footnotesize\ttfamily},
+  desc/.style={rectangle, rounded corners=3pt, draw=gray!40, fill=gray!8,
+    minimum width=6.2cm, minimum height=0.72cm, align=left, font=\footnotesize\sffamily,
+    text width=6cm, inner sep=4pt},
+  arr/.style={->, thick, primaryblue!60}
+]
+\node[ep] (e1) {POST /api/recommend};
+\node[desc, right=1cm of e1] (d1) {Recommandation hybride Sentence-BERT};
+\node[ep, below=of e1] (e2) {POST /api/index-course};
+\node[desc, right=1cm of e2] (d2) {Indexation du cours + extraction NLP};
+\node[ep, below=of e2] (e3) {POST /api/extract-text};
+\node[desc, right=1cm of e3] (d3) {Extraction de texte : PDF, DOCX, PPTX, TXT};
+\node[ep, below=of e3] (e4) {POST /api/detect-weak-topics};
+\node[desc, right=1cm of e4] (d4) {Détection sémantique des lacunes après quiz};
+\node[ep, below=of e4] (e5) {POST /api/batch-tutor-feedback};
+\node[desc, right=1cm of e5] (d5) {Feedback pédagogique (Gemini) + Mise en cache intelligente};
+\node[ep, below=of e5] (e6) {GET /health};
+\node[desc, right=1cm of e6] (d6) {Vérification de disponibilité du microservice};
+\foreach \s/\t in {e1/d1,e2/d2,e3/d3,e4/d4,e5/d5,e6/d6} \draw[arr] (\s)--(\t);
+\end{tikzpicture}}
+\caption{Endpoints REST du microservice IA FastAPI}
+\end{figure}
+
+\section{Sprint Review -- Sprint 4}
+
+La clôture du Sprint~4 valide l'intégration réussie d'une couche d'intelligence artificielle autonome au sein de la plateforme. Le moteur de recommandation hybride a démontré sa capacité à relier sémantiquement des requêtes multilingues à un catalogue de formations diversifié. Une innovation majeure a été apportée au tuteur pédagogique via l'implémentation d'un système de \textbf{mise en cache intelligente} (Smart Caching) des explications en base de données, réduisant la latence à zéro pour les questions déjà analysées. De plus, une \textbf{chaîne de secours multi-modèles} (Gemini 2.0 Flash, Pro, etc.) garantit une résilience totale face aux limitations de quota. L'isolation du microservice IA et ces optimisations garantissent des performances stables et une expérience utilisateur fluide, validant ainsi la pertinence d'une approche microservices.
+
+\newpage
+
+% ─────────────────────────────────────────────
+\section{Sprint 5 -- Système de Messagerie Intelligente}
+% ─────────────────────────────────────────────
+
+Ce cinquième et dernier sprint, d'une durée d'une semaine, a été mené par FRIKHA Amin pour le développement backend et BAHLOUL Donia pour la conception des interfaces. Son objectif visait à mettre en place un écosystème de communication avancé, intégrant la validation des comptes, la récupération sécurisée des mots de passe et l'envoi de notifications automatiques liées à l'activité pédagogique.
 
 \subsection{Architecture du module de messagerie}
 
-Le système repose sur un \texttt{EmailService} côté backend, utilisant le protocole SMTP (via \texttt{spring-boot-starter-mail}) et des templates HTML pour générer des emails dynamiques (mot de passe oublié, alertes d'inactivité, inscriptions). La gestion des notifications s'appuie sur :
-\begin{itemize}
-  \item \textbf{Génération de tokens sécurisés} : Un token unique est généré et stocké en base de données avec une date d'expiration pour la récupération de mot de passe.
-  \item \textbf{Tâches asynchrones et planifiées} : Un \texttt{EmailScheduler} surveille l'activité des utilisateurs et envoie automatiquement des emails de rappel aux étudiants inactifs.
-  \item \textbf{Événements d'application} : Lorsqu'un enseignant modifie un chapitre ou un cours, le service de cours déclenche une notification par email à tous les étudiants inscrits via le \texttt{MessageController} et l'entité \texttt{Message}.
-\end{itemize}
+Le dispositif repose sur un service d'envoi d'emails adossé au protocole SMTP, générant des courriels dynamiques à partir de templates HTML personnalisés. Il orchestre la création de jetons uniques et temporaires pour sécuriser les procédures de réinitialisation de mot de passe. Des tâches planifiées en arrière-plan scrutent l'activité de la plateforme afin de relancer automatiquement les étudiants inactifs. En outre, le système réagit aux événements applicatifs : toute modification apportée par un enseignant à un cours déclenche l'envoi d'une alerte informative à l'ensemble des inscrits concernés.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.82\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=1.1cm and 1.8cm,
+  comp/.style={rectangle, rounded corners=5pt, draw=secondaryblue, fill=secondaryblue!10,
+    minimum width=4.8cm, minimum height=0.85cm, align=center, font=\small\sffamily},
+  event/.style={rectangle, rounded corners=4pt, draw=accentorange, fill=accentorange!10,
+    minimum width=5cm, minimum height=0.75cm, align=center, font=\footnotesize\sffamily},
+  arrow/.style={->, thick, secondaryblue!60}
+]
+\node[comp] (smtp) {Service SMTP\\(spring-boot-starter-mail)};
+\node[comp, below=of smtp] (token) {Génération de tokens sécurisés\\+ date d'expiration};
+\node[comp, below=of token] (sched) {EmailScheduler\\(tâches planifiées en arrière-plan)};
+\node[event, right=2cm of smtp] (ev1) {Email de récupération de mot de passe};
+\node[event, right=2cm of token] (ev2) {Alerte inactivité envoyée à l'étudiant};
+\node[event, right=2cm of sched] (ev3) {Notification de mise à jour de cours};
+\draw[arrow] (smtp)--(ev1); \draw[arrow] (token)--(ev2); \draw[arrow] (sched)--(ev3);
+\end{tikzpicture}}
+\caption{Architecture du module de messagerie -- Sprint~5}
+\end{figure}
 
 \subsection{Intégration Frontend}
 
-Côté frontend, ce sprint introduit la \texttt{ForgotPasswordPage} et la \texttt{ResetPasswordPage}, offrant des interfaces claires et ergonomiques permettant aux utilisateurs de recevoir un lien de réinitialisation sécurisé sans compromettre l'architecture JWT existante.
+Côté client, l'expérience utilisateur a été enrichie de nouvelles interfaces ergonomiques dédiées à la gestion de l'identité numérique. Les flux de réinitialisation de mot de passe s'intègrent naturellement au design system existant, permettant à l'utilisateur de récupérer ses accès de manière autonome, intuitive et totalement sécurisée, sans compromettre l'architecture d'authentification JWT existante.
+
+% ─────────────────────────────────────────────
+\section*{Conclusion}
+% ─────────────────────────────────────────────
+
+Ce chapitre a détaillé la réalisation des deux ultimes sprints du projet, scellant l'aboutissement technique de la plateforme LearnAgent. L'intégration du moteur de recommandation sémantique Sentence-BERT et du tuteur pédagogique Gemini dote la plateforme d'une réelle capacité d'adaptation aux besoins de chaque apprenant. Associée au système de notification intelligent du Sprint~5, la solution offre désormais une couverture fonctionnelle globale : de la diffusion du savoir à l'évaluation personnalisée, en passant par le suivi individualisé et l'engagement continu des étudiants.
 
 \newpage
+
 
 % =====================================================================
 % CONCLUSION GÉNÉRALE
@@ -1383,53 +1581,16 @@ Côté frontend, ce sprint introduit la \texttt{ForgotPasswordPage} et la \textt
 \addcontentsline{toc}{chapter}{Conclusion Générale et Perspectives}
 \markboth{Conclusion Générale et Perspectives}{}
 
-\section*{Bilan du projet}
+Au terme de ce Projet de Fin d'Année, nous avons conçu et développé \textbf{LearnAgent}, une plateforme e-learning intelligente et complète répondant à l'ensemble des besoins identifiés lors de l'analyse de l'existant. Structuré en cinq sprints Scrum successifs, le projet a permis de livrer de façon incrémentielle un système d'authentification JWT sécurisé avec gestion des rôles, un moteur de cours multi-chapitres avec progression stricte, des modules interactifs de quiz et d'exercices pratiques, puis un moteur de recommandation sémantique Sentence-BERT couplé à un tuteur pédagogique Gemini, et enfin un système robuste de messagerie et de notifications automatiques.
 
-Au terme de ce Projet de Fin d'Année, nous avons conçu et développé \textbf{LearnAgent}, une plateforme e-learning intelligente et complète répondant à l'ensemble des besoins identifiés lors de l'analyse de l'existant. Le projet constitue une solution moderne et robuste qui intègre harmonieusement les dernières technologies du développement web et de l'intelligence artificielle sémantique.
+Sur le plan des compétences, ce projet nous a permis de consolider notre maîtrise des architectures microservices et de la conception d'API RESTful, en combinant Spring Boot 3.2 pour le backend transactionnel, React 19~\cite{react} pour le frontend et Python FastAPI pour la couche d'intelligence artificielle. Nous avons approfondi la gestion de la sécurité applicative (JWT, BCrypt, RBAC), le traitement du langage naturel multilingue avec Sentence-BERT et la similarité cosinus, ainsi que l'intégration des grands modèles de langage via l'API Gemini. Au-delà des aspects techniques, ce projet nous a également permis de renforcer notre capacité à travailler en équipe, à gérer les priorités dans un cadre agile et à documenter rigoureusement nos travaux.
 
-Les cinq sprints Scrum ont permis de livrer de façon incrémentielle :
-\begin{itemize}
-  \item Un système d'authentification JWT sécurisé avec gestion des rôles (Sprint 1).
-  \item Un moteur de cours multi-chapitres avec progression stricte et contrôle d'accès (Sprint 2).
-  \item Des modules interactifs de quiz avec correction automatique et exercices pratiques (Sprint 3).
-  \item Un moteur de recommandation sémantique Sentence-BERT et un détecteur de lacunes IA (Sprint 4).
-  \item Un système robuste de messagerie intelligente et de notifications asynchrones (Sprint 5).
-\end{itemize}
-
-\section*{Compétences acquises}
-
-\textbf{Compétences techniques :}
-\begin{itemize}
-  \item Architecture microservices et conception d'API RESTful (Spring Boot + FastAPI).
-  \item Développement backend avec Spring Boot 3.2.5, Spring Security, JPA/Hibernate sur PostgreSQL.
-  \item Développement frontend avec React.js 19, Vite, Context API, Design System Dark Mode.
-  \item Intelligence Artificielle appliquée : Sentence-BERT, similarité cosinus, NLP multilingue.
-  \item Gestion de la sécurité applicative (JWT JJWT 0.12.5, BCrypt, CORS, RBAC).
-\end{itemize}
-
-\textbf{Compétences transversales :}
-\begin{itemize}
-  \item Gestion de projet agile avec Scrum (sprints, cérémonies, backlog, rétrospectives).
-  \item Travail en équipe et répartition des responsabilités.
-  \item Documentation technique et rédaction de rapports académiques.
-\end{itemize}
-
-\section*{Perspectives et améliorations futures}
-
-\begin{enumerate}
-  \item \textbf{IA avancée} : Intégrer des LLMs (GPT-4, Gemini) pour générer des explications personnalisées et un tuteur virtuel.
-  \item \textbf{Apprentissage adaptatif} : Adapter dynamiquement le contenu selon les performances de chaque étudiant.
-  \item \textbf{Application mobile} : Développer une application React Native pour iOS et Android.
-  \item \textbf{Fonctionnalités sociales} : Forums de discussion, sessions collaboratives, pair-programming.
-  \item \textbf{Analytics avancée} : Tableau de bord d'analyse des comportements d'apprentissage.
-  \item \textbf{Gamification} : Badges, classements, points de progression pour augmenter la motivation.
-  \item \textbf{Déploiement Cloud} : Containerisation Docker + orchestration Kubernetes (AWS/Azure).
-\end{enumerate}
+En perspective, plusieurs axes d'amélioration se dégagent naturellement de ce premier prototype fonctionnel. L'intégration de modèles de langage de grande taille (GPT-4, Gemini) permettrait de générer des contenus pédagogiques personnalisés et d'enrichir le tuteur virtuel. Un moteur d'apprentissage adaptatif dynamique, ajustant le parcours de chaque étudiant en temps réel selon ses performances, constituerait une avancée significative. Par ailleurs, le déploiement d'une application mobile React Native, l'ajout de fonctionnalités sociales (forums, sessions collaboratives) et la mise en place de mécanismes de gamification (badges, classements, points de progression) contribueraient à renforcer l'engagement des apprenants. Enfin, la containerisation Docker et l'orchestration Kubernetes sur un hébergement cloud garantiraient la scalabilité et la résilience de la plateforme à grande échelle.
 
 \vspace{1cm}
 \begin{flushright}
 \textit{BAHLOUL Donia, FRIKHA Amin, ABDELHEDI Wassim}\\
-\textit{Sfax, 2025}
+\textit{Sfax, 2026}
 \end{flushright}
 
 \newpage
@@ -1437,66 +1598,67 @@ Les cinq sprints Scrum ont permis de livrer de façon incrémentielle :
 % =====================================================================
 % RÉFÉRENCES BIBLIOGRAPHIQUES
 % =====================================================================
-\chapter*{Références Bibliographiques}
+\renewcommand\bibname{Références Bibliographiques}
 \addcontentsline{toc}{chapter}{Références Bibliographiques}
-\markboth{Références Bibliographiques}{}
 
 \begin{thebibliography}{99}
 
+\bibitem{scrum}
+K.~Schwaber, J.~Sutherland, \textit{The Scrum Guide -- The Definitive Guide to Scrum},
+Novembre 2020. Disponible sur : \texttt{https://scrumguides.org/}.
+
 \bibitem{spring}
 Spring Framework Documentation, \textit{Spring Boot Reference Guide -- Version 3.2.x},
-Disponible sur : \url{https://docs.spring.io/spring-boot/docs/3.2.x/reference/html/},
+Disponible sur : \texttt{https://docs.spring.io/spring-boot/docs/3.2.x/reference/html/},
 Consulté en 2025.
+
+\bibitem{spring_security}
+Spring Framework Contributors, \textit{Spring Security Reference Documentation},
+VMware, Inc., 2023. Disponible sur : \texttt{https://docs.spring.io/spring-security/reference/}.
 
 \bibitem{react}
 Meta Open Source, \textit{React 19 -- A JavaScript library for building user interfaces},
-Disponible sur : \url{https://react.dev/},
-Consulté en 2025.
+Disponible sur : \texttt{https://react.dev/}, Consulté en 2025.
 
 \bibitem{jwt}
-M. Jones, J. Bradley, N. Sakimura, \textit{JSON Web Token (JWT) -- RFC 7519},
-IETF, Mai 2015.
-
-\bibitem{scrum}
-K. Schwaber, J. Sutherland, \textit{The Scrum Guide -- The Definitive Guide to Scrum},
-Novembre 2020. Disponible sur : \url{https://scrumguides.org/}.
+M.~Jones, J.~Bradley, N.~Sakimura, \textit{JSON Web Token (JWT) -- RFC 7519},
+Internet Engineering Task Force (IETF), Mai 2015.
 
 \bibitem{sbert}
-N. Reimers, I. Gurevych, \textit{Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks},
-Proceedings of EMNLP 2019. \url{https://arxiv.org/abs/1908.10084}.
+N.~Reimers, I.~Gurevych, \textit{Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks},
+Proceedings of EMNLP 2019. Disponible sur : \texttt{https://arxiv.org/abs/1908.10084}.
 
 \bibitem{huggingface}
-HuggingFace, \textit{Model: paraphrase-multilingual-MiniLM-L12-v2},
-Disponible sur : \url{https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2},
-Consulté en 2025.
+HuggingFace, \textit{Model : paraphrase-multilingual-MiniLM-L12-v2},
+Disponible sur : \texttt{https://huggingface.co/sentence-transformers/}, Consulté en 2025.
 
 \bibitem{cosine}
-G. Salton, C. Buckley, \textit{Term-weighting approaches in automatic text retrieval},
-Information Processing \& Management, Vol. 24, No. 5, pp. 513--523, 1988.
+G.~Salton, C.~Buckley, \textit{Term-weighting approaches in automatic text retrieval},
+Information Processing \& Management, Vol.~24, No.~5, pp.~513--523, 1988.
 
 \bibitem{fastapi}
-S. Ramírez, \textit{FastAPI -- Modern, fast web framework for building APIs with Python},
-Disponible sur : \url{https://fastapi.tiangolo.com/},
-Consulté en 2025.
+S.~Ramírez, \textit{FastAPI -- Modern, fast web framework for building APIs with Python},
+Disponible sur : \texttt{https://fastapi.tiangolo.com/}, Consulté en 2025.
 
 \bibitem{sklearn}
-F. Pedregosa et al., \textit{Scikit-learn: Machine Learning in Python},
-Journal of Machine Learning Research, Vol. 12, pp. 2825--2830, 2011.
+F.~Pedregosa et al., \textit{Scikit-learn: Machine Learning in Python},
+Journal of Machine Learning Research, Vol.~12, pp.~2825--2830, 2011.
 
 \bibitem{postgresql}
 PostgreSQL Global Development Group, \textit{PostgreSQL 15 Documentation},
-Disponible sur : \url{https://www.postgresql.org/docs/15/},
-Consulté en 2025.
+Disponible sur : \texttt{https://www.postgresql.org/docs/15/}, Consulté en 2025.
 
 \bibitem{vite}
-E. You, \textit{Vite -- Next Generation Frontend Tooling},
-Disponible sur : \url{https://vitejs.dev/},
-Consulté en 2025.
+E.~You, \textit{Vite -- Next Generation Frontend Tooling},
+Disponible sur : \texttt{https://vitejs.dev/}, Consulté en 2025.
 
 \bibitem{supabase}
-Supabase Inc., \textit{Supabase -- The Open Source Firebase Alternative (PostgreSQL Cloud)},
-Disponible sur : \url{https://supabase.com/},
-Consulté en 2025.
+Supabase Inc., \textit{Supabase -- The Open Source Firebase Alternative},
+Disponible sur : \texttt{https://supabase.com/}, Consulté en 2025.
+
+\bibitem{fowler_uml}
+M.~Fowler, \textit{UML Distilled: A Brief Guide to the Standard Object Modeling Language},
+3\textsuperscript{e} éd., Addison-Wesley Professional, 2003.
 
 \end{thebibliography}
 
@@ -1507,112 +1669,76 @@ Consulté en 2025.
 % =====================================================================
 \appendix
 
-\chapter{Annexe A -- Configuration application.yml (Spring Boot)}
-
-\begin{lstlisting}[caption=Fichier de configuration Spring Boot (application.yml)]
-server:
-  port: 8081
-
-spring:
-  main:
-    web-application-type: servlet
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/elearning_pfa
-    username: postgres
-    password: root
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 15
-      connection-timeout: 20000
-      max-lifetime: 180000
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
-  servlet:
-    multipart:
-      max-file-size: 500MB
-      max-request-size: 500MB
-
-app:
-  jwt:
-    secret: PFA_ENIS_2026_SECRET_KEY_256_BITS
-    expiration-ms: 86400000   # 24 heures
-
-  ai-service:
-    base-url: http://localhost:8000
-
-  upload:
-    dir: ./uploads
-
-logging:
-  level:
-    com.pfa.elearning: DEBUG
-\end{lstlisting}
-
-\chapter{Annexe B -- Dépendances Python (requirements.txt)}
-
-\begin{lstlisting}[caption=requirements.txt du service IA (ai-recommendation-engine)]
-sentence-transformers>=3.3.0
-fastapi>=0.115.0
-uvicorn[standard]>=0.32.0
-pydantic>=2.10.0
-scikit-learn>=1.6.0
-numpy>=2.1.0
-python-multipart>=0.0.17
-PyPDF2>=3.0.0
-python-docx>=1.1.0
-python-pptx>=1.0.0
-\end{lstlisting}
-
-\chapter{Annexe C -- Tableau récapitulatif des endpoints REST Backend}
+\chapter{Annexe A -- Tableau récapitulatif des Endpoints REST Backend}
 
 \begin{table}[H]
 \centering
+\renewcommand{\arraystretch}{1.25}
 \caption{Principaux endpoints REST du backend Spring Boot (port 8081)}
-\begin{tabularx}{\textwidth}{|l|l|X|l|}
-\hline
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l l X l}
+\toprule
 \textbf{Méthode} & \textbf{Endpoint} & \textbf{Description} & \textbf{Rôle} \\
-\hline
+\midrule
 POST & /api/auth/register & Inscription & Public \\
 POST & /api/auth/login & Connexion -- retourne JWT & Public \\
-GET & /api/auth/me & Infos utilisateur connecté & Authentifié \\
-\hline
-GET & /api/courses & Liste des cours publiés & Public \\
-GET & /api/courses/\{id\} & Détail d'un cours & Public \\
+GET  & /api/auth/me & Infos utilisateur connecté & Authentifié \\
+\midrule
+GET  & /api/courses & Liste des cours publiés & Public \\
 POST & /api/courses & Créer un cours & TEACHER \\
-PUT & /api/courses/\{id\} & Modifier un cours & TEACHER \\
+PUT  & /api/courses/\{id\} & Modifier un cours & TEACHER \\
 DELETE & /api/courses/\{id\} & Supprimer un cours & TEACHER \\
-GET & /api/courses/my-courses & Mes cours (enseignant) & TEACHER \\
-\hline
-GET & /api/courses/\{id\}/chapters & Chapitres d'un cours & Authentifié \\
+GET  & /api/courses/my-courses & Mes cours (enseignant) & TEACHER \\
+\midrule
+GET  & /api/courses/\{id\}/chapters & Chapitres d'un cours & Authentifié \\
 POST & /api/enrollments/\{courseId\} & S'inscrire à un cours & STUDENT \\
 POST & /api/chapters/\{id\}/complete & Marquer chapitre complété & STUDENT \\
-\hline
-GET & /api/quizzes & Liste des quiz publiés & Public \\
+\midrule
+GET  & /api/quizzes & Liste des quiz publiés & Public \\
 POST & /api/quizzes & Créer un quiz & TEACHER \\
 POST & /api/quizzes/\{id\}/submit & Soumettre un quiz & STUDENT \\
-GET & /api/quizzes/my-results & Résultats de mes quiz & TEACHER \\
-\hline
-GET & /api/exercises & Liste des exercices & Public \\
-POST & /api/exercises & Créer un exercice & TEACHER \\
-GET & /api/exercises/\{id\}/download & Télécharger un exercice & Authentifié \\
-\hline
+\midrule
 POST & /api/search & Recherche IA (cours) & STUDENT \\
-GET & /api/search/history & Historique recherches & STUDENT \\
-GET & /api/recommendations & Recommandations IA & STUDENT \\
-\hline
-GET & /api/admin/users & Liste des utilisateurs & ADMIN \\
-GET & /api/admin/stats & Statistiques globales & ADMIN \\
-\hline
+GET  & /api/search/history & Historique des recherches & STUDENT \\
+GET  & /api/recommendations & Recommandations IA & STUDENT \\
+\midrule
+GET  & /api/admin/users & Liste des utilisateurs & ADMIN \\
+GET  & /api/admin/stats & Statistiques globales & ADMIN \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\chapter{Annexe B -- Stack Technologique}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\caption{Technologies utilisées dans le projet LearnAgent}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Couche} & \textbf{Technologie} & \textbf{Rôle} \\
+\midrule
+Backend & Spring Boot 3.2.5 & API REST, sécurité, accès données \\
+Backend & Spring Security + JWT & Authentification et gestion des rôles \\
+Backend & JPA / Hibernate & ORM et persistance \\
+Base de données & PostgreSQL 15 & Stockage relationnel \\
+Cloud DB & Supabase & Hébergement PostgreSQL managé \\
+\midrule
+Frontend & React 19 + Vite & Interface utilisateur SPA \\
+Frontend & Context API & Gestion d'état globale \\
+Frontend & Dark Mode Design System & Charte graphique de la plateforme \\
+\midrule
+Service IA & Python FastAPI & Microservice de recommandation \\
+Service IA & Sentence-Transformers & Embeddings sémantiques multilingues \\
+Service IA & Scikit-learn & Calcul de similarité cosinus \\
+Service IA & Google Gemini API & Tuteur pédagogique + Smart Caching \\
+\midrule
+Messagerie & Spring Mail (SMTP) & Envoi d'emails transactionnels \\
+Gestion projet & Scrum / Jira & Méthodologie agile \\
+\bottomrule
 \end{tabularx}
 \end{table}
 
 \end{document}
+

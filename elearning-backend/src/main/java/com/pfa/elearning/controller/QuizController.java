@@ -9,6 +9,7 @@ import com.pfa.elearning.model.*;
 import com.pfa.elearning.repository.CategoryRepository;
 import com.pfa.elearning.repository.QuizRepository;
 import com.pfa.elearning.repository.QuizResultRepository;
+import com.pfa.elearning.repository.QuizQuestionRepository;
 import com.pfa.elearning.repository.EnrollmentRepository;
 import com.pfa.elearning.service.CourseService;
 import com.pfa.elearning.service.EnrollmentService;
@@ -37,6 +38,7 @@ public class QuizController {
 
     private final QuizRepository quizRepository;
     private final QuizResultRepository quizResultRepository;
+    private final QuizQuestionRepository quizQuestionRepository;
     private final UserService userService;
     private final CategoryRepository categoryRepository;
     private final CourseService courseService;
@@ -201,21 +203,28 @@ public class QuizController {
     @PostMapping("/{id}/submit")
     public ResponseEntity<Map<String, Object>> submitQuiz(
             @PathVariable Long id,
-            @RequestBody Map<String, Object> body,
-            Authentication authentication) {
+            @RequestBody Map<String, Object> body) {
 
-        User student = userService.getUserByEmail(authentication.getName());
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User student = userService.getUserByEmail(email);
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz", "id", id));
+
+        if (body.get("score") == null || body.get("totalQuestions") == null) {
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Données du quiz manquantes (score ou totalQuestions)"));
+        }
 
         int score = ((Number) body.get("score")).intValue();
         int totalQuestions = ((Number) body.get("totalQuestions")).intValue();
         double percentage = totalQuestions > 0 ? (double) score / totalQuestions * 100 : 0;
 
+        /* 
         if (quizResultRepository.existsByStudentIdAndQuizId(student.getId(), quiz.getId())) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Vous avez déjà passé ce quiz. Un seul essai est autorisé."));
         }
+        */
 
         QuizResult result = QuizResult.builder()
                 .quiz(quiz)
@@ -225,8 +234,8 @@ public class QuizController {
                 .failed(percentage < 60)
                 .build();
 
-        // Detect weak topics if failed and answers are provided
-        if (percentage < 60 && body.containsKey("answers")) {
+        // Process AI Analysis
+        if (body.containsKey("answers")) {
             try {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> studentAnswers = (List<Map<String, Object>>) body.get("answers");
@@ -243,6 +252,7 @@ public class QuizController {
                                 Map<String, Object> qPayload = new HashMap<>();
                                 qPayload.put("text", question.getText());
                                 qPayload.put("topic", question.getTopic() != null ? question.getTopic() : "General Topics");
+                                qPayload.put("question_id", question.getId());
                                 
                                 List<String> options = question.getOptions();
                                 String studentAnsText = (studentAnsIdx >= 0 && studentAnsIdx < options.size()) ? options.get(studentAnsIdx) : "Unknown";
@@ -255,93 +265,137 @@ public class QuizController {
                 }
 
                 if (!aiQuestionsPayload.isEmpty()) {
-                    // Method 1: Get chapters for automated topic mapping
-                    List<Map<String, Object>> aiChaptersPayload = new ArrayList<>();
-                    if (quiz.getCourse() != null && quiz.getCourse().getChapters() != null) {
-                        for (Chapter chapter : quiz.getCourse().getChapters()) {
-                            Map<String, Object> cMap = new HashMap<>();
-                            cMap.put("id", chapter.getId());
-                            cMap.put("title", chapter.getTitle());
-                            cMap.put("content", chapter.getContent() != null ? chapter.getContent() : "");
-                            aiChaptersPayload.add(cMap);
-                        }
+                    // 1. ALWAYS Generate AI Tutor Feedback for incorrect answers (even if passed)
+                    List<Map<String, Object>> batchQuestions = new ArrayList<>();
+                    List<Map<String, Object>> finalFeedbacks = new ArrayList<>();
+                    
+                    for (Map<String, Object> ans : studentAnswers) {
+                        Long qId = ((Number) ans.get("questionId")).longValue();
+                        int studentAnsIdx = ((Number) ans.get("studentAnswerIndex")).intValue();
+
+                        quiz.getQuestions().stream()
+                            .filter(q -> q.getId().equals(qId))
+                            .findFirst()
+                            .ifPresent(question -> {
+                                if (studentAnsIdx != question.getCorrectAnswer() && studentAnsIdx != -1) {
+                                    // Use CACHED explanation if available
+                                    if (question.getAiExplanation() != null && !question.getAiExplanation().isEmpty()) {
+                                        Map<String, Object> cached = new HashMap<>();
+                                        cached.put("question_id", question.getId());
+                                        cached.put("feedback", question.getAiExplanation());
+                                        finalFeedbacks.add(cached);
+                                    } else {
+                                        // Prepare for AI call
+                                        Map<String, Object> tutorReq = new HashMap<>();
+                                        tutorReq.put("question_id", question.getId());
+                                        tutorReq.put("question_text", question.getText());
+                                        
+                                        List<String> options = question.getOptions();
+                                        String studentAnsText = (studentAnsIdx >= 0 && studentAnsIdx < options.size()) ? options.get(studentAnsIdx) : "Unknown";
+                                        String correctAnsText = (question.getCorrectAnswer() >= 0 && question.getCorrectAnswer() < options.size()) ? options.get(question.getCorrectAnswer()) : "Unknown";
+                                        
+                                        tutorReq.put("student_answer", studentAnsText);
+                                        tutorReq.put("correct_answer", correctAnsText);
+                                        batchQuestions.add(tutorReq);
+                                    }
+                                }
+                            });
                     }
 
-                    Map<String, Object> finalPayload = new HashMap<>();
-                    finalPayload.put("questions", aiQuestionsPayload);
-                    finalPayload.put("chapters", aiChaptersPayload);
+                    log.info("Batch questions for AI: {}. Cached feedbacks used: {}", batchQuestions.size(), finalFeedbacks.size());
 
-                    log.info("Sending {} questions and {} chapters to AI detection for student {}", 
-                             aiQuestionsPayload.size(), aiChaptersPayload.size(), student.getId());
-
-                    Map<String, Object> aiResponse = webClientBuilder.build()
-                            .post()
-                            .uri(aiServiceBaseUrl + "/api/detect-weak-topics")
-                            .bodyValue(finalPayload)
-                            .retrieve()
-                            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                            .block();
-
-                    if (aiResponse != null) {
-                        result.setWeakTopics(objectMapper.writeValueAsString(aiResponse.get("weak_topics")));
-                        
-                        // Generate specialized recommendations based on these weak topics
+                    if (!batchQuestions.isEmpty()) {
                         try {
-                            @SuppressWarnings("unchecked")
-                            List<Map<String, String>> topicsList = (List<Map<String, String>>) aiResponse.get("weak_topics");
-                            if (topicsList != null && !topicsList.isEmpty()) {
-                                List<String> topicNames = topicsList.stream()
-                                        .map(m -> m.get("topic"))
-                                        .filter(Objects::nonNull)
-                                        .collect(Collectors.toList());
-                                searchService.generateRecommendationsForWeakTopics(student, topicNames);
-                            }
-                        } catch (Exception e) {
-                            log.error("Could not trigger specialized recommendations: {}", e.getMessage());
-                        }
-                        
-                        // --- Generate AI Tutor Feedback in BATCH (Replaces individual calls) ---
-                        List<Map<String, String>> batchQuestions = new ArrayList<>();
-                        for (Map<String, Object> q : aiQuestionsPayload) {
-                            String stuAns = (String) q.get("student_answer");
-                            String corAns = (String) q.get("correct_answer");
+                            Map<String, Object> batchReq = new HashMap<>();
+                            batchReq.put("questions", batchQuestions);
                             
-                            if (!stuAns.equals(corAns) && !stuAns.equals("Unknown")) {
-                                Map<String, String> tutorReq = new HashMap<>();
-                                tutorReq.put("question_text", (String) q.get("text"));
-                                tutorReq.put("student_answer", stuAns);
-                                tutorReq.put("correct_answer", corAns);
-                                batchQuestions.add(tutorReq);
-                            }
-                        }
-
-                        if (!batchQuestions.isEmpty()) {
-                            try {
-                                Map<String, Object> batchReq = new HashMap<>();
-                                batchReq.put("questions", batchQuestions);
-
-                                Map<String, Object> batchRes = webClientBuilder.build()
+                            Map<String, Object> batchRes = webClientBuilder.build()
                                     .post()
                                     .uri(aiServiceBaseUrl + "/api/batch-tutor-feedback")
                                     .bodyValue(batchReq)
                                     .retrieve()
+                                    .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {})
+                                    .block(java.time.Duration.ofSeconds(15));
+
+                            if (batchRes != null && batchRes.containsKey("feedbacks")) {
+                                List<Map<String, Object>> aiFeedbacks = (List<Map<String, Object>>) batchRes.get("feedbacks");
+                                
+                                // Update Cache and add to final list
+                                for (Map<String, Object> f : aiFeedbacks) {
+                                    finalFeedbacks.add(f);
+                                    
+                                    try {
+                                        Long qId = ((Number) f.get("question_id")).longValue();
+                                        String feedback = (String) f.get("feedback");
+                                        quizQuestionRepository.findById(qId).ifPresent(q -> {
+                                            q.setAiExplanation(feedback);
+                                            quizQuestionRepository.save(q);
+                                        });
+                                    } catch (Exception ex) {
+                                        log.warn("Failed to cache AI explanation: {}", ex.getMessage());
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error("Batch AI Tutor feedback error: {}", e.getMessage());
+                        }
+                    }
+                    
+                    // Store ALL feedbacks (cached + new AI) in the result
+                    try {
+                        String jsonFeedbacks = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(finalFeedbacks);
+                        result.setRecommendedLearningPath(jsonFeedbacks);
+                    } catch (Exception e) {
+                        log.error("Failed to serialize tutor feedbacks: {}", e.getMessage());
+                    }
+
+                    // 2. ONLY Detect weak topics if FAILED
+                    if (percentage < 60) {
+                        try {
+                            List<Map<String, Object>> aiChaptersPayload = new ArrayList<>();
+                            if (quiz.getCourse() != null && quiz.getCourse().getChapters() != null) {
+                                for (Chapter chapter : quiz.getCourse().getChapters()) {
+                                    Map<String, Object> cMap = new HashMap<>();
+                                    cMap.put("id", chapter.getId());
+                                    cMap.put("title", chapter.getTitle());
+                                    cMap.put("content", chapter.getContent() != null ? chapter.getContent() : "");
+                                    aiChaptersPayload.add(cMap);
+                                }
+                            }
+
+                            Map<String, Object> finalPayload = new HashMap<>();
+                            finalPayload.put("questions", aiQuestionsPayload);
+                            finalPayload.put("chapters", aiChaptersPayload);
+
+                            Map<String, Object> aiResponse = webClientBuilder.build()
+                                    .post()
+                                    .uri(aiServiceBaseUrl + "/api/detect-weak-topics")
+                                    .bodyValue(finalPayload)
+                                    .retrieve()
                                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                                     .block();
-                                    
-                                if (batchRes != null && batchRes.containsKey("feedbacks")) {
-                                    @SuppressWarnings("unchecked")
-                                    List<Map<String, Object>> tutorFeedbacks = (List<Map<String, Object>>) batchRes.get("feedbacks");
-                                    result.setRecommendedLearningPath(objectMapper.writeValueAsString(tutorFeedbacks));
+
+                            if (aiResponse != null) {
+                                result.setWeakTopics(objectMapper.writeValueAsString(aiResponse.get("weak_topics")));
+                                
+                                // Generate specialized recommendations
+                                @SuppressWarnings("unchecked")
+                                List<Map<String, String>> topicsList = (List<Map<String, String>>) aiResponse.get("weak_topics");
+                                if (topicsList != null && !topicsList.isEmpty()) {
+                                    List<String> topicNames = topicsList.stream()
+                                            .map(m -> m.get("topic"))
+                                            .filter(Objects::nonNull)
+                                            .collect(Collectors.toList());
+                                    searchService.generateRecommendationsForWeakTopics(student, topicNames);
                                 }
-                            } catch (Exception e) {
-                                log.error("Batch AI Tutor feedback error: {}", e.getMessage());
                             }
+                        } catch (Exception e) {
+                            log.error("Failed to detect weak topics: {}", e.getMessage());
                         }
-                        // ---------------------------------------------------------------------
                     }
                 }
             } catch (Exception e) {
-                log.error("Failed to detect weak topics via AI: {}", e.getMessage());
+                log.error("AI Analysis processing failed: {}", e.getMessage());
             }
         }
 

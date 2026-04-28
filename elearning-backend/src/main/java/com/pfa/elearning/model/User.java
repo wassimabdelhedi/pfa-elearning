@@ -50,7 +50,10 @@ public class User {
 
     // STUDENT SPECIFIC FIELDS
     @Column
-    private String niveau;
+    private String niveauEtude;
+
+    @Column
+    private String niveauCompetence;
 
     @Column
     private String domaineInteret;

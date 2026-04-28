@@ -100,4 +100,8 @@ public class MessageService {
         
         return previews;
     }
+
+    public long getUnreadCount(Long userId) {
+        return messageRepository.countByReceiverIdAndIsReadFalse(userId);
+    }
 }

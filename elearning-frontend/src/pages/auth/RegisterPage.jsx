@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { register } from '../../api/authApi';
-import { FiBookOpen } from 'react-icons/fi';
+import { FiBookOpen, FiUser, FiTarget, FiArrowRight, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
 
 export default function RegisterPage() {
+  const [step, setStep] = useState(1);
+  const [selectedInterests, setSelectedInterests] = useState([]);
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', role: 'STUDENT',
-    niveau: 'Débutant',
-    domaineInteret: 'Web',
+    niveauEtude: 'Étudiant universitaire',
+    niveauCompetence: 'Débutant',
+    domaineInteret: '',
     autreDomaineInteret: '',
-    objectif: 'Apprendre',
+    objectif: 'Améliorer mes compétences',
     autreObjectif: ''
   });
   const [error, setError] = useState('');
@@ -18,17 +21,90 @@ export default function RegisterPage() {
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
+  const studyLevels = [
+    "Lycée ou moins",
+    "Étudiant universitaire",
+    "Étudiant Master",
+    "Doctorat",
+    "Autre"
+  ];
+
+  const interestDomains = [
+    { id: 'tech', label: 'Technologie' },
+    { id: 'dev-perso', label: 'Développement personnel' },
+    { id: 'langues', label: 'Langues' },
+    { id: 'science', label: 'Sciences & Ingénierie' },
+    { id: 'ia', label: 'Intelligence Artificielle' },
+    { id: 'arts', label: 'Arts' },
+    { id: 'business', label: 'Business' },
+    { id: 'autre', label: 'Autre' }
+  ];
+
+  const competenceLevels = [
+    "Débutant",
+    "Intermédiaire",
+    "Avancé"
+  ];
+
+  const learningGoals = [
+    "Trouver un emploi",
+    "Améliorer mes compétences",
+    "Changer de carrière",
+    "Apprendre par intérêt",
+    "Autre"
+  ];
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const toggleInterest = (label) => {
+    if (selectedInterests.includes(label)) {
+      setSelectedInterests(selectedInterests.filter(i => i !== label));
+    } else if (selectedInterests.length < 3) {
+      setSelectedInterests([...selectedInterests, label]);
+    }
+  };
+
+  const nextStep = () => {
+    if (step === 1) {
+      if (!form.firstName || !form.lastName || !form.email || !form.password) {
+        setError('Veuillez remplir tous les champs obligatoires');
+        return;
+      }
+      if (form.password.length < 6) {
+        setError('Le mot de passe doit faire au moins 6 caractères');
+        return;
+      }
+      setError('');
+      if (form.role === 'TEACHER') {
+        handleSubmit(); 
+      } else {
+        setStep(2);
+      }
+    }
+  };
+
+  const prevStep = () => setStep(1);
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    if (form.role === 'STUDENT' && selectedInterests.length === 0) {
+      setError('Veuillez sélectionner au moins un domaine d\'intérêt');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
+    const finalForm = {
+      ...form,
+      domaineInteret: selectedInterests.join(', ')
+    };
+
     try {
-      const res = await register(form);
+      const res = await register(finalForm);
       const { token, userId, fullName, role } = res.data;
       loginUser({ id: userId, email: form.email, fullName, role }, token);
 
@@ -41,6 +117,7 @@ export default function RegisterPage() {
       } else {
         setError(data?.message || 'Erreur lors de l\'inscription');
       }
+      setStep(1);
     } finally {
       setLoading(false);
     }
@@ -48,100 +125,141 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-page">
-      <div className="card auth-card">
-        <div style={{ textAlign: 'center', marginBottom: 8 }}>
-          <FiBookOpen size={40} color="var(--primary-400)" />
+      <div className="card auth-card" style={{ maxWidth: '650px', width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div className="icon-badge">
+            <FiBookOpen size={32} />
+          </div>
+          <h1 style={{ fontSize: '1.8rem', marginTop: '12px' }}>Créer un compte</h1>
+          <p className="subtitle">Rejoignez la plateforme LearnAgent</p>
         </div>
-        <h1>Créer un compte</h1>
-        <p className="subtitle">Rejoignez la plateforme LearnAgent</p>
 
-        {error && <div className="error-message">{error}</div>}
+        {form.role === 'STUDENT' && (
+          <div className="stepper-horizontal">
+            <div className={`step-circle ${step >= 1 ? 'active' : ''}`}>1</div>
+            <div className={`step-line ${step >= 2 ? 'active' : ''}`}></div>
+            <div className={`step-circle ${step >= 2 ? 'active' : ''}`}>2</div>
+          </div>
+        )}
+
+        {error && <div className="error-message" style={{ marginBottom: 20 }}>{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="firstName">Prénom</label>
-            <input id="firstName" name="firstName" className="form-input"
-              placeholder="Ahmed" value={form.firstName}
-              onChange={handleChange} required />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="lastName">Nom</label>
-            <input id="lastName" name="lastName" className="form-input"
-              placeholder="Ben Ali" value={form.lastName}
-              onChange={handleChange} required />
-          </div>
+          {step === 1 ? (
+            <div className="form-step-content">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label>Prénom</label>
+                  <input name="firstName" className="form-input" placeholder="Ahmed" 
+                    value={form.firstName} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                  <label>Nom</label>
+                  <input name="lastName" className="form-input" placeholder="Ben Ali" 
+                    value={form.lastName} onChange={handleChange} required />
+                </div>
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="reg-email">Email</label>
-            <input id="reg-email" name="email" type="email" className="form-input"
-              placeholder="votre@email.com" value={form.email}
-              onChange={handleChange} required />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="reg-password">Mot de passe</label>
-            <input id="reg-password" name="password" type="password" className="form-input"
-              placeholder="Minimum 6 caractères" value={form.password}
-              onChange={handleChange} required minLength={6} />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="role">Je suis</label>
-            <select id="role" name="role" className="form-input"
-              value={form.role} onChange={handleChange}>
-              <option value="STUDENT">🎓 Étudiant</option>
-              <option value="TEACHER">👨‍🏫 Enseignant</option>
-            </select>
-          </div>
-
-          {form.role === 'STUDENT' && (
-            <>
               <div className="form-group">
-                <label htmlFor="niveau">Niveau</label>
-                <select id="niveau" name="niveau" className="form-input"
-                  value={form.niveau} onChange={handleChange}>
-                  <option value="Débutant">Débutant</option>
-                  <option value="Intermédiaire">Intermédiaire</option>
-                  <option value="Avancé">Avancé</option>
+                <label>Email professionnel ou personnel</label>
+                <input name="email" type="email" className="form-input" placeholder="votre@email.com" 
+                  value={form.email} onChange={handleChange} required />
+              </div>
+
+              <div className="form-group">
+                <label>Mot de passe</label>
+                <input name="password" type="password" className="form-input" placeholder="Min. 6 caractères" 
+                  value={form.password} onChange={handleChange} required minLength={6} />
+              </div>
+
+              <div className="form-group">
+                <label>Je m'inscris en tant que</label>
+                <div className="role-grid">
+                  <div className={`role-card ${form.role === 'STUDENT' ? 'active' : ''}`}
+                    onClick={() => setForm({...form, role: 'STUDENT'})}>
+                    <div className="role-icon">🎓</div>
+                    <span>Étudiant</span>
+                  </div>
+                  <div className={`role-card ${form.role === 'TEACHER' ? 'active' : ''}`}
+                    onClick={() => setForm({...form, role: 'TEACHER'})}>
+                    <div className="role-icon">👨‍🏫</div>
+                    <span>Enseignant</span>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" className="btn btn-primary btn-lg" onClick={nextStep}
+                style={{ width: '100%', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {form.role === 'TEACHER' ? (loading ? 'Inscription...' : 'Créer mon compte') : 'Continuer'} 
+                {form.role === 'STUDENT' && <FiArrowRight style={{ marginLeft: '10px' }} />}
+              </button>
+            </div>
+          ) : (
+            <div className="form-step-content">
+              <div className="form-group">
+                <label>Niveaux d’études</label>
+                <select name="niveauEtude" className="form-input" value={form.niveauEtude} onChange={handleChange}>
+                  {studyLevels.map(lvl => (
+                    <option key={lvl} value={lvl}>{lvl}</option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="domaineInteret">Domaine d'intérêt principal</label>
-                <select id="domaineInteret" name="domaineInteret" className="form-input"
-                  value={form.domaineInteret} onChange={handleChange}>
-                  <option value="Web">Web</option>
-                  <option value="IA">IA</option>
-                  <option value="Data">Data</option>
-                  <option value="Autre">Autre</option>
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Domaines d’intérêt (max 3)</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{selectedInterests.length}/3 sélectionnés</span>
+                </label>
+                <div className="interests-grid">
+                  {interestDomains.map(domain => (
+                    <div 
+                      key={domain.id} 
+                      className={`interest-tag ${selectedInterests.includes(domain.label) ? 'active' : ''} ${selectedInterests.length >= 3 && !selectedInterests.includes(domain.label) ? 'disabled' : ''}`}
+                      onClick={() => toggleInterest(domain.label)}
+                    >
+                      <span className="tag-label">{domain.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Niveau de compétence</label>
+                <select name="niveauCompetence" className="form-input" value={form.niveauCompetence} onChange={handleChange}>
+                  {competenceLevels.map(lvl => (
+                    <option key={lvl} value={lvl}>{lvl}</option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="objectif">Objectif</label>
-                <select id="objectif" name="objectif" className="form-input"
-                  value={form.objectif} onChange={handleChange}>
-                  <option value="Apprendre">Apprendre</option>
-                  <option value="Se perfectionner">Se perfectionner</option>
-                  <option value="Réussir un examen">Réussir un examen</option>
-                  <option value="Autre">Autre</option>
+                <label>Objectif d’apprentissage</label>
+                <select name="objectif" className="form-input" value={form.objectif} onChange={handleChange}>
+                  {learningGoals.map(goal => (
+                    <option key={goal} value={goal}>{goal}</option>
+                  ))}
                 </select>
               </div>
-            </>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+                <button type="button" className="btn btn-secondary" onClick={prevStep} style={{ flex: 1 }}>
+                  <FiArrowLeft /> Retour
+                </button>
+                <button type="submit" className="btn btn-primary btn-lg" disabled={loading} style={{ flex: 2 }}>
+                  {loading ? 'Inscription...' : 'Terminer l\'inscription'} <FiTarget style={{ marginLeft: '10px' }} />
+                </button>
+              </div>
+            </div>
           )}
-
-          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}
-            style={{ width: '100%' }}>
-            {loading ? 'Inscription...' : 'Créer mon compte'}
-          </button>
         </form>
 
-        <div className="auth-footer">
-          Déjà un compte ?{' '}
-          <Link to="/login">Se connecter</Link>
+
+
+        <div className="auth-footer" style={{ marginTop: '24px' }}>
+          Déjà un compte ? <Link to="/login">Se connecter</Link>
         </div>
       </div>
     </div>
   );
 }
+

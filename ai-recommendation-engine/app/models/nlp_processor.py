@@ -55,11 +55,12 @@ class NLPProcessor:
         # Dictionnaire de synonymes/termes techniques pour enrichir les recherches
         self.tech_synonyms = {
             "ia": ["intelligence artificielle", "artificial intelligence", "ai", "machine learning"],
+            "ai": ["artificial intelligence", "intelligence artificielle", "ia", "machine learning"],
             "ml": ["machine learning", "apprentissage automatique", "apprentissage machine"],
             "dl": ["deep learning", "apprentissage profond"],
             "poo": ["programmation orientée objet", "object oriented programming", "oop"],
             "bdd": ["base de données", "database", "sql"],
-            "js": ["javascript"],
+            "js": ["javascript", "web"],
             "ts": ["typescript"],
             "algo": ["algorithme", "algorithm", "algorithmique"],
             "dev": ["développement", "development", "programming", "programmation"],
@@ -67,6 +68,14 @@ class NLPProcessor:
             "api": ["interface de programmation", "application programming interface"],
             "ui": ["interface utilisateur", "user interface"],
             "ux": ["expérience utilisateur", "user experience"],
+            "react": ["frontend", "javascript", "framework", "web"],
+            "java": ["backend", "spring", "spring boot", "poo"],
+            "python": ["data science", "ia", "scripting", "backend"],
+            "data": ["données", "big data", "analyse"],
+            "docker": ["conteneur", "container", "devops"],
+            "git": ["versioning", "github", "gitlab"],
+            "cloud": ["aws", "azure", "infrastructure"],
+            "sécurité": ["cybersecurity", "security", "hacking", "protection"],
         }
 
     def extract_keywords(self, text: str) -> List[str]:
@@ -74,35 +83,28 @@ class NLPProcessor:
         Extrait les mots-clés significatifs d'un texte.
         Fonctionne en FR et EN.
         """
-        # Nettoyage
+        # Nettoyage (on garde + et # pour C++ et C#)
         text = text.lower().strip()
-        text = re.sub(r'[^\w\s\-]', ' ', text)
+        text = re.sub(r'[^\w\s\-\+\#]', ' ', text)
 
         # Tokenization
         words = text.split()
 
-        # Filtrage des stop words et mots courts
-        keywords = [
+        # Filtrage des stop words et mots courts (mais on garde les termes techniques de 2 lettres comme IA, AI, JS)
+        base_keywords = [
             word for word in words
             if word not in ALL_STOP_WORDS
-            and len(word) > 2
+            and (len(word) > 2 or word in self.tech_synonyms)
             and not word.isdigit()
         ]
 
-        # Extraction de n-grams (bi-grams) pour capturer des termes composés
-        bigrams = []
-        for i in range(len(words) - 1):
-            bigram = f"{words[i]} {words[i + 1]}"
-            # Garder les bigrams si au moins un mot n'est pas un stop word
-            if words[i] not in ALL_STOP_WORDS or words[i + 1] not in ALL_STOP_WORDS:
-                if len(words[i]) > 2 and len(words[i + 1]) > 2:
-                    bigrams.append(bigram)
-
         # Enrichir avec les synonymes techniques
-        enriched = list(keywords)
-        for word in keywords:
+        enriched = list(base_keywords)
+        for word in base_keywords:
             if word in self.tech_synonyms:
-                enriched.extend(self.tech_synonyms[word])
+                for syn in self.tech_synonyms[word]:
+                    if syn not in enriched:
+                        enriched.append(syn)
 
         # Déduplication tout en préservant l'ordre
         seen = set()
@@ -131,12 +133,21 @@ class NLPProcessor:
         if title:
             parts.append(title)
             parts.append(title)  # Double weight for title
+            # Extraire les mots-clés du titre pour renforcer l'embedding
+            title_kws = self.extract_keywords(title)
+            parts.extend(title_kws)
+            
         if category:
             parts.append(category)
+            
         if description:
-            parts.append(description)
+            # Nettoyer un peu la description pour l'embedding
+            desc_clean = re.sub(r'<[^>]+>', '', description) # Enlever HTML si présent
+            parts.append(desc_clean[:500])
+            
         if content:
-            # Limiter le contenu pour ne pas noyer les signaux importants
-            parts.append(content[:2000])
+            # Extraire quelques mots-clés du contenu au lieu de tout mettre
+            content_kws = self.extract_keywords(content[:5000])
+            parts.extend(content_kws[:15])
 
         return " ".join(parts)
