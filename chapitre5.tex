@@ -1,0 +1,142 @@
+\chapter{Sprints 4 et 5 -- Intelligence Artificielle et Messagerie Avancée}
+
+% =====================================================================
+% INTRODUCTION DU CHAPITRE
+% =====================================================================
+
+\section*{Introduction}
+Ce chapitre présente les deux derniers sprints de notre projet, marquant l'aboutissement fonctionnel de la plateforme LearnAgent. Le Sprint~4 est dédié au développement d'un moteur de recommandation sémantique basé sur Sentence-BERT, à la détection automatique des lacunes pédagogiques et à l'intégration d'un tuteur intelligent (API Google Gemini). Le Sprint~5 porte sur la conception d'un système de messagerie avancé assurant la validation des emails, la récupération sécurisée des comptes et l'envoi de notifications automatiques. Ensemble, ces itérations confèrent au système une dimension adaptative et communicante, en alliant le traitement du langage naturel à une infrastructure de notification résiliente. La composante IA a été isolée au sein d'un microservice Python FastAPI, communiquant avec le backend Spring Boot via des requêtes HTTP REST asynchrones.
+
+% =====================================================================
+% SPRINT 4 -- INTELLIGENCE ARTIFICIELLE
+% =====================================================================
+
+\section{Sprint 4 -- Intelligence Artificielle et Recommandation Sémantique}
+
+Ce quatrième sprint, d'une durée de deux semaines, a été placé sous la responsabilité conjointe de ABDELHEDI Wassim pour le développement du moteur IA et de FRIKHA Amin pour son intégration. Son objectif principal visait à concevoir un moteur de recommandation hybride exploitant le modèle Sentence-BERT, tout en intégrant des mécanismes automatiques de détection des lacunes et un tuteur pédagogique interactif.
+
+\subsection{Architecture du Service IA et Choix technologique : Sentence-BERT}
+
+Le service de recommandation repose sur le modèle \texttt{paraphrase-multilingual-MiniLM-L12-v2} issu de la bibliothèque \textit{Sentence-Transformers}. Il s'agit d'une architecture Transformer BERT fine-tunée pour la similarité sémantique, capable de générer des vecteurs de 384 dimensions sur plus de 50 langues. Son avantage majeur réside dans la recherche cross-lingue, permettant d'associer des requêtes et des contenus formulés dans des langues différentes. Contrairement à une recherche classique par mots-clés qui se limite aux correspondances exactes, Sentence-BERT évalue la proximité sémantique globale des phrases, rendant la découverte de ressources beaucoup plus intuitive et pertinente pour l'apprenant.
+
+\subsection{Sprint Backlog -- Sprint 4}
+
+Le tableau suivant détaille la planification des tâches de ce sprint, reflétant la distribution de la charge de travail entre la création du microservice IA, le développement des algorithmes de NLP et l'intégration complète aux couches backend et frontend de la plateforme.
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\caption{Sprint Backlog -- Sprint 4}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{c X l c}
+\toprule
+\textbf{ID} & \textbf{Tâche} & \textbf{Assigné à} & \textbf{Effort (h)} \\
+\midrule
+T-38 & Configuration du microservice FastAPI (CORS, uvicorn) & ABDELHEDI Wassim & 3 \\
+T-39 & Module d'extraction de texte (PDF, DOCX, PPTX) & ABDELHEDI Wassim & 7 \\
+T-40 & Processeur NLP bilingue (mots-clés, synonymes techniques) & ABDELHEDI Wassim & 8 \\
+T-41 & Moteur de recommandation hybride (Sentence-BERT + scoring) & ABDELHEDI Wassim & 12 \\
+T-42 & Détecteur de lacunes (mapping quiz vers chapitres) & ABDELHEDI Wassim & 10 \\
+T-43 & Service tuteur pédagogique (intégration API Gemini) & ABDELHEDI Wassim & 6 \\
+T-44 & Endpoints REST FastAPI et validation Pydantic & FRIKHA Amin & 5 \\
+T-45 & Service de recherche Spring Boot (WebClient vers IA) & FRIKHA Amin & 8 \\
+T-46 & Persistance de l'historique des recherches & FRIKHA Amin & 5 \\
+T-47 & Conception de la page de recherche (React) & BAHLOUL Donia & 7 \\
+T-48 & Intégration des recommandations au tableau de bord & BAHLOUL Donia & 5 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Pipeline de Recommandation Hybride}
+
+\subsection{Flux complet de recommandation}
+
+Le pipeline de recommandation associe une analyse sémantique profonde à des ajustements contextuels pour affiner les résultats de recherche. Comme illustré par le schéma explicatif ci-dessous, la requête de l'utilisateur traverse six étapes successives : de l'extraction des mots-clés jusqu'au calcul d'un score de similarité hybride, permettant d'isoler les contenus pédagogiques les plus pertinents.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.4cm,
+  box/.style={
+    rectangle, rounded corners=5pt,
+    draw=primaryblue, fill=primaryblue!8,
+    minimum width=8cm, minimum height=0.85cm,
+    align=center, font=\small\sffamily
+  },
+  arrow/.style={->, thick, primaryblue!70, shorten >=2pt, shorten <=2pt}
+]
+
+\node[box] (q)   {\textbf{Requête utilisateur}};
+\node[box, below=of q] (kw)  {\textbf{Étape 1 — Extraction NLP}\\\footnotesize Analyse lexicale et extraction des mots-clés};
+\node[box, below=of kw] (exp) {\textbf{Étape 2 — Expansion sémantique}\\\footnotesize Enrichissement par synonymes techniques};
+\node[box, below=of exp] (enc) {\textbf{Étape 3 — Encodage vectoriel}\\\footnotesize Génération d'embeddings via Sentence-BERT};
+\node[box, below=of enc] (cos) {\textbf{Étape 4 — Similarité Cosinus}\\\footnotesize Comparaison vectorielle avec le catalogue de cours};
+\node[box, below=of cos] (adj) {\textbf{Étape 5 — Scoring Hybride}\\\footnotesize Application des pondérations (titre, niveau, inscriptions)};
+\node[box, below=of adj] (top) {\textbf{Étape 6 — Agrégation des Résultats}\\\footnotesize Sélection du Top 10 et retour au backend principal};
+
+\draw[arrow] (q)   -- (kw);
+\draw[arrow] (kw)  -- (exp);
+\draw[arrow] (exp) -- (enc);
+\draw[arrow] (enc) -- (cos);
+\draw[arrow] (cos) -- (adj);
+\draw[arrow] (adj) -- (top);
+
+\end{tikzpicture}
+\caption{Schéma explicatif du flux complet de recommandation}
+\end{figure}
+
+\subsection{Algorithme de Scoring Hybride}
+
+Le score global d'un cours est défini par la somme de sa similarité cosinus avec la requête et de divers bonus lexicaux. Des bonifications sont accordées si la requête correspond exactement au titre, à la catégorie ou au niveau de difficulté visé par l'apprenant. À l'inverse, une pénalité multiplicative est appliquée si l'étudiant est déjà inscrit à ce cours, favorisant ainsi l'exploration de nouveaux apprentissages. Seuls les cours dépassant un seuil minimal de pertinence sont conservés et plafonnés à un score maximal de 1.
+
+\subsection{Expansion de Requête et NLP Bilingue}
+
+Le module d'analyse linguistique enrichit les requêtes courtes à l'aide d'un dictionnaire de synonymes techniques bidirectionnels. Ainsi, un sigle ou un terme générique est automatiquement étendu à ses variantes et acronymes associés pour maximiser les correspondances. Ce traitement intègre également une détection heuristique de la langue, un filtrage optimisé des mots vides et une extraction de l'intention de l'utilisateur (par exemple, le niveau de difficulté recherché), permettant au système d'ajuster dynamiquement le score de pertinence des résultats.
+
+\subsection{Intégration Backend (SearchService)}
+
+Le service de recherche du backend Spring Boot orchestre l'ensemble du flux transactionnel. Il agrège le catalogue des cours et les données d'inscription de l'utilisateur avant d'initier un appel asynchrone non-bloquant vers le microservice IA. Afin d'assurer une haute disponibilité, un mécanisme de secours (fallback) bascule automatiquement vers une recherche textuelle classique en base de données en cas d'inaccessibilité du moteur IA. L'historique complet des requêtes est tracé et les recommandations produites sont sauvegardées pour alimenter de manière proactive l'interface de l'étudiant.
+
+\section{Détection des Lacunes (Weak Topic Detector)}
+
+\subsection{Algorithme de détection}
+
+L'algorithme de détection des lacunes propose une analyse sémantique ciblée des erreurs commises lors d'une évaluation. Après un échec à un quiz, le système encode d'une part le contenu textuel des chapitres du cours, et d'autre part l'énoncé de chaque question ratée. Une comparaison par similarité cosinus permet ensuite d'associer chaque erreur au chapitre qui en traite le sujet, sous réserve que le score de proximité soit suffisant. Le taux d'erreur est alors calculé par chapitre et classé selon trois niveaux de sévérité (critique, moyen, faible), aboutissant à la génération d'un rapport orientant l'étudiant vers les sections précises à réviser.
+
+\section{Tuteur Pédagogique IA (Gemini)}
+
+Afin d'offrir un retour formatif personnalisé, un tuteur intelligent s'appuyant sur l'API Google Gemini complète la détection des lacunes. Lorsqu'une erreur est identifiée, le service transmet la question, la réponse fournie et la correction attendue au modèle d'intelligence artificielle. Ce dernier génère une explication concise et constructive qui éclaire l'étudiant sur la nature de son erreur sans se limiter à lui fournir la réponse exacte. Le traitement est optimisé par l'envoi groupé (batch) de toutes les questions incorrectes en une seule requête, réduisant drastiquement le temps d'attente global.
+
+\section{Endpoints REST du Service IA}
+
+Le microservice FastAPI expose une interface de programmation applicative (API) RESTful structurée autour des fonctionnalités clés de l'intelligence artificielle. Ses points d'accès prennent en charge la recommandation sémantique hybride, l'indexation du catalogue par extraction de mots-clés, ainsi que la lecture textuelle des documents multimédias (fichiers PDF et bureautiques). L'API assure également le traitement analytique des quiz pour la détection des lacunes et orchestre la communication par lot avec le modèle Gemini pour fournir des retours pédagogiques rapides et contextualisés.
+
+\section{Sprint Review -- Sprint 4}
+
+La clôture de ce quatrième sprint valide l'intégration réussie d'une couche d'intelligence artificielle autonome au sein de la plateforme. Le moteur de recherche hybride a démontré sa capacité à relier sémantiquement des requêtes multilingues à un catalogue de formations diversifié. Parallèlement, l'automatisation de la détection des lacunes et l'intégration du tuteur virtuel enrichissent considérablement l'expérience d'apprentissage. Sur le plan architectural, l'isolation du service IA garantit des performances stables, validant ainsi la pertinence d'une approche microservices et d'une communication inter-systèmes asynchrone sécurisée.
+
+\newpage
+
+% =====================================================================
+% SPRINT 5 -- MESSAGERIE ET NOTIFICATIONS
+% =====================================================================
+
+\section{Sprint 5 -- Système de Messagerie Intelligente}
+
+Ce cinquième et dernier sprint, mené conjointement par FRIKHA Amin pour le développement backend et BAHLOUL Donia pour la conception des interfaces, s'est concentré sur la mise en place d'un écosystème de communication avancé. L'objectif a consisté à intégrer un module de messagerie capable de gérer de manière fiable la validation des comptes, la récupération sécurisée des mots de passe et le déploiement de notifications asynchrones liées à l'activité pédagogique.
+
+\subsection{Architecture du module de messagerie}
+
+Le dispositif repose sur un service d'envoi d'emails adossé au protocole SMTP, générant des courriels dynamiques à partir de templates HTML. Il orchestre la création de jetons uniques et temporaires pour encadrer les procédures de réinitialisation de mot de passe, garantissant ainsi un haut niveau de sécurité. Des tâches planifiées en arrière-plan scrutent continuellement l'activité de la plateforme afin de relancer automatiquement les étudiants inactifs. En outre, le système réagit aux événements applicatifs : toute modification apportée par un enseignant à un cours ou un chapitre déclenche instantanément l'envoi d'une alerte informative à l'ensemble des inscrits concernés.
+
+\subsection{Intégration Frontend}
+
+Côté client, l'expérience utilisateur a été complétée par de nouvelles interfaces ergonomiques dédiées à la gestion de l'identité numérique. Les flux de réinitialisation de mot de passe s'intègrent naturellement au design system existant, permettant à l'utilisateur de procéder à la récupération de ses accès de manière autonome, intuitive et totalement sécurisée.
+
+% =====================================================================
+% CONCLUSION DU CHAPITRE
+% =====================================================================
+
+\section*{Conclusion}
+
+Ce chapitre a détaillé la réalisation des deux ultimes sprints du projet, scellant ainsi l'aboutissement technique de l'application LearnAgent. L'intégration de la recommandation sémantique via Sentence-BERT et d'un accompagnement personnalisé par le tuteur Gemini dote la plateforme d'une réelle capacité d'adaptation aux besoins de l'apprenant. Associée au système de notification intelligent déployé lors du dernier sprint, la solution offre désormais une couverture fonctionnelle globale : de la diffusion du savoir à l'évaluation, en passant par le suivi individualisé et l'engagement continu des étudiants.
