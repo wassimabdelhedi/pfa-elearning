@@ -1,0 +1,413 @@
+\documentclass[12pt,a4paper]{report}
+
+% ── Encodage & langue ────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% ── Mise en page ─────────────────────────────────────────────────────
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{setspace}
+\onehalfspacing
+
+% ── Tableaux professionnels ──────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+
+% ── Couleurs et symboles ─────────────────────────────────────────────
+\usepackage{xcolor}
+\usepackage{amssymb}
+
+% Couleurs du projet LearnAgent
+\definecolor{primaryblue}{RGB}{0,82,147}
+\definecolor{secondaryblue}{RGB}{41,128,185}
+\definecolor{accentorange}{RGB}{230,126,34}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{darkgray}{RGB}{60,60,60}
+\definecolor{scrumgreen}{RGB}{39,174,96}
+
+% ── Schémas professionnels (Zéro intersection) ───────────────────────
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit, shadows, backgrounds}
+
+\tikzset{
+  >={Latex[length=2.5mm,width=1.8mm]},
+  base/.style={
+    rectangle, rounded corners=5pt, thick, align=center, font=\small,
+    minimum height=1.3cm, text width=3.8cm,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  frontend/.style={base, draw=secondaryblue, fill=secondaryblue!10},
+  backend/.style={base, draw=primaryblue, fill=primaryblue!10},
+  process/.style={base, draw=scrumgreen, fill=scrumgreen!10},
+  db/.style={base, draw=accentorange, fill=accentorange!10},
+  decision/.style={
+    diamond, aspect=1.5, draw=accentorange, fill=accentorange!10, thick,
+    align=center, inner sep=2pt, text width=2.5cm, font=\small,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  flow/.style={->, thick, draw=darkgray, rounded corners=4pt},
+  line/.style={thick, draw=darkgray, rounded corners=4pt},
+  note/.style={
+    font=\footnotesize, text=primaryblue, fill=white, draw=lightgray, 
+    inner sep=3pt, rounded corners=3pt
+  }
+}
+
+\begin{document}
+
+\newpage
+
+% =====================================================================
+% CHAPITRE 3
+% =====================================================================
+\chapter{Mise en œuvre incrémentale : Sprints 1 et 2}
+
+\section*{Introduction du chapitre}
+Ce chapitre détaille la réalisation technique des deux premiers cycles de développement de la plateforme \textbf{LearnAgent}. En nous appuyant sur la méthodologie agile Scrum \cite{scrum_guide}, nous avons structuré notre travail en itérations courtes pour livrer rapidement une valeur fonctionnelle. Le premier sprint a été dédié à la mise en place des fondations sécuritaires de la plateforme, tandis que le second sprint s'est concentré sur la conception du noyau pédagogique, incluant la gestion des cours et le suivi strict de la progression des apprenants.
+
+\section{Sprint 1 -- Authentification et gestion des utilisateurs}
+
+Le premier sprint, réalisé sur deux semaines, a permis d'ériger le socle de sécurité de la plateforme. Les travaux ont porté sur l’authentification par jeton JWT \cite{jwt_rfc}, la gestion des utilisateurs structurée par rôles (Administrateur, Enseignant, Étudiant) et l’implémentation des interfaces de connexion et d’inscription. Le backend a été assuré principalement par \textbf{FRIKHA Amin}, tandis que le frontend a été pris en charge par \textbf{BAHLOUL Donia}.
+
+\subsection{Planification du sprint}
+
+Le backlog du sprint 1 a été organisé en trois volets complémentaires : la sécurité backend, la gestion métier des utilisateurs et l’interface d’authentification. La partie backend a couvert la configuration avancée de Spring Security \cite{spring_security}, la génération et la validation des jetons JWT, ainsi que l'exposition des points d’accès d’authentification (\texttt{/api/auth/login}, \texttt{/api/auth/register}). En parallèle, la modélisation des entités utilisateurs, l’inscription sécurisée avec hachage des mots de passe, et les fonctions d’administration ont été développées. Côté client, le frontend a intégré les pages d’authentification, le contexte React \cite{react_docs} pour la persistance de session, la protection des routes par rôle, et la configuration d’Axios avec des intercepteurs globaux.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 1 (Authentification \& Sécurité)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 1.1 & \textbf{En tant que} visiteur, \textbf{je souhaite} pouvoir créer un compte avec une adresse email valide \textbf{afin d'} accéder à la plateforme. & Haute & 5 pts \\
+US 1.2 & \textbf{En tant qu'} utilisateur, \textbf{je souhaite} m'authentifier de manière sécurisée \textbf{afin d'} obtenir un jeton d'accès (JWT). & Haute & 8 pts \\
+US 1.3 & \textbf{En tant qu'} administrateur, \textbf{je souhaite} disposer d'un espace de gestion \textbf{afin d'} attribuer et révoquer les rôles. & Moyenne & 5 pts \\
+US 1.4 & \textbf{En tant que} système, \textbf{je dois} sécuriser les routes (API et Frontend) selon les privilèges associés au rôle \textbf{afin de} garantir la confidentialité. & Haute & 8 pts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Réalisations techniques}
+
+L’architecture de sécurité mise en œuvre repose sur une chaîne d'approbation complète liant l’interface React, le contrôleur d’authentification, les services métier et la couche de persistance. Lors de la validation des identifiants, un jeton JWT est généré et transmis de manière sécurisée au client. Côté frontend, la session est centralisée au sein d'un contexte global (\texttt{AuthContext}), facilitant la gestion du profil utilisateur et l’application systématique d'un contrôle d’accès basé sur les rôles (RBAC).
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.8cm and 1cm]
+
+% --- Noeuds ---
+\node[frontend] (ui) {Interface Client\\(Login / Register)};
+\node[frontend, right=1.5cm of ui] (axios) {Client HTTP\\(Axios + Interceptor)};
+\node[backend, right=1.5cm of axios] (controller) {AuthController\\\texttt{/api/auth/login}};
+
+\node[backend, below=1.8cm of controller, text width=4.5cm] (service) {AuthService\\(Logique métier \& Validation)};
+
+\node[db, below=1.8cm of service] (db) {PostgreSQL\\(User \& Role)};
+\node[process, left=1cm of db] (bcrypt) {BCryptEncoder\\(Hachage MDP)};
+\node[process, right=1cm of db] (jwt) {JwtProvider\\(Génération Token)};
+
+% --- Flèches ---
+\draw[flow] (ui) -- node[above]{\footnotesize Identifiants} (axios);
+\draw[flow] (axios) -- node[above]{\footnotesize POST Request} (controller);
+\draw[flow] (controller) -- (service);
+
+\draw[flow, <->] (service.south) -- (db.north);
+\draw[flow, ->] (service.south west) -- ++(0,-0.5) -| (bcrypt.north);
+\draw[flow, ->] (service.south east) -- ++(0,-0.5) -| (jwt.north);
+
+% Flèche retour token
+\draw[flow, dashed, draw=scrumgreen] 
+    (jwt.east) -- ++(0.5,0) 
+    |- ([yshift=1.5cm]controller.north) 
+    -| (axios.north) node[pos=0.25, above, note, text=scrumgreen]{Retour du jeton JWT sécurisé};
+
+\end{tikzpicture}
+}
+\caption{Architecture détaillée du mécanisme d’authentification}
+\end{figure}
+
+Le contrôle des sessions s'effectue dynamiquement côté client. Les requêtes interceptées qui retournent une erreur 401 (Non autorisé) déclenchent automatiquement une invalidation de la session et une redirection vers la page de connexion.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[frontend] (pages) {Composants React\\(Vues protégées)};
+\node[frontend, right=1.5cm of pages] (context) {AuthContext\\(État de session global)};
+\node[process, right=1.5cm of context] (storage) {Local Storage\\(Persistance du JWT)};
+
+\node[backend, above=1.5cm of context] (routes) {ProtectedRoute\\(Contrôle RBAC)};
+\node[backend, below=1.5cm of storage] (api) {Appels API\\(Header Authorization)};
+
+\draw[flow] (pages) -- (context);
+\draw[flow] (context) -- (storage);
+\draw[flow] (context) -- (routes);
+\draw[flow] (storage) -- (api);
+
+\draw[flow, dashed, draw=accentorange] 
+    (api.west) -| node[pos=0.25, below, note, text=accentorange, draw=accentorange!30, yshift=-0.2cm]{Interception erreur 401} (context.south);
+
+\end{tikzpicture}
+}
+\caption{Gestion des sessions et contrôle d’accès (Frontend)}
+\end{figure}
+
+\subsection{Bilan du sprint}
+
+Les résultats de ce premier sprint garantissent la fiabilité et la sécurité de l'accès à LearnAgent. Le mécanisme d'inscription intégrant le chiffrement robuste des mots de passe (BCrypt) et l'authentification sans état (stateless) via JWT assurent une scalabilité optimale. Cette base permet une gestion granulaire des droits (\texttt{ADMIN}, \texttt{TEACHER}, \texttt{STUDENT}) garantissant la protection des ressources critiques aussi bien au niveau de l'API Spring Boot que des routes React. 
+
+\newpage
+
+\section{Sprint 2 -- Gestion des cours multi-chapitres}
+
+Le deuxième sprint s'est focalisé sur le cœur pédagogique de LearnAgent. Il a permis d'implémenter la gestion hiérarchique des cours, le suivi rigoureux de la progression des apprenants et le contrôle d’accès conditionnel aux différents modules d'apprentissage. La logique métier backend a été conçue par \textbf{ABDELHEDI Wassim}, tandis que l'intégration et l'interface utilisateur ont été assurées par \textbf{BAHLOUL Donia}.
+
+\subsection{Planification du sprint}
+
+La modélisation du sprint 2 s’est articulée autour de trois axes majeurs : la conception de l'arborescence des cours et chapitres, le stockage des supports pédagogiques, et le moteur de calcul de progression. Les tâches ont couvert la création des entités relationnelles, le développement des API de gestion de fichiers (upload de vidéos MP4, PDF, etc.), le calcul dynamique de l'avancement, et les interfaces permettant aux enseignants de construire leurs cours.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 2 (Moteur de Cours)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 2.1 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} créer et structurer un cours en plusieurs chapitres ordonnés \textbf{afin d'} offrir un apprentissage progressif. & Haute & 8 pts \\
+US 2.2 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} enrichir mes chapitres en y attachant divers supports (vidéos, PDF) \textbf{afin d'} améliorer l'engagement. & Haute & 5 pts \\
+US 2.3 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} m'inscrire à un cours et visualiser mon avancement en temps réel \textbf{afin de} suivre mon apprentissage. & Haute & 5 pts \\
+US 2.4 & \textbf{En tant qu'} étudiant, \textbf{je dois} valider le chapitre en cours avant de débloquer le suivant \textbf{afin de} respecter le cheminement imposé. & Moyenne & 3 pts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Réalisations techniques}
+
+Le modèle de données repose sur une relation hiérarchique stricte : un cours (\texttt{Course}) agrège une séquence ordonnée de chapitres (\texttt{Chapter}). Chaque chapitre héberge un type de média (\texttt{SupportType}) influençant son rendu frontend. Le mécanisme de progression (\texttt{ChapterProgress}) assure la liaison entre l'inscription de l'étudiant (\texttt{Enrollment}) et les chapitres, déclenchant des calculs automatiques du pourcentage global d'avancement.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1cm]
+
+\node[backend] (course) {Course\\(Métadonnées)};
+\node[process, right=1.5cm of course] (chap1) {Chapter 1\\(Ordre = 1)};
+\node[process, right=1cm of chap1] (chap2) {Chapter 2\\(Ordre = 2)};
+\node[process, right=1cm of chap2] (chapn) {Chapter N\\(Ordre = N)};
+
+\node[db, above=1cm of chap1] (support1) {SupportType\\(VIDEO / PDF)};
+\node[db, above=1cm of chap2] (support2) {SupportType\\(PPTX / IMAGE)};
+
+\node[backend, below=2.2cm of chap2, text width=4.5cm] (progress) {ChapterProgress\\(État d'achèvement par étudiant)};
+\node[backend, left=1.5cm of progress] (enroll) {Enrollment\\(Inscription \& Taux de complétion)};
+
+\draw[flow] (course) -- (chap1);
+\draw[flow] (chap1) -- (chap2);
+\draw[flow, dashed] (chap2) -- (chapn);
+
+\draw[flow] (chap1) -- (support1);
+\draw[flow] (chap2) -- (support2);
+
+\draw[flow] (chap1.south) -- (progress.north west);
+\draw[flow] (chap2.south) -- (progress.north);
+\draw[flow] (chapn.south) -- (progress.north east);
+\draw[flow] (progress) -- (enroll);
+
+\end{tikzpicture}
+}
+\caption{Architecture relationnelle des cours multi-chapitres et suivi de progression}
+\end{figure}
+
+Le moteur de progression conditionne l'accès aux activités pratiques (Quiz, Exercices). Le système de vérification (\texttt{EnrollmentService}) garantit qu'un étudiant ne peut accéder à l'évaluation finale qu'après avoir marqué la totalité des chapitres comme terminés, garantissant ainsi l'intégrité du parcours pédagogique \cite{fowler_uml}.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.7\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.2cm and 1.5cm]
+
+\node[frontend] (student) {Étudiant authentifié};
+\node[process, below=of student] (request) {Requête d'accès\\(Quiz / Exercice)};
+\node[backend, below=of request, text width=4cm] (check) {Service de Vérification\\(Progression globale = 100\%)};
+\node[decision] (decision) [below=1cm of check] {Cours validé ?};
+
+\node[process, left=1.2cm of decision, fill=scrumgreen!20, draw=scrumgreen] (allow) {Accès Autorisé};
+\node[process, right=1.2cm of decision, fill=accentorange!20, draw=accentorange] (deny) {Accès Refusé\\(Message d'alerte)};
+
+\draw[flow] (student) -- (request);
+\draw[flow] (request) -- (check);
+\draw[flow] (check) -- (decision);
+\draw[flow] (decision) -- node[above, note]{Oui} (allow);
+\draw[flow] (decision) -- node[above, note]{Non} (deny);
+
+\end{tikzpicture}
+}
+\caption{Algorithme de contrôle d’accès basé sur la progression de l'étudiant}
+\end{figure}
+
+\subsection{Bilan du sprint}
+
+La finalisation du sprint 2 dote LearnAgent d'un noyau pédagogique puissant et résilient. L'architecture supporte dorénavant la gestion de cours modulaires et la diffusion de ressources multimédias lourdes de façon fluide. Le tracking des chapitres s'est avéré extrêmement précis, générant des jauges de progression fiables sur les tableaux de bord étudiants. De plus, la règle d'affaire imposant l'achèvement à 100\% avant toute évaluation a été strictement implémentée et testée avec succès, consolidant la crédibilité académique de la plateforme.
+
+\section*{Conclusion du chapitre}
+Ces deux premières itérations ont permis d'asseoir l'infrastructure fondamentale de LearnAgent. L'intégration de la sécurité JWT couplée à un moteur de structuration de cours performant forme une base logicielle mature. Ce socle technique stable nous permet d'aborder sereinement le développement des fonctionnalités pédagogiques évaluatives détaillées dans le chapitre suivant.
+
+\newpage
+
+% =====================================================================
+% CHAPITRE 4
+% =====================================================================
+\chapter{Sprint 3 -- Fonctionnalités pédagogiques avancées}
+
+\section*{Introduction du chapitre}
+Faisant suite au développement de l'architecture de base, ce chapitre se penche sur l'élaboration du troisième sprint, centré sur les mécanismes d'évaluation formelle des acquis. En introduisant des modules interactifs de quiz et de soumission d'exercices, le système s'enrichit d'outils d'évaluation automatique indispensables pour mesurer les performances de l'apprenant et offrir aux enseignants un suivi analytique complet de leurs classes.
+
+\section{Planification du sprint}
+
+Le backlog du sprint 3 a ciblé la conception des évaluations asynchrones. Il englobe la création des structures de données complexes pour les quiz, les logiques de correction automatisée, et la gestion des livrables pratiques. La charge de développement a été répartie stratégiquement : \textbf{FRIKHA Amin} a piloté l'ingénierie des quiz et du scoring, \textbf{ABDELHEDI Wassim} s'est chargé du module d'exercices pratiques, et \textbf{BAHLOUL Donia} a assuré la création d'interfaces ergonomiques et réactives pour une expérience d'évaluation fluide.
+
+\vspace{0.5cm}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\caption{Sprint Backlog -- Sprint 3 (Quiz \& Évaluation)}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{l X c c}
+\toprule
+\textbf{ID} & \textbf{User Story} & \textbf{Priorité} & \textbf{Complexité} \\
+\midrule
+US 3.1 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} concevoir des quiz (QCM) \textbf{afin d'} évaluer la compréhension des apprenants. & Haute & 8 pts \\
+US 3.2 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} passer un quiz interactif en fin de parcours \textbf{afin de} valider mes acquis. & Haute & 5 pts \\
+US 3.3 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} publier des exercices pratiques avec pièces jointes \textbf{afin de} diversifier l'évaluation. & Moyenne & 5 pts \\
+US 3.4 & \textbf{En tant qu'} étudiant, \textbf{je souhaite} soumettre un exercice et marquer mon travail comme complété \textbf{afin de} mettre à jour mon dossier. & Moyenne & 3 pts \\
+US 3.5 & \textbf{En tant qu'} enseignant, \textbf{je souhaite} accéder à un tableau de bord analytique \textbf{afin de} suivre la réussite de mes étudiants. & Basse & 5 pts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Module d'Évaluation : Quiz}
+
+\subsection{Architecture du module}
+
+L'implémentation du module de quiz repose sur un graphe d'entités interconnectées. L'entité centrale \texttt{Quiz} qualifie l'épreuve (niveau de difficulté, métadonnées). Elle est liée à une collection d'items \texttt{QuizQuestion} définissant l'énoncé, les distracteurs (options) et la clé de correction. L'entité \texttt{QuizResult} historise l'ensemble des tentatives de l'apprenant, constituant la source de données primaire pour les statistiques et le futur système de recommandation par IA.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.85\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[backend] (course) {Entité Course};
+\node[process, right=2cm of course] (quiz) {Quiz\\(Métadonnées, Difficulté)};
+\node[process, above=1.5cm of quiz, text width=4cm] (rule) {Précondition d'accès\\(Progression = 100\%)};
+
+\node[db, right=2cm of quiz, text width=4cm] (questions) {QuizQuestion\\(Énoncé, Choix, Réponse exacte)};
+\node[backend, below=1.5cm of quiz] (result) {QuizResult\\(Score, Date, Tentative)};
+
+\draw[flow] (course) -- (quiz);
+\draw[flow] (rule) -- (quiz); 
+\draw[flow] (quiz) -- (questions);
+\draw[flow] (quiz) -- (result);
+
+\end{tikzpicture}
+}
+\caption{Modèle architectural du module d'évaluation par Quiz}
+\end{figure}
+
+\subsection{Soumission et correction algorithmique}
+
+Le flux de traitement d'un quiz garantit la fiabilité et l'instantanéité des retours. À la soumission, un pipeline transactionnel valide d'abord l'éligibilité de l'étudiant, confronte les réponses soumises aux clés de correction, agrège les points, calcule le pourcentage de réussite, et persiste l'entité \texttt{QuizResult} en base de données.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+
+\node[frontend] (access) {Initiation du Quiz};
+\node[backend, right=1cm of access] (verify) {Contrôle\\d'éligibilité};
+\node[decision] (ok) [right=1cm of verify] {Validé ?};
+
+\node[process, below=1.5cm of ok] (submit) {Soumission du formulaire de réponses};
+\node[process, left=1cm of submit] (score) {Moteur de correction\\(Calcul du score \%)};
+\node[db, right=1cm of submit] (save) {Persistance\\(QuizResult DB)};
+
+\draw[flow] (access) -- (verify);
+\draw[flow] (verify) -- (ok);
+\draw[flow] (ok) -- node[right, note, yshift=-0.2cm]{Oui} (submit);
+\draw[flow] (submit) -- (score);
+\draw[flow] (submit) -- (save);
+
+\end{tikzpicture}
+}
+\caption{Pipeline transactionnel de correction automatique d'un Quiz}
+\end{figure}
+
+\section{Module d'Activités Pratiques : Exercices}
+
+\subsection{Architecture du module}
+
+En complément de l'évaluation théorique, le module des exercices adresse les compétences pratiques. L'entité \texttt{Exercise} encapsulate un sujet détaillé, un niveau de complexité et un support didactique téléchargeable. Le traçage de la réalisation s'effectue via l'entité de jonction \texttt{ExerciseCompletion}, alimentant directement les tableaux de bord de supervision des enseignants.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.8\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.5cm and 1.5cm]
+
+\node[backend] (exercise) {Exercise\\(Titre, Sujet, Difficulté)};
+\node[db, right=1.5cm of exercise] (file) {File Storage\\(Sujet PDF/ZIP)};
+\node[backend, below=1.5cm of exercise] (completion) {ExerciseCompletion\\(Étudiant, Horodatage)};
+\node[frontend, right=1.5cm of completion] (dashboard) {Tableau de bord Enseignant\\(Analytique)};
+
+\draw[flow] (exercise) -- (file);
+\draw[flow] (exercise) -- (completion);
+\draw[flow] (completion) -- (dashboard);
+
+\end{tikzpicture}
+}
+\caption{Logique de liaison et de suivi du module Exercice}
+\end{figure}
+
+\section{Bilan du sprint}
+
+L'achèvement du sprint 3 marque un tournant qualitatif pour la plateforme LearnAgent. La mise en production du moteur d'évaluation QCM s'est accompagnée du développement d'un algorithme de correction instantané à la fois performant et robuste face aux cas de figure anormaux. La restriction d'accès aux évaluations a été couplée au moteur de progression (Sprint 2) pour consolider l'expérience d'apprentissage séquentiel. Par ailleurs, la gestion fluide des supports d'exercices et des états de complétion permet aujourd'hui de restituer aux enseignants un profil analytique riche et exploitable, valorisant ainsi considérablement l'écosystème pédagogique.
+
+\section*{Conclusion du chapitre}
+La finalisation des fonctionnalités pédagogiques de ce troisième sprint vient clore la phase de développement des fonctionnalités métiers fondamentales. La boucle d'apprentissage est désormais complète : structuration de cours, diffusion de contenus, suivi de progression, et évaluation des connaissances. Sur cette base logicielle exhaustive et éprouvée, le chapitre suivant s'attachera à l'intégration d'une couche d'intelligence artificielle (moteur Sentence-BERT), visant à propulser LearnAgent vers un modèle d'apprentissage adaptatif de nouvelle génération.
+
+\newpage
+
+% =====================================================================
+% BIBLIOGRAPHIE / RÉFÉRENCES
+% =====================================================================
+\renewcommand\bibname{Références bibliographiques}
+\begin{thebibliography}{99}
+
+\bibitem{scrum_guide}
+Schwaber, K., \& Sutherland, J. (2020). \textit{The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game}. Scrum.org.
+
+\bibitem{jwt_rfc}
+Jones, M., Bradley, J., \& Sakimura, N. (2015). \textit{JSON Web Token (JWT) - RFC 7519}. Internet Engineering Task Force (IETF).
+
+\bibitem{spring_security}
+Spring Framework Contributors. (2023). \textit{Spring Security Reference Documentation}. VMware, Inc. Disponible sur : \texttt{https://docs.spring.io/spring-security/reference/}
+
+\bibitem{react_docs}
+Meta Open Source. (2023). \textit{React Documentation}. Meta Platforms, Inc. Disponible sur : \texttt{https://react.dev/}
+
+\bibitem{fowler_uml}
+Fowler, M. (2003). \textit{UML Distilled: A Brief Guide to the Standard Object Modeling Language} (3rd ed.). Addison-Wesley Professional.
+
+\end{thebibliography}
+
+\end{document}

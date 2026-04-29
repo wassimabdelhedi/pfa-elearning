@@ -1,0 +1,268 @@
+% !TeX program = pdflatex
+\documentclass[12pt,a4paper]{report}
+
+% =====================================================================
+% PACKAGES
+% =====================================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{mdframed}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,shadows,backgrounds}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{longtable}
+
+% =====================================================================
+% ALGORITHMES
+% =====================================================================
+\usepackage[ruled,vlined,linesnumbered,french]{algorithm2e}
+\SetKwInput{KwData}{\textcolor{primaryblue}{\textbf{Entrée}}}
+\SetKwInput{KwResult}{\textcolor{scrumgreen}{\textbf{Sortie}}}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{darkgray}{#1}}
+\SetCommentSty{mycommfont}
+
+% =====================================================================
+% GÉOMÉTRIE
+% =====================================================================
+\geometry{
+  top=2.5cm,
+  bottom=2.5cm,
+  left=2.5cm,
+  right=2.5cm,
+  headheight=28pt,
+  headsep=12pt,
+  footskip=1.2cm
+}
+
+\setlength{\headheight}{28pt}
+\setlength{\headsep}{12pt}
+
+% =====================================================================
+% COULEURS
+% =====================================================================
+\definecolor{primaryblue}{RGB}{0,82,147}
+\definecolor{secondaryblue}{RGB}{41,128,185}
+\definecolor{layoutblack}{RGB}{0,0,0}
+\definecolor{accentorange}{RGB}{230,126,34}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{darkgray}{RGB}{60,60,60}
+\definecolor{scrumgreen}{RGB}{39,174,96}
+
+% =====================================================================
+% STYLES TIKZ
+% =====================================================================
+\tikzset{
+  >={Latex[length=2.5mm,width=1.8mm]},
+  base/.style={
+    rectangle, rounded corners=5pt, thick, align=center, font=\small,
+    minimum height=1.3cm, text width=3.8cm,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  frontend/.style={base, draw=secondaryblue, fill=secondaryblue!10},
+  backend/.style={base, draw=primaryblue, fill=primaryblue!10},
+  process/.style={base, draw=scrumgreen, fill=scrumgreen!10},
+  db/.style={base, draw=accentorange, fill=accentorange!10},
+  decision/.style={
+    diamond, aspect=1.5, draw=accentorange, fill=accentorange!10, thick,
+    align=center, inner sep=2pt, text width=2.5cm, font=\small,
+    drop shadow={opacity=0.15, shadow xshift=1.5pt, shadow yshift=-1.5pt}
+  },
+  flow/.style={->, thick, draw=darkgray, rounded corners=4pt},
+  line/.style={thick, draw=darkgray, rounded corners=4pt},
+  note/.style={
+    font=\footnotesize, text=primaryblue, fill=white, draw=lightgray, 
+    inner sep=3pt, rounded corners=3pt
+  }
+}
+
+% =====================================================================
+% COMMANDE ACTEUR UML (stick figure)
+% =====================================================================
+\newcommand{\actornode}[3]{%
+  \draw[thick] (#1,{#2+0.38}) circle (0.22cm);
+  \draw[thick] (#1,{#2+0.16}) -- (#1,{#2-0.30});
+  \draw[thick] ({#1-0.30},{#2+0.02}) -- (#1,{#2+0.10}) -- ({#1+0.30},{#2+0.02});
+  \draw[thick] (#1,{#2-0.30}) -- ({#1-0.22},{#2-0.68});
+  \draw[thick] (#1,{#2-0.30}) -- ({#1+0.22},{#2-0.68});
+  \node[below, font=\small\bfseries, align=center] at (#1,{#2-0.72}) {#3};
+}
+
+% =====================================================================
+% STYLES DES TITRES
+% =====================================================================
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{layoutblack}}
+  {\chaptername\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-10pt}{30pt}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{layoutblack}}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{darkgray}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{layoutblack}}
+  {\thesubsubsection}{1em}{}
+
+% =====================================================================
+% EN-TÊTES ET PIEDS DE PAGE
+% =====================================================================
+\pagestyle{fancy}
+\fancyhf{}
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+\fancyhead[L]{%
+  \small\color{layoutblack}\textbf{LearnAgent}%
+}
+
+\fancyhead[R]{%
+  \small\color{darkgray}\itshape\nouppercase{\leftmark}%
+}
+
+\renewcommand{\headrulewidth}{0.4pt}
+
+\fancyfoot[L]{\small\color{darkgray}ENIS -- Génie Informatique / 2025--2026}
+\fancyfoot[C]{\small\thepage}
+\fancyfoot[R]{}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyhead[L]{%
+    \small\color{layoutblack}\textbf{LearnAgent}%
+  }
+  \fancyhead[R]{%
+    \small\color{darkgray}\itshape\nouppercase{\leftmark}%
+  }
+  \fancyfoot[L]{\small\color{darkgray}ENIS -- Génie Informatique / 2025--2026}
+  \fancyfoot[C]{\small\thepage}
+  \fancyfoot[R]{}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+% =====================================================================
+% LISTINGS
+% =====================================================================
+\lstset{
+  backgroundcolor=\color{lightgray},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{primaryblue},
+  keywordstyle=\color{primaryblue}\bfseries,
+  commentstyle=\color{scrumgreen},
+  stringstyle=\color{accentorange},
+  numbers=left,
+  numberstyle=\tiny\color{darkgray},
+  tabsize=2,
+  inputencoding=utf8,
+  extendedchars=true
+}
+
+% =====================================================================
+% BOÎTES
+% =====================================================================
+\newmdenv[
+  linecolor=scrumgreen,
+  backgroundcolor=scrumgreen!8,
+  linewidth=2pt,
+  roundcorner=5pt,
+  frametitle={\color{scrumgreen}\bfseries Sprint},
+  frametitleaboveskip=5pt,
+]{scrumbox}
+
+\newmdenv[
+  linecolor=primaryblue,
+  backgroundcolor=primaryblue!5,
+  linewidth=1.5pt,
+  roundcorner=4pt,
+]{infobox}
+
+% =====================================================================
+% HYPERLIENS
+% =====================================================================
+\hypersetup{
+  colorlinks=true,
+  linkcolor=layoutblack,
+  urlcolor=layoutblack,
+  citecolor=layoutblack,
+  pdfauthor={BAHLOUL Donia, FRIKHA Amin, ABDELHEDI Wassim},
+  pdftitle={Rapport PFA -- LearnAgent Plateforme E-Learning},
+  pdfsubject={Projet de Fin d'Année ENIS}
+}
+
+\onehalfspacing
+
+% =====================================================================
+% DÉBUT DU DOCUMENT
+% =====================================================================
+\begin{document}
+
+% =====================================================================
+% PARTIE AVANT-PROPOS (numérotation romaine)
+% =====================================================================
+\pagenumbering{roman}
+
+\include{00-pagegarde}
+\include{01-remerciements}
+\include{02-abreviations}
+\include{03-resume}
+
+% Tables des matières
+\tableofcontents
+\newpage
+
+% Liste des figures
+\listoffigures
+\newpage
+
+% Liste des tableaux
+\listoftables
+\newpage
+
+% =====================================================================
+% CORPS DU RAPPORT (numérotation arabe)
+% =====================================================================
+\pagenumbering{arabic}
+
+\include{04-introduction}
+\include{05-chapitre1}
+\include{06-chapitre2}
+\include{07-chapitre3}
+\include{08-chapitre4}
+
+\include{09-conclusion}
+
+% =====================================================================
+% PARTIE POST-TEXTE
+% =====================================================================
+\include{10-bibliographie}
+\include{11-annexes}
+\include{12-backcover}
+
+\end{document}
