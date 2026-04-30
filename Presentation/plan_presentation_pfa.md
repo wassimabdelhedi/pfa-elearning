@@ -1,10 +1,10 @@
 # Plan de Présentation PFA - LearnAgent (E-Learning Intelligent)
 
-**Temps strict ciblé** : 13 minutes (Environ 30 à 35 secondes de temps de parole par slide, laissant le temps de respirer et pointer les schémas).
+**Temps strict ciblé** : 15 minutes (Environ 40 à 45 secondes de temps de parole par slide).
 **Répartition recommandée** : 
-- **Donia** : Intro, Contexte, Frontend, Démos (~4 min 20s)
-- **Amin** : Architecture, Backend Spring Boot, Sécurité, Messagerie (~4 min 20s)
-- **Wassim** : Moteur IA, NLP, Recommandation, Tuteur Gemini (~4 min 20s)
+- **Donia** : Intro, Contexte, Solution, Web Features, Démos (~5 min)
+- **Amin** : Architecture, Stack, Sécurité, Méthodologie (~5 min)
+- **Wassim** : Moteur IA complet (NLP, Recommandation, Tuteur Gemini) (~5 min)
 
 ---
 
@@ -15,153 +15,155 @@
   - Conception d'une Plateforme E-Learning Intelligente
   - Présenté par : Donia BAHLOUL, Amin FRIKHA, Wassim ABDELHEDI
   - Encadré par : [Nom de l'encadrant]
-* **Speech (Donia)** : "Bonjour au jury. Nous avons l'honneur de vous présenter aujourd'hui LearnAgent, notre plateforme e-learning intelligente. Je suis Donia, et avec mes collègues Amin et Wassim, nous allons vous exposer notre travail."
+* **Speech (Donia)** : "Bonjour au jury. Nous avons l'honneur de vous présenter aujourd'hui LearnAgent. Je suis Donia, et avec mes collègues Amin et Wassim, nous allons vous exposer comment nous avons intégré l'IA au service de l'éducation."
 
-## Slide 2 : Contexte & Problématique
-* **Visuel** : Trois icônes épurées (Étudiant confus, Graphique en baisse, Engrenage bloqué).
+## Slide 2 : Sommaire
+* **Visuel** : Icônes thématiques pour chaque section.
 * **Texte sur le slide** :
-  - **Passivité** : Catalogues immenses sans guidage.
-  - **Isolement** : Aucun retour immédiat lors des difficultés.
-  - **Bilan** : Taux d'abandon très élevé.
-* **Speech (Donia)** : "L'e-learning actuel est trop souvent passif. Les étudiants font face à des listes de cours sans réel guidage. Ce manque de personnalisation et d'accompagnement provoque de l'isolement et un fort taux d'abandon."
+  1. Contexte & Problématique
+  2. Solution : L'E-Learning Intelligent
+  3. Méthodologie & Fonctionnalités Web
+  4. Le Moteur d'Intelligence Artificielle
+  5. Architectures & Technologies
+  6. Démonstration & Bilan
+* **Speech (Donia)** : "Notre présentation suivra ce cheminement : du contexte général à la solution proposée, en passant par les fonctionnalités web et IA, pour finir par l'architecture technique et une démonstration."
 
-## Slide 3 : Objectifs du Projet
-* **Visuel** : Schéma cible (Étudiant au centre avec IA, Suivi, Personnalisation).
+## Slide 3 : Contexte Général & Problématique
+* **Visuel** : Infographie (Importance de l'éducation vs Barrières classiques).
 * **Texte sur le slide** :
-  - Apprentissage proactif : **LearnAgent**.
-  - Recommandation sémantique.
-  - Tutorat virtuel automatisé.
-* **Speech (Donia)** : "Notre réponse est LearnAgent. Une plateforme proactive qui s'adapte à l'étudiant via des recommandations sémantiques ciblées, et qui intègre un tuteur IA pour l'accompagner dès qu'il rencontre une difficulté."
+  - **Éducation** : Pilier fondamental du développement humain.
+  - **Système Classique** : Rigide, passif, manque de personnalisation.
+  - **Conséquences** : Décrochage, isolement et perte de motivation.
+* **Speech (Donia)** : "L'éducation est le moteur de notre société, mais le modèle classique montre ses limites. La passivité des élèves et le manque de suivi personnalisé mènent trop souvent au décrochage scolaire."
 
-## Slide 4 : Méthodologie & Planification
+## Slide 4 : Solution Proposée : L'E-Learning
+* **Visuel** : "LearnAgent" au centre de l'écosystème numérique.
+* **Texte sur le slide** :
+  - **Apprentissage en ligne (E-Learning)** : Flexibilité et accessibilité.
+  - **LearnAgent** : Un assistant proactif pour l'apprenant.
+  - **Objectif** : Transformer la passivité en engagement.
+* **Speech (Donia)** : "Pour répondre à ces défis, nous proposons LearnAgent. En misant sur l'E-learning ou apprentissage en ligne, nous brisons les barrières géographiques et temporelles tout en offrant un accompagnement proactif."
+
+## Slide 5 : Méthodologie & Planification
 * **Visuel** : Cycle Scrum (5 Sprints).
 * **Texte sur le slide** :
   - **Approche Scrum** : 5 Sprints.
-  - S1-S3 : Fondations, Sécurité, Moteur de cours.
-  - S4 : Intelligence Artificielle.
-  - S5 : Messagerie.
-* **Speech (Donia)** : "Le projet a été mené en méthode Scrum sur 5 sprints. Nous avons d'abord bâti un socle backend robuste et l'interface, avant d'y intégrer notre moteur d'Intelligence Artificielle puis les outils de communication."
+  - Développement itératif et incrémental.
+  - Focus : Sécurité $\to$ Moteur de cours $\to$ IA.
+* **Speech (Amin)** : "Le projet a été mené en méthode Scrum sur 5 sprints. Cette approche nous a permis d'assurer une progression constante, en validant d'abord le socle technique avant d'intégrer les modules d'intelligence artificielle."
 
-## Slide 5 : Architecture Globale
-* **Visuel** : Diagramme architectural global (React -> Spring Boot -> FastAPI).
+## Slide 6 : Fonctionnalités de l'Application Web
+* **Visuel** : Icônes (Cours, Quiz, Messagerie, Dashboard).
 * **Texte sur le slide** :
-  - **Microservices**.
-  - Séparation des responsabilités.
-  - Traitements asynchrones.
-* **Speech (Amin)** : "Côté technique, nous avons opté pour une architecture orientée microservices. Le Frontend React communique avec le Backend Spring Boot, qui délègue de manière asynchrone les calculs complexes à un service Python indépendant."
+  - **Gestion Pédagogique** : Cours hiérarchisés et quiz de validation.
+  - **Messagerie & Alertes** : Chat temps réel et notifications SMTP.
+  - **Suivi de Progression** : Tableaux de bord intuitifs.
+* **Speech (Donia)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis pour l'étudiant comme pour l'enseignant."
 
-## Slide 6 : Stack Technologique
-* **Visuel** : Logos (React, Spring Boot, PostgreSQL, Python, FastAPI, Gemini).
+## Slide 7 : Fonctionnalités IA - Extraction et NLP
+* **Visuel** : Schéma (Fichier PDF/Word $\to$ Analyse NLP $\to$ Mots-clés).
 * **Texte sur le slide** :
-  - **Frontend** : React 19, Vite.
-  - **Backend** : Java 21, Spring Boot, PostgreSQL.
-  - **Moteur IA** : Python 3, FastAPI, Sentence-BERT, Gemini.
-* **Speech (Amin)** : "Notre stack est à l'état de l'art : React pour la réactivité client, Spring Boot et PostgreSQL pour la robustesse transactionnelle, et l'écosystème Python avec Sentence-BERT pour le traitement IA."
+  - Extraction automatisée du texte.
+  - Nettoyage sémantique (Stop-words).
+  - Indexation intelligente sans effort enseignant.
+* **Speech (Wassim)** : "Côté IA, tout commence par l'extraction. Dès qu'un enseignant dépose un document, notre système en analyse le contenu sémantique et extrait automatiquement les concepts clés pour indexer le cours."
 
-## Slide 7 : Sécurité & Accès
-* **Visuel** : Schéma du flux JWT.
+## Slide 8 : Fonctionnalités IA - Recommandation Sémantique
+* **Visuel** : Graphique de similarité cosinus (Sentence-BERT).
 * **Texte sur le slide** :
-  - Authentification **JWT** (JSON Web Tokens).
-  - Mots de passe chiffrés (BCrypt).
-  - Contrôle d'accès strict (RBAC).
-* **Speech (Amin)** : "La sécurité est fondamentale. Elle est assurée par des tokens JWT cryptés en BCrypt. Notre contrôle d'accès (RBAC) isole parfaitement les espaces administrateur, enseignant et étudiant."
+  - Modèle **Sentence-BERT**.
+  - Analyse du sens profond (Vecteurs).
+  - Recommandation personnalisée selon le profil.
+* **Speech (Wassim)** : "Nous utilisons Sentence-BERT pour comprendre le sens réel des cours. Le moteur compare le profil de l'étudiant avec notre base de données pour lui recommander les ressources les plus pertinentes à son niveau."
 
-## Slide 8 : Moteur Pédagogique
-* **Visuel** : Entité-relation simplifié (Cours -> Chapitres -> Quiz avec cadenas).
+## Slide 9 : Fonctionnalités IA - Détection des Lacunes
+* **Visuel** : Graphique de performance (Mapping Questions $\to$ Concepts).
 * **Texte sur le slide** :
-  - Cours hiérarchisés.
-  - Progression conditionnée.
-  - Déblocage via succès aux quiz.
-* **Speech (Amin)** : "Le moteur pédagogique impose une progression rigoureuse. Les cours sont divisés en chapitres. Un étudiant ne débloque le chapitre suivant qu'après validation du quiz précédent, garantissant son assiduité."
+  - Analyse fine des échecs aux quiz.
+  - Identification des concepts non maîtrisés.
+  - Classification de sévérité (Critique / Moyen).
+* **Speech (Wassim)** : "En cas d'échec, le système ne se contente pas d'une note. Il identifie précisément les lacunes sémantiques en faisant le lien entre les questions ratées et les concepts du cours."
 
-## Slide 9 : Architecture du Microservice IA
-* **Visuel** : Schéma de l'architecture Python (main.py, recommender, nlp_processor, etc.).
+## Slide 10 : Fonctionnalités IA - Tuteur Virtuel (Google Gemini)
+* **Visuel** : Dialogue entre l'étudiant et Gemini.
 * **Texte sur le slide** :
-  - **Service Indépendant** (Python FastAPI).
-  - **Zéro impact** sur le backend Java.
-  - Extraction, NLP, Recommandation, Tuteur.
-* **Speech (Wassim)** : "Le cœur de l'innovation est notre microservice IA en Python. Découplé de Java pour ne pas impacter ses performances, il gère l'extraction des documents, le NLP, la recommandation et le tuteur Gemini."
+  - Génération de feedbacks personnalisés.
+  - Explications ciblées sur les lacunes critiques.
+  - **Batch Processing** pour l'optimisation.
+* **Speech (Wassim)** : "Enfin, Google Gemini intervient comme un tuteur personnel. Il analyse les erreurs de l'étudiant et génère une explication pédagogique sur-mesure pour l'aider à surmonter ses difficultés immédiates."
 
-## Slide 10 : Extraction et NLP
-* **Visuel** : Schéma d'extraction (PDF/DOCX -> NLP -> Mots-clés).
+## Slide 11 : Architecture Globale
+* **Visuel** : Diagramme (React $\leftrightarrow$ Spring Boot $\leftrightarrow$ FastAPI).
 * **Texte sur le slide** :
-  - Extraction de texte brut.
-  - Filtrage NLP (Stop-words).
-  - Indexation automatique des mots-clés.
-* **Speech (Wassim)** : "Lorsqu'un enseignant dépose un fichier PDF ou Word, l'IA en extrait le texte brut, filtre les mots inutiles et indexe automatiquement les mots-clés métiers. L'enseignant n'a rien à configurer."
+  - **Architecture Microservices**.
+  - Découplage des responsabilités.
+  - Communication asynchrone (WebFlux).
+* **Speech (Amin)** : "L'architecture repose sur trois piliers : un Frontend React réactif, un Backend Spring Boot robuste pour la logique métier, et un microservice Python dédié exclusivement aux calculs IA intensifs."
 
-## Slide 11 : Recommandation Sémantique
-* **Visuel** : Encadré de l'Algorithme de Recommandation Hybride.
+## Slide 12 : Stack Technologique
+* **Visuel** : Logos (React, Spring Boot, Java, Python, FastAPI, PostgreSQL).
 * **Texte sur le slide** :
-  - Modèle **Sentence-BERT** (Vecteurs).
-  - Similarité Cosinus.
-  - Scoring hybride (Bonus/Malus).
-* **Speech (Wassim)** : "Pour la recommandation, nous utilisons Sentence-BERT qui analyse le sens profond par similarité cosinus. Nous y appliquons un scoring hybride qui pénalise les cours déjà vus et bonifie la pertinence du niveau."
+  - **Frontend** : React 19, Vite, Recharts.
+  - **Backend** : Java 21, Spring Boot.
+  - **IA** : Python 3.12, FastAPI, PyTorch.
+* **Speech (Amin)** : "Notre stack est moderne et performante : Java 21 pour le cœur du système, PostgreSQL pour la persistance des données, et l'écosystème Python pour la puissance de ses bibliothèques de machine learning."
 
-## Slide 12 : Détection des Lacunes
-* **Visuel** : Schéma du Weak Topic Detector.
+## Slide 13 : Sécurité & Accès
+* **Visuel** : Flux d'authentification JWT.
 * **Texte sur le slide** :
-  - Post-échec (Score < 60%).
-  - Mapping sémantique (Questions $\to$ Chapitres).
-  - Sévérité : **Critique (>70%)**, Moyen, Faible.
-* **Speech (Wassim)** : "En cas d'échec à un quiz, l'IA cartographie sémantiquement les erreurs vers les chapitres du cours. Elle calcule le taux d'échec par concept et classifie la lacune en niveau Critique, Moyen ou Faible."
+  - Authentification sécurisée par **JWT**.
+  - Chiffrement des données (BCrypt).
+  - Contrôle d'accès basé sur les rôles (RBAC).
+* **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées."
 
-## Slide 13 : Tuteur IA (Google Gemini)
-* **Visuel** : Flux d'intégration du Tuteur IA Gemini.
+## Slide 14 : Architecture du Microservice IA
+* **Visuel** : Schéma interne du service Python.
 * **Texte sur le slide** :
-  - Explication pédagogique ciblée.
-  - **Batch Processing** (Optimisation réseau).
-  - **Fallback Routing** (Haute disponibilité).
-* **Speech (Wassim)** : "Pour corriger ces lacunes, Gemini intervient comme tuteur virtuel. Nous regroupons les erreurs en 'Batch' pour optimiser le réseau, et utilisons un mécanisme de secours automatique en cas de surcharge des serveurs Google."
+  - Indépendance vis-à-vis du backend Java.
+  - Pipeline NLP optimisé.
+  - Intégration de l'API Gemini.
+* **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles d'intelligence artificielle ou de changer de fournisseur de LLM sans jamais impacter la stabilité de la plateforme principale."
 
-## Slide 14 : Messagerie & Notifications
-* **Visuel** : Architecture des communications (SMTP & In-App).
+## Slide 15 : Démonstration - Dashboard & Recommandation
+* **Visuel** : Capture du Dashboard Étudiant.
 * **Texte sur le slide** :
-  - **Asynchrone** : Alertes emails (SMTP) pour l'inactivité.
-  - **Temps Réel** : Chat interne Étudiant-Enseignant.
-* **Speech (Amin)** : "Pour maximiser l'engagement, nous avons couplé des relances emails automatiques via SMTP pour contrer l'inactivité, avec un chat interne en temps réel facilitant l'échange direct entre l'étudiant et le professeur."
+  - Vue d'ensemble de l'apprenant.
+  - Recommandations IA affichées.
+* **Speech (Donia)** : "Passons à la pratique. Voici l'espace étudiant : un tableau de bord clair où les recommandations du moteur IA apparaissent dès la connexion pour guider l'apprentissage."
 
-## Slide 15 : Démonstration - Espace Étudiant
-* **Visuel** : Capture du Dashboard Étudiant (Recommandations).
+## Slide 16 : Démonstration - Tuteur IA en Action
+* **Visuel** : Capture d'un quiz avec feedback Gemini.
 * **Texte sur le slide** :
-  - Interface Dashboard Apprenant.
-  - Recommandations dynamiques.
-* **Speech (Donia)** : "Place à l'interface. Voici le Dashboard Étudiant, conçu de manière fluide et réactive. Dès la connexion, le moteur IA y pousse instantanément des cours adaptés au profil de l'apprenant."
-
-## Slide 16 : Démonstration - Tuteur IA
-* **Visuel** : Capture d'un Quiz raté, affichage des lacunes et du feedback Gemini.
-* **Texte sur le slide** :
-  - Alerte sur les concepts critiques.
-  - Feedback IA personnalisé.
-* **Speech (Donia)** : "Si l'étudiant échoue, voici le tableau de bord du tuteur IA. Le système lui signale les concepts critiques à revoir absolument, et affiche l'explication générée sur-mesure par Gemini."
+  - Diagnostic des erreurs.
+  - Explications générées par l'IA.
+* **Speech (Donia)** : "Lorsqu'un étudiant rencontre une difficulté sur un quiz, le tuteur IA intervient immédiatement. Il lui explique ses erreurs de manière pédagogique, simulant la présence d'un professeur particulier."
 
 ## Slide 17 : Démonstration - Espace Enseignant
-* **Visuel** : Capture de la création de cours / statistiques.
+* **Visuel** : Capture de l'upload de cours et statistiques.
 * **Texte sur le slide** :
-  - Création de cours rapide.
-  - Traitement IA invisible.
-  - Suivi des classes.
-* **Speech (Donia)** : "Côté enseignant, la création de cours et l'upload de documents sont extrêmement simplifiés. L'extraction par l'IA se fait en arrière-plan sans bloquer l'interface, et l'enseignant garde un œil sur les statistiques globales."
+  - Création de contenu simplifiée.
+  - Suivi analytique des étudiants.
+* **Speech (Donia)** : "L'enseignant dispose d'outils puissants pour créer des cours et suivre ses classes. L'IA gère l'analyse des documents en arrière-plan, lui laissant plus de temps pour l'interaction humaine."
 
 ## Slide 18 : Bilan & Défis
-* **Visuel** : 3 icônes (Réseau, Vitesse, Base de données).
+* **Visuel** : Icônes (Vitesse, Intégration, Résilience).
 * **Texte sur le slide** :
-  - Communication Inter-Services (WebClient).
-  - Latence IA (Résolue par traitement par lots).
-  - Résilience système.
-* **Speech (Amin)** : "Le grand défi technique de ce projet fut la communication inter-services. Nous l'avons résolu via le client asynchrone Spring WebFlux et le traitement par lots pour éviter toute latence ressentie par l'utilisateur."
+  - Intégration multi-langages (Java/Python).
+  - Optimisation des temps de réponse IA.
+  - Gestion des flux de données.
+* **Speech (Amin)** : "Le défi majeur a été de faire communiquer harmonieusement deux écosystèmes différents (Java et Python). Nous avons réussi à maintenir une fluidité totale grâce à des communications asynchrones optimisées."
 
 ## Slide 19 : Perspectives
-* **Visuel** : 3 icônes (Cloud Docker, Mobile React Native, Gamification).
+* **Visuel** : Icônes (Mobile, Cloud, Gamification).
 * **Texte sur le slide** :
-  - **Scalabilité** : Déploiement Docker / Cloud.
-  - **Mobilité** : App React Native.
-  - **Gamification** : Badges et classements.
-* **Speech (Wassim)** : "Pour l'avenir, LearnAgent pourrait évoluer vers une application mobile React Native, inclure des mécanismes de gamification avec des badges, et être intégralement déployé via Docker sur le Cloud."
+  - Extension mobile (React Native).
+  - Déploiement Cloud (Docker/Kubernetes).
+  - Gamification avancée (Badges, Challenges).
+* **Speech (Wassim)** : "Pour la suite, nous envisageons une version mobile, un déploiement Cloud pour la scalabilité, et l'ajout de mécaniques de gamification pour renforcer encore plus l'engagement des étudiants."
 
 ## Slide 20 : Conclusion
-* **Visuel** : "Merci de votre attention" + Code QR (optionnel).
+* **Visuel** : "Merci pour votre attention".
 * **Texte sur le slide** :
   - Fin de la présentation.
   - Questions ?
-* **Speech (Donia)** : "LearnAgent prouve qu'une architecture microservices robuste couplée à l'IA transforme l'e-learning. Nous vous remercions pour votre attention et sommes à l'écoute de vos questions."
+* **Speech (Donia)** : "LearnAgent démontre que l'E-learning intelligent n'est plus une option, mais une nécessité. Nous vous remercions pour votre attention et sommes prêts pour vos questions."
