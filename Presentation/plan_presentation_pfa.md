@@ -61,14 +61,22 @@
 * **Speech (Amin)** : "Le projet a été mené en méthode Scrum sur 5 sprints. Cette approche nous a permis d'assurer une progression constante, en validant d'abord le socle technique avant d'intégrer les modules d'intelligence artificielle."
 
 ## Slide 7 : Fonctionnalités de l'Application Web
-* **Visuel** : Icônes (Cours, Quiz, Messagerie, Dashboard).
+* **Visuel** : Schéma du Moteur Pédagogique (Cours -> Chapitres -> Quiz).
 * **Texte sur le slide** :
-  - **Gestion Pédagogique** : Cours hiérarchisés et quiz de validation.
-  - **Messagerie & Alertes** : Chat temps réel et notifications SMTP.
-  - **Suivi de Progression** : Tableaux de bord intuitifs.
-* **Speech (Amin)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis. Je passe la main à Wassim pour vous dévoiler la puissance de notre moteur IA."
+  - **Moteur Pédagogique** : Cours hiérarchisés et chapitres.
+  - **Progression** : Déblocage conditionné par la réussite.
+  - **Quiz** : Validation des acquis en fin de module.
+* **Speech (Amin)** : "L'application web repose sur un moteur pédagogique rigoureux. L'étudiant avance chapitre par chapitre et ne débloque la suite qu'après avoir validé ses connaissances via des quiz dédiés."
 
-## Slide 8 : Fonctionnalités IA - Extraction et NLP
+## Slide 8 : Messagerie & Notifications
+* **Visuel** : Interface de chat et icône d'alerte email.
+* **Texte sur le slide** :
+  - **Temps Réel** : Messagerie interne Étudiant-Enseignant.
+  - **Engagement** : Relances automatiques par email (SMTP).
+  - **Support** : Canal de communication direct pour lever les doutes.
+* **Speech (Amin)** : "Pour briser l'isolement de l'apprentissage en ligne, nous avons intégré une messagerie en temps réel et des relances automatiques par email. Cela permet de maintenir l'engagement et de faciliter l'échange direct avec les professeurs. Je passe la main à Wassim pour la partie IA."
+
+## Slide 9 : Fonctionnalités IA - Extraction et NLP
 * **Visuel** : Schéma (Fichier PDF/Word $\to$ Analyse NLP $\to$ Mots-clés).
 * **Texte sur le slide** :
   - Extraction automatisée du texte.
@@ -76,7 +84,7 @@
   - Indexation intelligente sans effort enseignant.
 * **Speech (Wassim)** : "Côté IA, tout commence par l'extraction. Dès qu'un enseignant dépose un document, notre système en analyse le contenu sémantique et extrait automatiquement les concepts clés pour indexer le cours."
 
-## Slide 9 : Fonctionnalités IA - Recommandation Sémantique
+## Slide 10 : Fonctionnalités IA - Recommandation Sémantique
 * **Visuel** : Graphique de similarité cosinus (Sentence-BERT).
 * **Texte sur le slide** :
   - Modèle **Sentence-BERT**.
@@ -84,7 +92,7 @@
   - Recommandation personnalisée selon le profil.
 * **Speech (Wassim)** : "Nous utilisons Sentence-BERT pour comprendre le sens réel des cours. Le moteur compare le profil de l'étudiant avec notre base de données pour lui recommander les ressources les plus pertinentes à son niveau."
 
-## Slide 10 : Fonctionnalités IA - Détection des Lacunes
+## Slide 11 : Fonctionnalités IA - Détection des Lacunes
 * **Visuel** : Graphique de performance (Mapping Questions $\to$ Concepts).
 * **Texte sur le slide** :
   - Analyse fine des échecs aux quiz.
@@ -92,7 +100,7 @@
   - Classification de sévérité (Critique / Moyen).
 * **Speech (Wassim)** : "En cas d'échec, le système ne se contente pas d'une note. Il identifie précisément les lacunes sémantiques en faisant le lien entre les questions ratées et les concepts du cours."
 
-## Slide 11 : Fonctionnalités IA - Tuteur Virtuel (Google Gemini)
+## Slide 12 : Fonctionnalités IA - Tuteur Virtuel (Google Gemini)
 * **Visuel** : Dialogue entre l'étudiant et Gemini.
 * **Texte sur le slide** :
   - Génération de feedbacks personnalisés.
@@ -100,7 +108,7 @@
   - **Batch Processing** pour l'optimisation.
 * **Speech (Wassim)** : "Enfin, Google Gemini intervient comme un tuteur personnel. Il analyse les erreurs de l'étudiant et génère une explication pédagogique sur-mesure. Amin va maintenant vous présenter l'architecture qui soutient ces fonctionnalités."
 
-## Slide 12 : Architecture Globale
+## Slide 13 : Architecture Globale
 * **Visuel** : Diagramme (React $\leftrightarrow$ Spring Boot $\leftrightarrow$ FastAPI).
 * **Texte sur le slide** :
   - **Architecture Microservices**.
@@ -108,7 +116,7 @@
   - Communication asynchrone (WebFlux).
 * **Speech (Amin)** : "L'architecture repose sur trois piliers : un Frontend React réactif, un Backend Spring Boot robuste pour la logique métier, et un microservice Python dédié exclusivement aux calculs IA intensifs."
 
-## Slide 13 : Stack Technologique
+## Slide 14 : Stack Technologique
 * **Visuel** : Logos (React, Spring Boot, Java, Python, FastAPI, PostgreSQL).
 * **Texte sur le slide** :
   - **Frontend** : React 19, Vite, Recharts.
@@ -116,7 +124,7 @@
   - **IA** : Python 3.12, FastAPI, PyTorch.
 * **Speech (Amin)** : "Notre stack est moderne et performante : Java 21 pour le cœur du système, PostgreSQL pour la persistance des données, et l'écosystème Python pour la puissance de ses bibliothèques de machine learning."
 
-## Slide 14 : Sécurité & Accès
+## Slide 15 : Sécurité & Accès
 * **Visuel** : Flux d'authentification JWT.
 * **Texte sur le slide** :
   - Authentification sécurisée par **JWT**.
@@ -124,7 +132,7 @@
   - Contrôle d'accès basé sur les rôles (RBAC).
 * **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées. Je repasse la main à Wassim pour l'architecture IA."
 
-## Slide 15 : Architecture du Microservice IA
+## Slide 16 : Architecture du Microservice IA
 * **Visuel** : Schéma interne du service Python.
 * **Texte sur le slide** :
   - Indépendance vis-à-vis du backend Java.
@@ -132,7 +140,7 @@
   - Intégration de l'API Gemini.
 * **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles ou de changer de LLM sans impacter la stabilité. Passons maintenant à la démonstration pour voir ces outils en action."
 
-## Slide 16 : Démonstration des Espaces
+## Slide 17 : Démonstration des Espaces
 * **Visuel** : Collage des trois interfaces (Étudiant, Tuteur IA, Enseignant).
 * **Texte sur le slide** :
   - **Espace Étudiant** : Dashboard & Recommandations.
@@ -140,21 +148,13 @@
   - **Espace Enseignant** : Création & Suivi analytique.
 * **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Donia pour le bilan."
 
-## Slide 17 : Bilan du Projet
-* **Visuel** : Graphique de réussite (Objectifs atteints).
+## Slide 18 : Bilan & Défis Techniques
+* **Visuel** : Icônes (Succès, Réseau, Performance).
 * **Texte sur le slide** :
-  - Application fonctionnelle et sécurisée.
-  - Moteur IA intégré avec succès.
-  - Expérience utilisateur fluide.
-* **Speech (Donia)** : "En bilan, nous avons réalisé une plateforme e-learning complète et sécurisée. Le moteur d'intelligence artificielle est pleinement opérationnel, offrant une expérience fluide et réellement personnalisée pour chaque utilisateur."
-
-## Slide 18 : Défis Techniques & Solutions
-* **Visuel** : Icônes (Vitesse, Intégration, Résilience).
-* **Texte sur le slide** :
-  - **Latence IA** : Résolue par le traitement par lots.
-  - **Inter-services** : Communication asynchrone via WebFlux.
-  - **Stabilité** : Découplage via microservices.
-* **Speech (Amin)** : "Le défi majeur a été la communication entre Java et Python. Nous avons réussi à maintenir une fluidité totale grâce à des communications asynchrones optimisées et à résoudre la latence de l'IA par un traitement par lots efficace."
+  - **Bilan** : Moteur IA et plateforme 100% opérationnels.
+  - **Latence** : Optimisée via traitement par lots.
+  - **Inter-services** : Communication fluide via WebFlux.
+* **Speech (Amin)** : "En bilan, LearnAgent est une solution robuste où nous avons surmonté des défis complexes de latence et de communication inter-services pour offrir une expérience utilisateur performante."
 
 ## Slide 19 : Perspectives
 * **Visuel** : Icônes (Mobile, Cloud, Gamification).
