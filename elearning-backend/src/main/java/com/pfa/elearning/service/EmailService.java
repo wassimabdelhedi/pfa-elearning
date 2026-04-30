@@ -102,6 +102,14 @@ public class EmailService {
         sendHtmlEmail(toEmail, "Password Reset Request - LearnAgent", "emails/reset-password", context);
     }
 
+    @Async
+    public void sendAccountValidationEmail(String toEmail, String firstName) {
+        Context context = new Context();
+        context.setVariable("name", firstName);
+        context.setVariable("loginUrl", "http://localhost:5173/login");
+        sendHtmlEmail(toEmail, "Bienvenue sur LearnAgent ! Validation de votre compte", "emails/account-validation", context);
+    }
+
     private void sendHtmlEmail(String to, String subject, String templateName, Context context) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();

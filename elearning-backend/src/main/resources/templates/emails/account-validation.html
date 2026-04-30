@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f9fafb; }
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .header { background-color: #10b981; color: white; padding: 30px 40px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { padding: 40px; }
+        .greeting { font-size: 18px; font-weight: 600; color: #111827; margin-top: 0; }
+        .button { display: inline-block; padding: 14px 28px; background-color: #10b981; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 25px 0; }
+        .footer { background-color: #f3f4f6; padding: 20px 40px; text-align: center; font-size: 14px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bienvenue sur LearnAgent ! 🎉</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Bonjour <span th:text="${name}">Étudiant</span>,</p>
+            <p>Félicitations ! Votre compte étudiant sur la plateforme <strong>LearnAgent</strong> a été créé avec succès. Nous sommes ravis de vous compter parmi nous.</p>
+            <p>Afin de valider définitivement votre inscription et commencer à explorer vos cours personnalisés, veuillez vous connecter en cliquant sur le bouton ci-dessous :</p>
+            <div style="text-align: center;">
+                <a th:href="${loginUrl}" class="button">Valider et me connecter</a>
+            </div>
+            <p>Si vous rencontrez la moindre difficulté, notre assistant IA et notre équipe pédagogique sont là pour vous accompagner.</p>
+            <p>Bon apprentissage !<br>L'équipe LearnAgent</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 LearnAgent Platform. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -55,6 +55,14 @@ public class AuthController {
         User user = userService.registerUser(request);
         String token = tokenProvider.generateTokenFromEmail(user.getEmail());
 
+        // Send validation email
+        try {
+            emailService.sendAccountValidationEmail(user.getEmail(), user.getFirstName());
+        } catch (Exception e) {
+            // Log error but don't fail registration
+            e.printStackTrace();
+        }
+
         AuthResponse response = new AuthResponse(
                 token, user.getId(), user.getEmail(),
                 user.getFullName(), user.getRole()
