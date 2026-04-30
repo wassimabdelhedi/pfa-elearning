@@ -28,15 +28,23 @@
   6. Démonstration & Bilan
 * **Speech (Donia)** : "Notre présentation suivra ce cheminement : du contexte général à la solution proposée, en passant par les fonctionnalités web et IA, pour finir par l'architecture technique et une démonstration."
 
-## Slide 3 : Contexte Général & Problématique
-* **Visuel** : Infographie (Importance de l'éducation vs Barrières classiques).
+## Slide 3 : Contexte Général
+* **Visuel** : Image inspirante sur l'éducation (Fondation du futur).
 * **Texte sur le slide** :
   - **Éducation** : Pilier fondamental du développement humain.
-  - **Système Classique** : Rigide, passif, manque de personnalisation.
-  - **Conséquences** : Décrochage, isolement et perte de motivation.
-* **Speech (Donia)** : "L'éducation est le moteur de notre société, mais le modèle classique montre ses limites. La passivité des élèves et le manque de suivi personnalisé mènent trop souvent au décrochage scolaire."
+  - **Évolution** : Nécessité d'adapter l'apprentissage aux nouveaux besoins.
+  - **Accessibilité** : Un droit universel à renforcer.
+* **Speech (Donia)** : "L'éducation est le moteur de notre société et le socle de l'avenir. Dans un monde en constante évolution, il est impératif d'adapter nos méthodes d'apprentissage pour répondre aux nouveaux besoins de connaissance et d'accessibilité."
 
-## Slide 4 : Solution Proposée : L'E-Learning
+## Slide 4 : Problématique du Système Classique
+* **Visuel** : Icônes (Étudiant passif, Isolement, Manque de guidage).
+* **Texte sur le slide** :
+  - **Processus classique** : Souvent rigide et unidirectionnel.
+  - **Passivité** : Catalogues immenses sans personnalisation.
+  - **Isolement** : Taux d'abandon élevé par manque de suivi.
+* **Speech (Donia)** : "Pourtant, le modèle classique montre ses limites : le processus d'éducation est souvent trop rigide et passif. Sans guidage personnalisé, les étudiants se perdent dans des catalogues de cours immenses, ce qui provoque l'isolement et un fort taux d'abandon."
+
+## Slide 5 : Solution Proposée : L'E-Learning
 * **Visuel** : "LearnAgent" au centre de l'écosystème numérique.
 * **Texte sur le slide** :
   - **Apprentissage en ligne (E-Learning)** : Flexibilité et accessibilité.
@@ -44,7 +52,7 @@
   - **Objectif** : Transformer la passivité en engagement.
 * **Speech (Donia)** : "Pour répondre à ces défis, nous proposons LearnAgent. En misant sur l'E-learning ou apprentissage en ligne, nous brisons les barrières géographiques et temporelles tout en offrant un accompagnement proactif. Je laisse maintenant Amin vous présenter notre méthodologie et les fonctionnalités web."
 
-## Slide 5 : Méthodologie & Planification
+## Slide 6 : Méthodologie & Planification
 * **Visuel** : Cycle Scrum (5 Sprints).
 * **Texte sur le slide** :
   - **Approche Scrum** : 5 Sprints.
@@ -52,21 +60,13 @@
   - Focus : Sécurité $\to$ Moteur de cours $\to$ IA.
 * **Speech (Amin)** : "Le projet a été mené en méthode Scrum sur 5 sprints. Cette approche nous a permis d'assurer une progression constante, en validant d'abord le socle technique avant d'intégrer les modules d'intelligence artificielle."
 
-## Slide 6 : Fonctionnalités de l'Application Web
+## Slide 7 : Fonctionnalités de l'Application Web
 * **Visuel** : Icônes (Cours, Quiz, Messagerie, Dashboard).
 * **Texte sur le slide** :
   - **Gestion Pédagogique** : Cours hiérarchisés et quiz de validation.
   - **Messagerie & Alertes** : Chat temps réel et notifications SMTP.
   - **Suivi de Progression** : Tableaux de bord intuitifs.
-* **Speech (Amin)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis."
-
-## Slide 7 : Diagramme de Cas d'Utilisation
-* **Visuel** : Diagramme UML des Cas d'Utilisation (Acteurs : Étudiant, Enseignant, Administrateur).
-* **Texte sur le slide** :
-  - **Étudiant** : Consulter cours, passer quiz, interagir avec le tuteur.
-  - **Enseignant** : Créer cours, uploader documents, suivre les statistiques.
-  - **Admin** : Gestion des utilisateurs et de la plateforme.
-* **Speech (Amin)** : "Pour bien comprendre les interactions, voici notre diagramme de cas d'utilisation. Il définit clairement les rôles de chaque acteur, l'étudiant étant au centre de l'apprentissage tandis que l'enseignant assure la création et le suivi."
+* **Speech (Amin)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis. Je passe la main à Wassim pour vous dévoiler la puissance de notre moteur IA."
 
 ## Slide 8 : Fonctionnalités IA - Extraction et NLP
 * **Visuel** : Schéma (Fichier PDF/Word $\to$ Analyse NLP $\to$ Mots-clés).
@@ -122,18 +122,9 @@
   - Authentification sécurisée par **JWT**.
   - Chiffrement des données (BCrypt).
   - Contrôle d'accès basé sur les rôles (RBAC).
-* **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées."
+* **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées. Je repasse la main à Wassim pour l'architecture IA."
 
-## Slide 15 : Environnement de Travail
-* **Visuel** : Logos (GitHub, Trello, VS Code, Postman, IntelliJ).
-* **Texte sur le slide** :
-  - **Gestion de version** : Git / GitHub.
-  - **Planification** : Trello / Méthode Scrum.
-  - **Développement** : IntelliJ IDEA, VS Code, PyCharm.
-  - **Tests** : Postman (APIs), JUnit (Java).
-* **Speech (Amin)** : "Pour mener à bien ce projet, nous avons mis en place un environnement de travail collaboratif utilisant GitHub pour le code, Trello pour le suivi des tâches, et des outils de test rigoureux comme Postman et JUnit."
-
-## Slide 16 : Architecture du Microservice IA
+## Slide 15 : Architecture du Microservice IA
 * **Visuel** : Schéma interne du service Python.
 * **Texte sur le slide** :
   - Indépendance vis-à-vis du backend Java.
@@ -141,7 +132,7 @@
   - Intégration de l'API Gemini.
 * **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles ou de changer de LLM sans impacter la stabilité. Passons maintenant à la démonstration pour voir ces outils en action."
 
-## Slide 17 : Démonstration des Espaces
+## Slide 16 : Démonstration des Espaces
 * **Visuel** : Collage des trois interfaces (Étudiant, Tuteur IA, Enseignant).
 * **Texte sur le slide** :
   - **Espace Étudiant** : Dashboard & Recommandations.
@@ -149,13 +140,21 @@
   - **Espace Enseignant** : Création & Suivi analytique.
 * **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Donia pour le bilan."
 
-## Slide 18 : Bilan & Défis
+## Slide 17 : Bilan du Projet
+* **Visuel** : Graphique de réussite (Objectifs atteints).
+* **Texte sur le slide** :
+  - Application fonctionnelle et sécurisée.
+  - Moteur IA intégré avec succès.
+  - Expérience utilisateur fluide.
+* **Speech (Donia)** : "En bilan, nous avons réalisé une plateforme e-learning complète et sécurisée. Le moteur d'intelligence artificielle est pleinement opérationnel, offrant une expérience fluide et réellement personnalisée pour chaque utilisateur."
+
+## Slide 18 : Défis Techniques & Solutions
 * **Visuel** : Icônes (Vitesse, Intégration, Résilience).
 * **Texte sur le slide** :
-  - Intégration multi-langages (Java/Python).
-  - Optimisation des temps de réponse IA.
-  - Gestion des flux de données.
-* **Speech (Amin)** : "Le défi majeur a été de faire communiquer harmonieusement deux écosystèmes différents (Java et Python). Nous avons réussi à maintenir une fluidité totale grâce à des communications asynchrones optimisées."
+  - **Latence IA** : Résolue par le traitement par lots.
+  - **Inter-services** : Communication asynchrone via WebFlux.
+  - **Stabilité** : Découplage via microservices.
+* **Speech (Amin)** : "Le défi majeur a été la communication entre Java et Python. Nous avons réussi à maintenir une fluidité totale grâce à des communications asynchrones optimisées et à résoudre la latence de l'IA par un traitement par lots efficace."
 
 ## Slide 19 : Perspectives
 * **Visuel** : Icônes (Mobile, Cloud, Gamification).
