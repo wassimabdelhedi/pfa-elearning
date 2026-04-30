@@ -2,9 +2,9 @@
 
 **Temps strict ciblé** : 15 minutes (Environ 40 à 45 secondes de temps de parole par slide).
 **Répartition recommandée** : 
-- **Donia** : Intro, Contexte, Solution, Web Features, Démos (~5 min)
-- **Amin** : Architecture, Stack, Sécurité, Méthodologie (~5 min)
-- **Wassim** : Moteur IA complet (NLP, Recommandation, Tuteur Gemini) (~5 min)
+- **Donia** : Intro, Solution, Bilan & Conclusion (~5 min)
+- **Amin** : Méthodologie, Fonctionnalités Web, Architecture Globale, Stack & Sécurité (~4 min)
+- **Wassim** : Moteur IA, Architecture IA & Démonstrations (~6 min)
 
 ---
 
@@ -42,7 +42,7 @@
   - **Apprentissage en ligne (E-Learning)** : Flexibilité et accessibilité.
   - **LearnAgent** : Un assistant proactif pour l'apprenant.
   - **Objectif** : Transformer la passivité en engagement.
-* **Speech (Donia)** : "Pour répondre à ces défis, nous proposons LearnAgent. En misant sur l'E-learning ou apprentissage en ligne, nous brisons les barrières géographiques et temporelles tout en offrant un accompagnement proactif."
+* **Speech (Donia)** : "Pour répondre à ces défis, nous proposons LearnAgent. En misant sur l'E-learning ou apprentissage en ligne, nous brisons les barrières géographiques et temporelles tout en offrant un accompagnement proactif. Je laisse maintenant Amin vous présenter notre méthodologie et les fonctionnalités web."
 
 ## Slide 5 : Méthodologie & Planification
 * **Visuel** : Cycle Scrum (5 Sprints).
@@ -58,9 +58,17 @@
   - **Gestion Pédagogique** : Cours hiérarchisés et quiz de validation.
   - **Messagerie & Alertes** : Chat temps réel et notifications SMTP.
   - **Suivi de Progression** : Tableaux de bord intuitifs.
-* **Speech (Donia)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis pour l'étudiant comme pour l'enseignant."
+* **Speech (Amin)** : "L'application offre un environnement complet : des cours structurés déblocables par des quiz, une messagerie instantanée pour briser l'isolement, et des outils de suivi précis."
 
-## Slide 7 : Fonctionnalités IA - Extraction et NLP
+## Slide 7 : Diagramme de Cas d'Utilisation
+* **Visuel** : Diagramme UML des Cas d'Utilisation (Acteurs : Étudiant, Enseignant, Administrateur).
+* **Texte sur le slide** :
+  - **Étudiant** : Consulter cours, passer quiz, interagir avec le tuteur.
+  - **Enseignant** : Créer cours, uploader documents, suivre les statistiques.
+  - **Admin** : Gestion des utilisateurs et de la plateforme.
+* **Speech (Amin)** : "Pour bien comprendre les interactions, voici notre diagramme de cas d'utilisation. Il définit clairement les rôles de chaque acteur, l'étudiant étant au centre de l'apprentissage tandis que l'enseignant assure la création et le suivi."
+
+## Slide 8 : Fonctionnalités IA - Extraction et NLP
 * **Visuel** : Schéma (Fichier PDF/Word $\to$ Analyse NLP $\to$ Mots-clés).
 * **Texte sur le slide** :
   - Extraction automatisée du texte.
@@ -68,7 +76,7 @@
   - Indexation intelligente sans effort enseignant.
 * **Speech (Wassim)** : "Côté IA, tout commence par l'extraction. Dès qu'un enseignant dépose un document, notre système en analyse le contenu sémantique et extrait automatiquement les concepts clés pour indexer le cours."
 
-## Slide 8 : Fonctionnalités IA - Recommandation Sémantique
+## Slide 9 : Fonctionnalités IA - Recommandation Sémantique
 * **Visuel** : Graphique de similarité cosinus (Sentence-BERT).
 * **Texte sur le slide** :
   - Modèle **Sentence-BERT**.
@@ -76,7 +84,7 @@
   - Recommandation personnalisée selon le profil.
 * **Speech (Wassim)** : "Nous utilisons Sentence-BERT pour comprendre le sens réel des cours. Le moteur compare le profil de l'étudiant avec notre base de données pour lui recommander les ressources les plus pertinentes à son niveau."
 
-## Slide 9 : Fonctionnalités IA - Détection des Lacunes
+## Slide 10 : Fonctionnalités IA - Détection des Lacunes
 * **Visuel** : Graphique de performance (Mapping Questions $\to$ Concepts).
 * **Texte sur le slide** :
   - Analyse fine des échecs aux quiz.
@@ -84,15 +92,15 @@
   - Classification de sévérité (Critique / Moyen).
 * **Speech (Wassim)** : "En cas d'échec, le système ne se contente pas d'une note. Il identifie précisément les lacunes sémantiques en faisant le lien entre les questions ratées et les concepts du cours."
 
-## Slide 10 : Fonctionnalités IA - Tuteur Virtuel (Google Gemini)
+## Slide 11 : Fonctionnalités IA - Tuteur Virtuel (Google Gemini)
 * **Visuel** : Dialogue entre l'étudiant et Gemini.
 * **Texte sur le slide** :
   - Génération de feedbacks personnalisés.
   - Explications ciblées sur les lacunes critiques.
   - **Batch Processing** pour l'optimisation.
-* **Speech (Wassim)** : "Enfin, Google Gemini intervient comme un tuteur personnel. Il analyse les erreurs de l'étudiant et génère une explication pédagogique sur-mesure pour l'aider à surmonter ses difficultés immédiates."
+* **Speech (Wassim)** : "Enfin, Google Gemini intervient comme un tuteur personnel. Il analyse les erreurs de l'étudiant et génère une explication pédagogique sur-mesure. Amin va maintenant vous présenter l'architecture qui soutient ces fonctionnalités."
 
-## Slide 11 : Architecture Globale
+## Slide 12 : Architecture Globale
 * **Visuel** : Diagramme (React $\leftrightarrow$ Spring Boot $\leftrightarrow$ FastAPI).
 * **Texte sur le slide** :
   - **Architecture Microservices**.
@@ -100,7 +108,7 @@
   - Communication asynchrone (WebFlux).
 * **Speech (Amin)** : "L'architecture repose sur trois piliers : un Frontend React réactif, un Backend Spring Boot robuste pour la logique métier, et un microservice Python dédié exclusivement aux calculs IA intensifs."
 
-## Slide 12 : Stack Technologique
+## Slide 13 : Stack Technologique
 * **Visuel** : Logos (React, Spring Boot, Java, Python, FastAPI, PostgreSQL).
 * **Texte sur le slide** :
   - **Frontend** : React 19, Vite, Recharts.
@@ -108,7 +116,7 @@
   - **IA** : Python 3.12, FastAPI, PyTorch.
 * **Speech (Amin)** : "Notre stack est moderne et performante : Java 21 pour le cœur du système, PostgreSQL pour la persistance des données, et l'écosystème Python pour la puissance de ses bibliothèques de machine learning."
 
-## Slide 13 : Sécurité & Accès
+## Slide 14 : Sécurité & Accès
 * **Visuel** : Flux d'authentification JWT.
 * **Texte sur le slide** :
   - Authentification sécurisée par **JWT**.
@@ -116,34 +124,30 @@
   - Contrôle d'accès basé sur les rôles (RBAC).
 * **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées."
 
-## Slide 14 : Architecture du Microservice IA
+## Slide 15 : Environnement de Travail
+* **Visuel** : Logos (GitHub, Trello, VS Code, Postman, IntelliJ).
+* **Texte sur le slide** :
+  - **Gestion de version** : Git / GitHub.
+  - **Planification** : Trello / Méthode Scrum.
+  - **Développement** : IntelliJ IDEA, VS Code, PyCharm.
+  - **Tests** : Postman (APIs), JUnit (Java).
+* **Speech (Amin)** : "Pour mener à bien ce projet, nous avons mis en place un environnement de travail collaboratif utilisant GitHub pour le code, Trello pour le suivi des tâches, et des outils de test rigoureux comme Postman et JUnit."
+
+## Slide 16 : Architecture du Microservice IA
 * **Visuel** : Schéma interne du service Python.
 * **Texte sur le slide** :
   - Indépendance vis-à-vis du backend Java.
   - Pipeline NLP optimisé.
   - Intégration de l'API Gemini.
-* **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles d'intelligence artificielle ou de changer de fournisseur de LLM sans jamais impacter la stabilité de la plateforme principale."
+* **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles ou de changer de LLM sans impacter la stabilité. Passons maintenant à la démonstration pour voir ces outils en action."
 
-## Slide 15 : Démonstration - Dashboard & Recommandation
-* **Visuel** : Capture du Dashboard Étudiant.
+## Slide 17 : Démonstration des Espaces
+* **Visuel** : Collage des trois interfaces (Étudiant, Tuteur IA, Enseignant).
 * **Texte sur le slide** :
-  - Vue d'ensemble de l'apprenant.
-  - Recommandations IA affichées.
-* **Speech (Donia)** : "Passons à la pratique. Voici l'espace étudiant : un tableau de bord clair où les recommandations du moteur IA apparaissent dès la connexion pour guider l'apprentissage."
-
-## Slide 16 : Démonstration - Tuteur IA en Action
-* **Visuel** : Capture d'un quiz avec feedback Gemini.
-* **Texte sur le slide** :
-  - Diagnostic des erreurs.
-  - Explications générées par l'IA.
-* **Speech (Donia)** : "Lorsqu'un étudiant rencontre une difficulté sur un quiz, le tuteur IA intervient immédiatement. Il lui explique ses erreurs de manière pédagogique, simulant la présence d'un professeur particulier."
-
-## Slide 17 : Démonstration - Espace Enseignant
-* **Visuel** : Capture de l'upload de cours et statistiques.
-* **Texte sur le slide** :
-  - Création de contenu simplifiée.
-  - Suivi analytique des étudiants.
-* **Speech (Donia)** : "L'enseignant dispose d'outils puissants pour créer des cours et suivre ses classes. L'IA gère l'analyse des documents en arrière-plan, lui laissant plus de temps pour l'interaction humaine."
+  - **Espace Étudiant** : Dashboard & Recommandations.
+  - **Tuteur IA** : Feedback pédagogique personnalisé.
+  - **Espace Enseignant** : Création & Suivi analytique.
+* **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Donia pour le bilan."
 
 ## Slide 18 : Bilan & Défis
 * **Visuel** : Icônes (Vitesse, Intégration, Résilience).
