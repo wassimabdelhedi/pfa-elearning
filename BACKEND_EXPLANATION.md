@@ -127,6 +127,43 @@ flowchart TD
     Service -- "WebClient Call" --> AI
     Repository -- "Generated SQL" --> DB
 ```
+## 10. Backend ↔ AI Engine Interaction Diagram
+
+```mermaid
+flowchart LR
+    Frontend[React Frontend]
+    Backend[Spring Boot Backend]
+    AI[FastAPI AI Engine]
+    DB[(PostgreSQL DB)]
+    Prometheus[(Prometheus Metrics)]
+
+    Frontend -->|HTTP API| Backend
+    Backend -->|WebClient Call| AI
+    AI -->|Embedding & Recommendation| Backend
+    Backend -->|Persist Recommendations| DB
+    AI -->|Metrics| Prometheus
+```
+
+## 11. Backend Component Diagram
+
+```mermaid
+componentDiagram
+    component Backend {
+        component Controller
+        component Service
+        component Repository
+        component Security
+    }
+    component AIEngine {
+        component FastAPI
+        component Model
+    }
+    Backend <..> AIEngine : "WebClient Call"
+    Backend --> Database : "JPA"
+    AIEngine --> Redis : "Embedding Cache"
+    AIEngine --> Prometheus : "Metrics"
+```
+
 
 ---
 

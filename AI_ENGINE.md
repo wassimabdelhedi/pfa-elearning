@@ -76,7 +76,210 @@ The engine exposes a FastAPI REST application running on `http://localhost:8000`
 
 ---
 
-## 3. The Recommendation Pipeline (`app/models/recommender.py`)
+## 3. Web Feature → AI Engine: What Happens Exactly
+
+This section maps every user-facing action in the LearnAgent web application to the precise technical steps that occur inside the AI engine.
+
+---
+
+### 🔍 Feature: Student searches for a course
+
+**What the user sees:** A search bar on the homepage. The student types a query (e.g., *"Python pour débutants"*) and receives a ranked list of recommended courses.
+
+**What happens technically:**
+
+```
+[React UI]
+  → POST /api/courses/search  (Spring Boot: SearchController)
+  → SearchService logs query to SearchHistory table in PostgreSQL
+  → RecommendationService calls WebClient → POST http://localhost:8000/api/recommend
+
+[FastAPI AI Engine – /api/recommend]
+  1. Pydantic validates incoming JSON (query, enrolled_course_ids, catalog)
+  2. nlp_processor.py detects query language (langdetect → FR / EN)
+  3. recommender.py encodes the query:
+       model.encode("Python pour débutants") → vector[384 dims]
+  4. For each course in the catalog:
+       - Fetch pre-computed embedding from Redis (key = course:{id}:embedding)
+       - Compute cosine_similarity(query_vector, course_vector)
+  5. Apply business-logic weighting:
+       - Title match bonus:    +0.15 if query token appears in course title
+       - Enrolled penalty:     ×0.10 if student is already enrolled
+       - Category match bonus: +0.05 if category matches inferred query domain
+  6. Sort results descending by weighted score
+  7. Generate reason string:
+       "Correspond très bien à votre recherche : Python"
+  8. Return top-10 as JSON → Spring Boot → React UI
+```
+
+**Backend role:** `RecommendationService.java` persists the results to the `Recommendation` table in PostgreSQL, so the dashboard can display them without re-calling the AI engine on every page load.
+
+---
+
+### 📚 Feature: Instructor uploads a course document (PDF / PPTX / DOCX)
+
+**What the user sees:** An instructor uploads a file during course creation. The platform silently indexes it so students can search its content semantically.
+
+**What happens technically:**
+
+```
+[React UI – Course Creation Form]
+  → POST /api/courses  (Spring Boot: CourseController)
+  → FileStorageService saves the raw file to /uploads/ on disk
+  → CourseService calls WebClient → POST http://localhost:8000/api/extract-text
+       with the file as multipart/form-data
+
+[FastAPI AI Engine – /api/extract-text]
+  1. Detect file type from extension
+  2. Route to the correct parser:
+       .pdf  → PyPDF2.PdfReader  → extract page-by-page text
+       .docx → python-docx Document → iterate paragraphs
+       .pptx → python-pptx Presentation → iterate slide shapes/text frames
+  3. Concatenate extracted text into one plain-text string
+  4. Return { "text": "..." } → Spring Boot
+
+[Spring Boot – after text extraction]
+  → Stores text in Course.content field in PostgreSQL
+  → Calls WebClient → POST http://localhost:8000/api/index-course
+       with { course_id, title, description, content, category }
+
+[FastAPI AI Engine – /api/index-course]
+  1. Concatenate: title + " " + description + " " + content
+  2. model.encode(combined_text) → vector[384 dims]
+  3. Redis SET course:{id}:embedding <serialized numpy array>
+  4. Return { "status": "indexed" }
+```
+
+**Result:** The course embedding is immediately live in Redis. All future `/api/recommend` calls include this course in their similarity ranking at O(1) lookup cost.
+
+---
+
+### 🏷️ Feature: Auto-generated keyword tags on a course
+
+**What the user sees:** After publishing a course, keyword tags appear on its card (e.g., *"machine learning", "Python", "neural networks"*), powering the filter sidebar.
+
+**What happens technically:**
+
+```
+[Spring Boot – CourseService after text extraction]
+  → Calls WebClient → POST http://localhost:8000/api/extract-keywords
+       with { "text": "<full course content>" }
+
+[FastAPI AI Engine – /api/extract-keywords]
+  1. nlp_processor.py loads the correct spaCy model:
+       FR text → fr_core_news_sm
+       EN text → en_core_web_sm
+  2. Tokenize text, filter: remove stop-words, punctuation, numbers
+  3. Apply TF-IDF scoring to rank remaining tokens by document importance
+  4. Run Named Entity Recognition (NER): PRODUCT, ORG, TOPIC tokens get +weight
+  5. Return top-N keywords: ["Python", "machine learning", "neural network"]
+
+[Spring Boot]
+  → CourseService stores tags in the Course.tags field in PostgreSQL
+  → Tags are indexed and surfaced in the filter sidebar on the UI
+```
+
+---
+
+### 📝 Feature: Student fails a quiz → personalized review panel
+
+**What the user sees:** After scoring below the pass threshold, the student sees a "You need to review these topics" panel listing the specific chapters they struggled with.
+
+**What happens technically:**
+
+```
+[React UI – Quiz submission]
+  → POST /api/quizzes/{id}/submit  (Spring Boot: QuizController)
+  → QuizController evaluates answers, computes score
+  → If score < threshold:
+       QuizController calls RecommendationService
+       → WebClient → POST http://localhost:8000/api/detect-weak-topics
+
+[FastAPI AI Engine – /api/detect-weak-topics]
+  Payload:
+  {
+    "failed_questions": [{ "text": "What is overfitting?" }],
+    "chapters": [{ "id": 1, "title": "Regularization", "content": "..." }]
+  }
+
+  1. For each failed question:
+       model.encode(question_text) → question_vector[384 dims]
+  2. For each chapter:
+       Fetch chapter_vector from Redis (or encode on-the-fly if not cached)
+  3. Compute cosine_similarity(question_vector, chapter_vector) for all pairs
+  4. Group questions by the chapter with the highest similarity score
+  5. Chapters where ≥ 2 questions cluster → flagged as "critical"
+  6. Return:
+       [{ "chapter_id": 2, "title": "Regularization", "severity": "critical" }]
+
+[Spring Boot]
+  → QuizController stores result in QuizResult entity
+  → Frontend renders the "Review these chapters" panel
+```
+
+---
+
+### 🏠 Feature: Personalized course recommendations on the student dashboard
+
+**What the user sees:** On login, the "Recommended for You" section shows courses tailored to the student's history, interests and past quiz struggles.
+
+**What happens technically:**
+
+```
+[React UI – Dashboard load]
+  → GET /api/recommendations  (Spring Boot: RecommendationController)
+  → Check Recommendation table: are cached results < 24 hours old?
+
+  If stale or missing:
+    RecommendationService builds a synthetic profile query from:
+      - SearchHistory table: last 10 queries
+      - Enrollment table: enrolled course IDs (used as penalty list)
+      - QuizResult table: weak topic titles concatenated
+    → WebClient → POST http://localhost:8000/api/recommend
+         payload: {
+           "query": "<aggregated student profile text>",
+           "enrolled_course_ids": [...],
+           "catalog": [...]
+         }
+
+[FastAPI AI Engine – /api/recommend]
+  (Identical pipeline to the search feature above)
+  → Returns top-10 personalized courses with reason strings
+
+[Spring Boot]
+  → Persists recommendations to Recommendation table with timestamp
+  → Returns list to React frontend for rendering
+```
+
+**Key difference from search:** The `query` field is not typed by the user — it is synthetically constructed from behavioral data, producing truly personalized results without any explicit input.
+
+---
+
+### 🔑 Feature: Instructor publishes a course → immediately searchable
+
+**What the user sees:** The instructor clicks "Publish" and the course appears in search results and recommendation feeds instantly.
+
+**What happens technically:**
+
+```
+[Spring Boot – CourseService.publishCourse()]
+  1. UPDATE Course SET status = 'PUBLISHED' in PostgreSQL
+  2. Calls WebClient → POST http://localhost:8000/api/index-course
+       with { course_id, title, description, content }
+
+[FastAPI AI Engine – /api/index-course]
+  1. model.encode(title + description + content) → vector[384 dims]
+  2. Redis SET course:{id}:embedding <vector>  (no TTL — permanent)
+  3. Return { "status": "indexed", "course_id": "..." }
+
+→ From this moment, the course embedding is live.
+  All subsequent /api/recommend calls will rank this course
+  against student queries via cosine similarity.
+```
+
+---
+
+## 4. The Recommendation Pipeline (`app/models/recommender.py`)
 
 The Machine Learning pipeline is powered by the **`paraphrase-multilingual-MiniLM-L12-v2`** model from Sentence-Transformers. This allows it to work out-of-the-box with multiple languages (including French and English).
 
