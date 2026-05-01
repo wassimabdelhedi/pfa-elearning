@@ -29,9 +29,11 @@ elearning-backend/
     │   ├── AdminController.java
     │   ├── AuthController.java
     │   ├── CategoryController.java
+    │   ├── ChapterController.java
     │   ├── CourseController.java
     │   ├── EnrollmentController.java
     │   ├── ExerciseController.java
+    │   ├── MessageController.java
     │   ├── QuizController.java
     │   ├── RecommendationController.java
     │   └── SearchController.java
@@ -60,6 +62,8 @@ elearning-backend/
     │   ├── Enrollment.java
     │   ├── Exercise.java
     │   ├── ExerciseCompletion.java
+    │   ├── Message.java
+    │   ├── PasswordResetToken.java
     │   ├── Quiz.java
     │   ├── QuizQuestion.java
     │   ├── QuizResult.java
@@ -70,10 +74,16 @@ elearning-backend/
     │   └── User.java
     ├── repository/                           # Database Interfaces (Hibernate)
     │   ├── CategoryRepository.java
+    │   ├── ChapterProgressRepository.java
+    │   ├── ChapterRepository.java
     │   ├── CourseRatingRepository.java
     │   ├── CourseRepository.java
     │   ├── EnrollmentRepository.java
+    │   ├── ExerciseCompletionRepository.java
     │   ├── ExerciseRepository.java
+    │   ├── MessageRepository.java
+    │   ├── PasswordResetTokenRepository.java
+    │   ├── QuizQuestionRepository.java
     │   ├── QuizRepository.java
     │   ├── QuizResultRepository.java
     │   ├── RecommendationRepository.java
@@ -85,8 +95,11 @@ elearning-backend/
     │   └── JwtTokenProvider.java
     └── service/                              # Core Business Logic
         ├── CourseService.java
+        ├── EmailScheduler.java
+        ├── EmailService.java
         ├── EnrollmentService.java
         ├── FileStorageService.java
+        ├── MessageService.java
         ├── RecommendationService.java
         ├── SearchService.java
         └── UserService.java
@@ -133,6 +146,8 @@ This package contains the JPA (Java Persistence API) Entity classes. These class
 - **`Enrollment.java`**: A mapping/join entity tracking which `User` (Student) is participating in which `Course`.
 - **`Exercise.java`**: Represents homework or practical assignments linked to a core course or chapter.
 - **`ExerciseCompletion.java`**: Tracks if a user has completed a specific exercise, serving as a gate for progression.
+- **`Message.java`**: Represents a peer-to-peer or teacher-to-student private message.
+- **`PasswordResetToken.java`**: Stores secure temporary tokens for the "Forgot Password" workflow.
 - **`Quiz.java`**: Represents an assessment module for testing a student's knowledge after chapters/courses.
 - **`QuizQuestion.java`**: Contains an individual question prompt, expected answers, and ties back to a specific `Quiz`.
 - **`QuizResult.java`**: Tracks a student's score and statistics when they attempt a `Quiz`.
@@ -147,10 +162,16 @@ This package contains the JPA (Java Persistence API) Entity classes. These class
 ## 3. Repositories (`com.pfa.elearning.repository`)
 Interfaces extending Spring Data JPA's `JpaRepository` or `CrudRepository`. These automatically generate SQL queries (via Hibernate) to interact with the entities.
 - **`CategoryRepository.java`**: Queries categories.
+- **`ChapterProgressRepository.java`**: Manages granular tracking of student movement through chapters.
+- **`ChapterRepository.java`**: Handles basic CRUD for course modules.
 - **`CourseRatingRepository.java`**: Queries ratings associated with courses to generate aggregate scores.
 - **`CourseRepository.java`**: Manages queries to find courses based on ids, authors, or categories.
 - **`EnrollmentRepository.java`**: Queries to see if a user has access to course materials.
+- **`ExerciseCompletionRepository.java`**: Verifies if a student has successfully finished an assignment.
 - **`ExerciseRepository.java`**: Finds exercises specific to a module.
+- **`MessageRepository.java`**: Handles the storage and retrieval of user conversations.
+- **`PasswordResetTokenRepository.java`**: Manages security tokens for account recovery.
+- **`QuizQuestionRepository.java`**: Manages individual quiz items.
 - **`QuizRepository.java`**: Fetches quizzes.
 - **`QuizResultRepository.java`**: Retrieves past attempts of a student.
 - **`RecommendationRepository.java`**: Fetches cached recommendations for a user.
@@ -162,8 +183,11 @@ Interfaces extending Spring Data JPA's `JpaRepository` or `CrudRepository`. Thes
 ## 4. Services (`com.pfa.elearning.service`)
 This layer encapsulates the core **Business Logic**. Controllers call Services, and Services call Repositories.
 - **`CourseService.java`**: Logic for managing course lifecycles. Makes sure instructors can only edit their own courses and manages course file references.
+- **`EmailScheduler.java`**: A background worker that checks for user inactivity or new enrollments to trigger automated emails.
+- **`EmailService.java`**: The SMTP implementation for sending HTML-formatted emails to users.
 - **`EnrollmentService.java`**: Handles the transaction of a user joining or dropping a course.
 - **`FileStorageService.java`**: Contains the IO logic to safely upload, store, delete, and retrieve physical files (like PDFs, PPTXs, Videos) out of the local `/uploads/` directory.
+- **`MessageService.java`**: Core logic for the real-time chat system, handling unread counts and message history.
 - **`RecommendationService.java`**: Serves as the bridge to the Python AI engine using Spring's reactive `WebClient`. It passes student preferences/history to Python and formats the results for the frontend to digest.
 - **`SearchService.java`**: Parses complex queries, searches across course titles and descriptions, and ensures that user actions are accurately logged via `SearchHistoryRepository`.
 - **`UserService.java`**: Handles administrative tasks over users, fetching profiles, or updating user meta-data distinct from primary Authentication.
@@ -176,8 +200,10 @@ The API endpoints (`@RestController`) that interact directly with the frontend's
 - **`AuthController.java`**: Exposes `/login` and `/register`. Reissues security tokens on login.
 - **`CategoryController.java`**: Fetches category dropdown lists.
 - **`CourseController.java`**: Enables fetching the course catalog and allows instructors to mutate courses.
+- **`ChapterController.java`**: Manages sub-module data and progress tracking.
 - **`EnrollmentController.java`**: Simple trigger endpoints to join a class.
 - **`ExerciseController.java`**: Serving assignment documents to students.
+- **`MessageController.java`**: Endpoints for the in-app chat system.
 - **`QuizController.java`**: Validates a student's answer sheet when they submit a test.
 - **`RecommendationController.java`**: Exposes the user's customized feed of courses.
 - **`SearchController.java`**: Facilitates the frontend's search bar API.
