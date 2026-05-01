@@ -2,8 +2,8 @@
 
 **Temps strict ciblé** : 15 minutes (Environ 40 à 45 secondes de temps de parole par slide).
 **Répartition recommandée** : 
-- **Donia** : Intro, Solution, Bilan & Conclusion (~5 min)
-- **Amin** : Méthodologie, Fonctionnalités Web, Architecture Globale, Stack & Sécurité (~4 min)
+- **Donia** : Intro, Solution, Perspectives & Conclusion (~4.5 min)
+- **Amin** : Méthodologie, Fonctionnalités Web, Architecture Globale, Stack, Sécurité & Bilan (~4.5 min)
 - **Wassim** : Moteur IA, Architecture IA & Démonstrations (~6 min)
 
 ---
@@ -146,7 +146,7 @@
   - **Espace Étudiant** : Dashboard & Recommandations.
   - **Tuteur IA** : Feedback pédagogique personnalisé.
   - **Espace Enseignant** : Création & Suivi analytique.
-* **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Donia pour le bilan."
+* **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Amin pour le bilan."
 
 ## Slide 18 : Bilan & Défis Techniques
 * **Visuel** : Icônes (Succès, Réseau, Performance).
@@ -154,7 +154,7 @@
   - **Bilan** : Moteur IA et plateforme 100% opérationnels.
   - **Latence** : Optimisée via traitement par lots.
   - **Inter-services** : Communication fluide via WebFlux.
-* **Speech (Amin)** : "En bilan, LearnAgent est une solution robuste où nous avons surmonté des défis complexes de latence et de communication inter-services pour offrir une expérience utilisateur performante."
+* **Speech (Amin)** : "En bilan, LearnAgent est une solution robuste où nous avons surmonté des défis complexes de latence et de communication inter-services pour offrir une expérience utilisateur performante. Je passe maintenant la parole à Donia pour les perspectives et la conclusion."
 
 ## Slide 19 : Perspectives
 * **Visuel** : Icônes (Mobile, Cloud, Gamification).
@@ -162,7 +162,7 @@
   - Extension mobile (React Native).
   - Déploiement Cloud (Docker/Kubernetes).
   - Gamification avancée (Badges, Challenges).
-* **Speech (Wassim)** : "Pour la suite, nous envisageons une version mobile, un déploiement Cloud pour la scalabilité, et l'ajout de mécaniques de gamification pour renforcer encore plus l'engagement des étudiants."
+* **Speech (Donia)** : "Pour la suite, nous envisageons une version mobile, un déploiement Cloud pour la scalabilité, et l'ajout de mécaniques de gamification pour renforcer encore plus l'engagement des étudiants."
 
 ## Slide 20 : Conclusion
 * **Visuel** : "Merci pour votre attention".
