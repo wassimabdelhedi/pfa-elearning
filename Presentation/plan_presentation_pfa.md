@@ -2,9 +2,9 @@
 
 **Temps strict ciblé** : 15 minutes (Environ 40 à 45 secondes de temps de parole par slide).
 **Répartition recommandée** : 
-- **Donia** : Intro, Solution, Perspectives & Conclusion (~4.5 min)
-- **Amin** : Méthodologie, Fonctionnalités Web, Architecture Globale, Stack, Sécurité & Bilan (~4.5 min)
-- **Wassim** : Moteur IA, Architecture IA & Démonstrations (~6 min)
+- **Donia** : Intro, Solution, Bilan, Perspectives & Conclusion (~5 min)
+- **Amin** : Méthodologie, Fonctionnalités Web, Architecture Globale, Stack, Sécurité & Architecture IA (~4.5 min)
+- **Wassim** : Moteur IA & Démonstrations (~5.5 min)
 
 ---
 
@@ -130,7 +130,7 @@
   - Authentification sécurisée par **JWT**.
   - Chiffrement des données (BCrypt).
   - Contrôle d'accès basé sur les rôles (RBAC).
-* **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées. Je repasse la main à Wassim pour l'architecture IA."
+* **Speech (Amin)** : "La sécurité est transversale. Nous utilisons des tokens JWT pour l'authentification et BCrypt pour le hachage. Le système RBAC garantit que chaque utilisateur n'accède qu'aux fonctionnalités autorisées."
 
 ## Slide 16 : Architecture du Microservice IA
 * **Visuel** : Schéma interne du service Python.
@@ -138,7 +138,7 @@
   - Indépendance vis-à-vis du backend Java.
   - Pipeline NLP optimisé.
   - Intégration de l'API Gemini.
-* **Speech (Wassim)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles ou de changer de LLM sans impacter la stabilité. Passons maintenant à la démonstration pour voir ces outils en action."
+* **Speech (Amin)** : "Le microservice IA est totalement autonome. Cela nous permet de faire évoluer les modèles ou de changer de LLM sans impacter la stabilité. Je passe maintenant la main à Wassim pour la démonstration afin de voir ces outils en action."
 
 ## Slide 17 : Démonstration des Espaces
 * **Visuel** : Collage des trois interfaces (Étudiant, Tuteur IA, Enseignant).
@@ -146,7 +146,7 @@
   - **Espace Étudiant** : Dashboard & Recommandations.
   - **Tuteur IA** : Feedback pédagogique personnalisé.
   - **Espace Enseignant** : Création & Suivi analytique.
-* **Speech (Wassim)** : "Passons à la démonstration. Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Amin pour le bilan."
+* **Speech (Wassim)** : "Côté étudiant, le système pousse des recommandations dès le dashboard. Si l'apprenant échoue à un quiz, le tuteur Gemini intervient avec un feedback sur-mesure. Enfin, l'enseignant dispose d'un espace simplifié pour gérer ses cours et suivre la progression globale de ses classes. Je redonne la parole à Donia pour le bilan."
 
 ## Slide 18 : Bilan & Défis Techniques
 * **Visuel** : Icônes (Succès, Réseau, Performance).
@@ -154,7 +154,7 @@
   - **Bilan** : Moteur IA et plateforme 100% opérationnels.
   - **Latence** : Optimisée via traitement par lots.
   - **Inter-services** : Communication fluide via WebFlux.
-* **Speech (Amin)** : "En bilan, LearnAgent est une solution robuste où nous avons surmonté des défis complexes de latence et de communication inter-services pour offrir une expérience utilisateur performante. Je passe maintenant la parole à Donia pour les perspectives et la conclusion."
+* **Speech (Donia)** : "En bilan, LearnAgent est une solution robuste où nous avons surmonté des défis complexes de latence et de communication inter-services pour offrir une expérience utilisateur performante."
 
 ## Slide 19 : Perspectives
 * **Visuel** : Icônes (Mobile, Cloud, Gamification).
